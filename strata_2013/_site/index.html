@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>AMP Camp 2012 Exercises</title>
+        <meta name="description" content="">
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <style>
+            body {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+         <!-- prettify js and CSS, used for code highlighting -->
+        <link rel="stylesheet" href="js/vendor/prettify/prettify.css" type="text/css" />
+        <script src="js/vendor/prettify/prettify.js" type="text/javascript"></script>
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="container" id="content">
+          <h1 class="title">AMP Camp 2012 Exercises</h1>
+          <div id="toc"></div>
+          <h1 id="introduction-to-amp-camp-2012-exercises">Introduction to AMP Camp 2012 Exercises</h1>
+
+<p>The following series of exercises will walk you through the process of setting up a 4-machine cluster on EC2 running <a href="http://spark-project.org">Spark</a>, <a href="http://shark.cs.berkeley.edu">Shark</a> and <a href="http://mesos-project.org">Mesos</a>.
+Then loading and analyzing a real wikipedia dataset using your cluster.
+We begin with simple analysis techniques at the command-line, and progress to writing standalone programs, and then onto more advanced machine learning algorithms.</p>
+
+<h1 id="launching-a-sparkshark-cluster-on-ec2">Launching a Spark/Shark Cluster on EC2</h1>
+
+<p>This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this <a href="https://aws.amazon.com/amis/">intro to AMIs</a>).</p>
+
+<h2 id="pre-requisites">Pre-requisites</h2>
+
+<p>The cluster setup script we&rsquo;ll use below requires Python 2.x and has been tested to work on Linux or OS X.
+We will use the <a href="http://www.gnu.org/software/bash/manual/bashref.html">Bash shell</a> in our examples below.
+If you are using Windows, consider installing <a href="http://www.cygwin.com/">Cygwin</a> (note that we have not tested this, hence providing debug support would be hard).</p>
+
+<h2 id="setting-up-ec2-keys">Setting up EC2 keys</h2>
+
+<p>Make sure you have an Amazon EC2 account.
+Set the environment variables <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> to your Amazon EC2 access key ID and secret access key.
+These can be obtained from the <a href="http://aws.amazon.com/">AWS homepage</a> by clicking <code>Account &gt; Security Credentials &gt; Access Credentials</code>.</p>
+
+<pre><code>export AWS_ACCESS_KEY_ID=&lt;ACCESS_KEY_ID&gt;
+export AWS_SECRET_ACCESS_KEY=&lt;SECRET_ACCESS_KEY&gt;
+</code></pre>
+
+<p>Create an Amazon EC2 key pair for yourself.
+This can be done by logging into your Amazon Web Services account through the <a href="http://aws.amazon.com/console/">AWS console</a>, clicking <code>Key Pairs</code> on the left sidebar, and creating and downloading a key.</p>
+
+<p>Make sure that you set the permissions for the private key file to <code>600</code> (i.e. only you can read and write it) so that <code>ssh</code> will work (commands to do this are provided farther below).</p>
+
+<p>NOTE: The AMI we are using for this exercise is only available in the <code>us-east</code> region.
+So make sure you create a key-pair in that region!</p>
+
+<h2 id="getting-the-scripts-to-launch-ec2-cluster">Getting the scripts to launch EC2 cluster</h2>
+
+<p>Check out the launch scripts by cloning the github repository.</p>
+
+<pre><code>git clone git://github.com/amplab/ampcamp.git
+</code></pre>
+
+<p>You can also obtain them by downloading the zip file at <code>http://github.com/amplab/ampcamp/zipball/master</code></p>
+
+<h2 id="launching-the-cluster">Launching the cluster</h2>
+<p>Launch the cluster by running the following command.
+This will launch a cluster, create a HDFS cluster and configure Mesos, Spark and Shark.
+Finally, it will copy the datasets used in the exercises from S3 to the HDFS cluster.
+<em>This can take around 15-20 mins.</em></p>
+
+<pre><code>cd ampcamp
+./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; –copy launch ampcamp
+</code></pre>
+
+<p>Where <code>&lt;name_of_key_pair&gt;</code> is the name of your EC2 key pair (that you gave it when you created it), <code>&lt;key_file&gt;</code>is the private key file for your key pair.</p>
+
+<p>For example, if you created a key pair named <code>ampcamp-key</code> and the private key (<code>&lt;key_file&gt;</code>) is in your home directory and is called <code>ampcamp.pem</code>, then the command would be</p>
+
+<pre><code>./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key –copy launch ampcamp
+</code></pre>
+
+<p>The following are some errors that you may encounter, and other frequently asked questions.
+Once you are able to successfully launch the cluster, continue to step 4.</p>
+
+<p><strong>Question: I got the following permission error when I ran the above command. Help!</strong></p>
+
+<pre class="nocode">
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ WARNING: UNPROTECTED PRIVATE KEY FILE! @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Permissions 0644 for ‘../ampcamp.pem' are too open.
+It is recommended that your private key files are NOT accessible by others.
+This private key will be ignored.
+bad permissions: ignore key: ../ampcamp.pem
+Permission denied (publickey).
+</pre>
+
+<p><strong>Answer:</strong> Run the next two commands.</p>
+
+<pre><code>chmod 600 ../ampcamp.pem
+./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; --copy --resume launch ampcamp
+</code></pre>
+
+<p><strong>Question: I got the following error when I ran the above command. Help!</strong></p>
+
+<pre class="nocode">
+￼"Your requested instance type (m2.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zonee or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
+</pre>
+
+<p><strong>Answer:</strong> Add the &ldquo;-z&rdquo; flag to your command line argument to specify which availability zone to use other than <code>us-east-1b</code>.
+You can set the value of that flag to &ldquo;none&rdquo; as in the following example command, which tells the script to pick a random availability zone, though it may randomly pick an availability zone that doesn&rsquo;t support this instance size (such as <code>us-east-1b</code>), so you may need to try this command a few times to get it to work.</p>
+
+<pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; -z none --copy launch ampcamp
+</code></pre>
+
+<p><strong>Question: I got the following error when I ran the above command. Help!</strong></p>
+
+<pre class="nocode">
+12/08/21 16:50:45 INFO tools.DistCp: destPath=hdfs://ip-10-42-151-150.ec2.internal:9000/wiki/pagecounts
+java.lang.IllegalArgumentException: Invalid hostname in URI
+s3n://AKIAJIFGXUZ4MDJNYCGQ:COWo3AxVhjyu43Ug5kDvTnO/V3wQloBRIEOYEQgG@ak-ampcamp/wikistats_20090505-07
+</pre>
+
+<p><strong>Answer:</strong> The data copy from S3 to your EC2 cluster has failed. Do the following steps:</p>
+
+<ol>
+  <li>
+    <p>Login to the master node by running</p>
+
+    <pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;key_pair&gt; login ampcamp
+</code></pre>
+  </li>
+  <li>
+    <p>Open the HDFS config file at <code>/root/ephemeral-hdfs/conf/core-site.xml</code> and
+copy your AWS access key and secret key into the respective fields.</p>
+  </li>
+  <li>
+    <p>Restart HDFS</p>
+
+    <pre><code>/root/ephemeral-hdfs/bin/stop-dfs.sh
+/root/ephemeral-hdfs/bin/start-dfs.sh
+</code></pre>
+  </li>
+  <li>
+    <p>Delete the directory the data was supposed to copied to</p>
+
+    <pre><code>/root/ephemeral-hdfs/bin/hadoop fs -rmr /wiki
+</code></pre>
+  </li>
+  <li>
+    <p>Logout and run the following command to retry copying data from S3</p>
+
+    <pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;key_pair&gt; copy-data ampcamp
+</code></pre>
+  </li>
+</ol>
+
+<p><strong>Question: Can I specify the instances types while creating the cluster?</strong></p>
+
+<p><strong>Answer:</strong> These exercises have been designed to work with at least 3 slave
+machines and using instances of type <strong>m2.xlarge</strong>.
+You can also launch the cluster with different <a href="http://aws.amazon.com/ec2/instance-types/">instance types</a>.
+However, you should ensure two things.</p>
+
+<ol>
+  <li>
+    <p><strong>Correct number of slaves:</strong> Make sure that the total memory in the slaves is about 54GB as the exercises are designed accordingly.
+So if you are launching <code>m1.large</code> (which has 7.5 GB memory), then you should launch a cluster with at least 8 slaves.</p>
+
+    <p>You can specify the instance type in the above command by setting the flag <code>-t &lt;instance_type&gt;</code> .
+Similarly, you can specify the number of slaves by setting the flag <code>-s &lt;number of slaves&gt;</code>.
+For example, for launching cluster with 7 <code>m1.large</code> slaves, use</p>
+
+    <pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; -t m1.large -s 8 --copy launch ampcamp
+</code></pre>
+  </li>
+  <li>
+    <p><strong>Correct java heap setting for Spark:</strong> Make sure to change the <code>SPARK_MEM</code> variable in
+<code>/root/spark/conf/spark-env.sh</code> and <code>/root/shark/conf/shark-env.sh</code> on all of the instances to match the amount of memory available in the instance type you use.
+This is typically set it to the total amount of memory of the instance minus 1 GB for the OS (that is, for <code>m1.large</code> with 7.5GB memory, set <code>SPARK_MEM=6g</code>).
+There is a easy way to change this configuration on all the instances.
+First, change this file in the master.
+Then run</p>
+
+    <pre><code>/root/mesos-ec2/copy-dir /root/spark/conf/ .
+</code></pre>
+  </li>
+</ol>
+
+<p><strong>Information:</strong> Sometimes the EC2 instances don&rsquo;t initialize within the specified waiting time of 120 seconds.
+If that happens you will ssh errors (or check in the Amazon web console).
+Try to increase the waiting to 4 minutes using the <code>-w 240</code> switch.</p>
+
+<h2 id="post-launch-steps">Post-launch steps</h2>
+<p>Your cluster should be ready to use.
+You can find the master hostname (<code>&lt;master_node_hostname&gt;</code> in the instructions below) by running</p>
+
+<pre><code>./spark-ec2 -i -k get-master ampcamp
+</code></pre>
+
+<p>At this point, it would be helpful to open a text file and copy <code>&lt;master_node_hostname&gt;</code> there.
+In a later exercises, you will want to have <code>&lt;master_node_hostname&gt;</code> ready at hand without having to scroll through your terminal history.</p>
+
+<h2 id="when-youre-ready-to-terminate-the-cluster-not-yet-only-after-you-do-the-exercises-below">When You&rsquo;re Ready to Terminate the Cluster (Not yet! Only after you do the exercises below.)</h2>
+<p><strong>After you are done with your exercise</strong>, you can terminate the cluster by running</p>
+
+<pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;key_pair&gt; destroy ampcamp
+</code></pre>
+
+<h1 id="intro-to-scala">Intro to Scala</h1>
+
+<p>This short exercise will teach you the basics of Scala and introduce you to functional programming with collections.
+Do as much as you feel you need.
+The exercise is based on a great and fast tutorial, <a href="http://www.artima.com/scalazine/articles/steps.html">First Steps to Scala</a>.
+Just reading that and trying the examples at the console might be enough!
+Open this in a separate browser window and look through it if you need help.
+We will use only sections 1-9.</p>
+
+<ol>
+  <li>
+    <p>Log into your cluster via <code>ssh -i &lt;key_file&gt; -l root@&lt;master_node_hostname&gt;</code></p>
+
+    <p><strong>Question: I got the following permission error when I ran the above command. Help!</strong></p>
+
+    <pre class="nocode">
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@             WARNING: UNPROTECTED PRIVATE KEY FILE!              @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Permissions 0644 for '../ampcamp.pem' are too open.
+It is recommended that your private key files are NOT accessible by others.
+This private key will be ignored.
+bad permissions: ignore key: ../ampcamp.pem
+Permission denied (publickey).
+</pre>
+
+    <p><strong>Answer:</strong> Run the next two commands.</p>
+
+    <pre><code>chmod 600 ../ampcamp.pem
+./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; --copy --resume launch ampcamp
+</code></pre>
+  </li>
+  <li>
+    <p>Launch the Scala console by typing <code>scala</code>.</p>
+  </li>
+  <li>
+    <p>Declare a list of integers, numbers, as <code>val numbers = List(1, 2, 5, 4, 7, 3)</code></p>
+  </li>
+  <li>
+    <p>Declare a function, <code>cube</code>, that computes the cube (third power) of a number.
+See steps 2-4 of First Steps to Scala.
+Then apply the function on the list using <code>map</code>.</p>
+  </li>
+  <li>
+    <p>Then also try writing the function inline in a <code>map</code> call, using closure notation.</p>
+  </li>
+  <li>
+    <p>Define a <code>factorial</code> function that computes n! = 1 * 2 * &hellip; * n given input n.
+You can use either a loop or recursion (see steps 5-7 of First Steps to Scala).
+Then compute the sum of factorials in <code>numbers</code>.</p>
+  </li>
+  <li>
+    <p>As a final exercise, implement a program that counts how many times a particular word occurs in a text file.
+You can load a text file as an array of lines as shown below:</p>
+
+    <pre><code>import scala.io.Source
+val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+</code></pre>
+
+    <p>Then use functional methods to count the number of occurrences (steps 8-9 of First Steps to Scala).
+Also add a flag to your program to perform case-insensitive search.</p>
+  </li>
+</ol>
+
+<h1 id="spark-shell-and-shark">Spark Shell and Shark</h1>
+
+<p>In this section of the exercise, we will walk you through using the Spark shell and/or the Shark console to interactively explore data.
+We will be working with Wikipedia traffic statistics data obtained from http://aws.amazon.com/datasets/4182</p>
+
+<p>To make the analysis feasible (within the short timeframe of the exercise), AMP Camp organizers took three days worth of data (May 5 to May 7, 2009; roughly 20G and 329 million entries) and preloaded into an instance of HDFS running on your cluster.
+We&rsquo;ll take a look at it in a minute.</p>
+
+<h2 id="data-set-and-cluster">Data Set and Cluster</h2>
+<p>If you have launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes.
+One of these 4 nodes is the master node, responsible for scheduling tasks as well as maintaining the HDFS metadata (a.k.a. HDFS name node).
+The other 3 are the slave nodes on which tasks are actually executed.
+You will mainly interact with the master node.
+If you haven&rsquo;t already, let&rsquo;s ssh onto the master node:</p>
+
+<pre><code>ssh -i &lt;key_file&gt; -l root &lt;master_node_hostname&gt;
+</code></pre>
+
+<p>On the cluster, run the <code>ls</code> command and you will see a number of directories.
+Some of the more important ones are listed below:</p>
+
+<ul>
+  <li><code>ephemeral-hdfs:</code> Hadoop installation.</li>
+  <li><code>hive:</code> Hive installation</li>
+  <li><code>java-app-template:</code> Some stand-alone Spark programs in java 4. mesos: Mesos installation</li>
+  <li><code>mesos-ec2:</code> A suite of scripts to manage Mesos on EC2</li>
+  <li><code>scala-2.9.1.final:</code> Scala installation</li>
+  <li><code>scala-app-template:</code> Some stand-alone Spark programs in scala 8. spark: Spark installation</li>
+  <li><code>shark:</code> Shark installation</li>
+</ul>
+
+<p>You can find a list of your 3 slave nodes in mesos-ec2/slaves:</p>
+
+<pre><code>cat mesos-ec2/slaves
+</code></pre>
+
+<p>Your HDFS cluster should come preloaded with 20GB of Wikipedia traffic statistics data for May 5 to May 7, 2009.
+You can list the files:</p>
+
+<pre><code>ephemeral-hdfs/bin/hadoop fs -ls /wiki/pagecounts
+</code></pre>
+
+<p>There are 74 files (2 of which are intentionally left empty).</p>
+
+<p>The data are partitioned by date and time.
+Each file contains traffic statistics for all pages in a specific hour.
+Let&rsquo;s take a look at the file:</p>
+
+<pre><code>ephemeral-hdfs/bin/hadoop fs -cat /wiki/pagecounts/part-00148less
+</code></pre>
+
+<p>The first few lines of the file are copied here:</p>
+
+<pre class="nocode">
+20090507-040000 aa ?page=http://www.stockphotosharing.com/Themes/Images/users_raw/id.txt 3 39267
+20090507-040000 aa Main_Page 7 51309
+20090507-040000 aa Special:Boardvote 1 11631
+20090507-040000 aa Special:Imagelist 1 931
+</pre>
+
+<p>Each line, delimited by a space, contains stats for one page.
+The schema is:</p>
+
+<p><code>&lt;date_time&gt; &lt;project_code&gt; &lt;page_title&gt; &lt;num_hits&gt; &lt;page_size&gt;</code></p>
+
+<p>The <code>&lt;date_time&gt;</code> field specifies a date in the YYYYMMDD format (year, month, day) followed by a hyphen and then the hour in the HHmmSS format (hour, minute, second).
+There is no information in mmSS.
+The <code>&lt;project_code&gt;</code> field contains information about the language of the pages.
+For example, project code &ldquo;en&rdquo; indicates an English page.
+The <code>&lt;page_title&gt;</code> field gives the title of the Wikipedia page.
+The <code>&lt;num_hits&gt;</code> field gives the number of page views in the hour-long time slot starting at <code>&lt;data_time&gt;</code>.
+The <code>&lt;page_size&gt;</code> field gives the size in bytes of the Wikipedia page.</p>
+
+<p>To quit <code>less</code> and stop viewing the file and return to the command line, press <code>q</code>.</p>
+
+<h2 id="data-exploration-using-spark">Data Exploration Using Spark</h2>
+
+<p>Let&rsquo;s now use Spark to do some order statistics on the data set.
+First, launch the Spark shell:</p>
+
+<pre><code>/root/spark/spark-shell
+</code></pre>
+
+<p>Wait for the scala prompt to appear.</p>
+
+<ol>
+  <li>
+    <p>Warm up by creating an RDD (Resilient Distributed Dataset) named <code>pagecounts</code> from the input files.
+In the Spark shell, the SparkContext is already created for you as variable <code>sc</code>.</p>
+
+    <pre><code>scala&gt; sc
+res: spark.SparkContext = spark.SparkContext@470d1f30
+
+scala&gt; val pagecounts = sc.textFile("/wiki/pagecounts")
+12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
+pagecounts: spark.RDD[String] = spark.MappedRDD@34da7b85
+</code></pre>
+  </li>
+  <li>
+    <p>Let&rsquo;s take a peek at the data. You can use the take operation of an RDD to get the first K records. Here, K = 10.</p>
+
+    <pre><code>scala&gt; pagecounts.take(10)
+......
+res: Array[String] = Array(20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463, 20090505-000000 aa.b Special:Statistics 1 840, 20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019, 20090505-000000 aa.b Wikibooks:About 1 15719, 20090505-000000 aa ?14mFX1ildVnBc 1 13205, 20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207, 20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199, 20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201, 20090505-000000 aa File:Wikinews-logo.svg 1 8357, 20090505-000000 aa Main_Page 2 9980, 20090505-000000 aa User:TottyBot 1 7998, 20090505-000000 aa Wikipedia:Community_Portal 1 9644, 20090505-000000 aa main_page 1 928, 20090505-000000 ab.d %D0%A1%D0%BB%D1%83%D0%B6%D0%B5%D0%B1%D0%BD%D0%B0%D1%8F: \
+Recentchangeslinked/%D0%A3%D1%87%D0%B0%D1%81%D1%82%D0%BD%D0%B8%D0%BA: \
+H%C3%A9g%C3%A9sippe_...
+</code></pre>
+
+    <p>Unfortunately this is not very readable because take returns an array and Scala simply prints the array with each element separated by a comma.
+We can make it prettier by traversing the array to print each record on its own line.</p>
+
+    <pre><code>scala&gt; pagecounts.take(10).foreach(println)
+......
+20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
+20090505-000000 aa.b Special:Statistics 1 840
+20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
+20090505-000000 aa.b Wikibooks:About 1 15719
+20090505-000000 aa ?14mFX1ildVnBc 1 13205
+20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
+20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
+20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
+20090505-000000 aa File:Wikinews-logo.svg 1 8357
+20090505-000000 aa Main_Page 2 9980
+</code></pre>
+  </li>
+  <li>
+    <p>Let&rsquo;s see how many records in total are in this data set (this command will take a while, so read ahead while it is running).</p>
+
+    <pre><code>scala&gt; pagecounts.count
+</code></pre>
+
+    <p>This should launch 177 Spark tasks on the Mesos cluster.
+If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
+Because we are reading 20G of data from HDFS, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).
+￼
+While it&rsquo;s running, you can open the Mesos web console to see the progress.
+To do this, open your favorite browser, and type in the following URL.
+Recall that during the Cluster Setup section, you copied <code>&lt;master_node_hostname&gt;</code> to a text file for easy access.</p>
+
+    <p><code>http://&lt;master_node_hostname&gt;:8080</code></p>
+
+    <p>When your count does finish running, it should return the following result: <code>res2: Long = 329641466</code></p>
+  </li>
+  <li>
+    <p>Recall from above when we described the format of the data set, that the 2nd field is the &ldquo;project code&rdquo; and contains information about the language of the pages.
+For example, project code &ldquo;en&rdquo; indicates an English page.
+Let&rsquo;s derive an RDD containing only English pages from <code>pagecounts</code>.
+This can be done by applying a filter function to <code>pagecounts</code>.
+For each record, we can split it by the field delimiter (i.e. a space) and get the second field-– and then compare it with the string &ldquo;en&rdquo;.</p>
+
+    <p>To avoid reading from disks each time we perform any operations on the RDD, we also <strong>cache the RDD into memory</strong>.
+This is where Spark really starts to to shine.</p>
+
+    <pre><code>scala&gt; val enPages = pagecounts.filter(_.split(" ")(1) == "en").cache
+enPages: spark.RDD[String] = spark.FilteredRDD@8262adc
+</code></pre>
+
+    <p>When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
+Next time any action is invoked on <code>enPages</code>, Spark will cache the data set in memory
+across the 3 slaves in your cluster.</p>
+  </li>
+  <li>
+    <p>How many records are there for English pages?</p>
+
+    <pre><code>scala&gt; enPages.count
+......
+res: Long = 122352588
+</code></pre>
+
+    <p>The first time this command is run, similar to the last count we did, it will take 2 - 3 mins while Spark scans through the entire data set on disk.
+<strong>But since enPages is marked as &ldquo;cached&rdquo; in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster</strong>.</p>
+
+    <p>If you examine the console log closely, you will see logs like this indicating some data is added to the cache:</p>
+
+    <p><code>12/08/18 00:30:55 INFO spark.CacheTrackerActor: Cache entry added: (2, 0) on ip-10-92-69-90.ec2.internal (size added: 16.0B, available: 4.2GB)</code></p>
+  </li>
+  <li>
+    <p>Let&rsquo;s try something fancier.
+Generate a histogram of total page views on Wikipedia English pages for May to May 7, 2009.
+The high level idea of what we&rsquo;ll be doing is as follows.
+First, we generate a key value pair for each line; the key is the date (the first eight characters of the first field), and the value is the number of pageviews for that date (the fourth field).</p>
+
+    <pre><code>scala&gt; val enTuples = enPages.map(line =&gt; line.split(" "))
+enTuples: spark.RDD[Array[java.lang.String]] = spark.MappedRDD@5a62a404
+
+scala&gt; val enKeyValuePairs = enTuples.map(line =&gt; (line(0).substring(0, 8), line(3).toInt))
+enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = spark.MappedRDD@142eda55
+</code></pre>
+
+    <p>Then we shuffle the data and group all values of the same key together.
+Finally we sum up the values for each key.
+There is a convenient method called <code>reduceByKey</code> in Spark for exactly this pattern.
+Note that the second argument to <code>reduceByKey</code> determines the number of reducers to use.
+Spark by default assumes that the reduce function is algebraic and applies combiners on the mapper side.
+Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let&rsquo;s use only one reducer.</p>
+
+    <pre><code>scala&gt; enKeyValuePairs.reduceByKey(_+_, 1).collect
+......
+res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+</code></pre>
+
+    <p>The <code>collect</code> method at the end converts the result from an RDD to a Scala array.
+Note that when we don&rsquo;t specify a name for the result of a command (e.g. <code>val enTuples</code> above), a variable with name <code>res</code> is automatically created.</p>
+
+    <p>We can combine the previous three commands into one:</p>
+
+    <pre><code>scala&gt; enPages.map(line =&gt; line.split(" ")).map(line =&gt; (line(0).substring(0, 8), line(3).toInt)).reduceByKey(_+_, 1).collect
+......
+res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+</code></pre>
+  </li>
+  <li>
+    <p>Suppose we want to find out what the top 50 pages are during these three days.
+Conceptually, this task is very similar to the previous query.
+But, given the large number of pages (23 million distinct page names), the new task is very expensive.
+We are doing a super expensive group-by with a lot of network shuffling of data.</p>
+
+    <p>Also, we would like to use the distributed sorting in Spark rather than loading all 23 million results to the master node to take the top K.
+Spark provides a <code>sortByKey</code> method for an RDD, but the value needs to come before the key in a tuple when running this method.
+So make sure you swap the key and value in each tuple that results from <code>reduceByKey</code> before running <code>sortByKey</code>.</p>
+
+    <p>To recap, first we find the fields in each line of data (<code>map(l =&gt; l.split(" "))</code>).
+Next, we extract the fields for page name and number of page views (<code>map(l =&gt; (l(2), l(3).toInt))</code>).
+We reduce by key again, this time with 40 reducers (<code>reduceByKey(_+_, 40)</code>).
+Finally, we swap the key and values (<code>map(x =&gt; (x._2, x._1))</code>), sort by key in descending order (the <code>false</code> argument specifies descending order and <code>true</code> would specify ascending), and return the top 50 results (<code>take</code>). The full command is:</p>
+
+    <pre><code>scala&gt; enPages.map(l =&gt; l.split(" ")).map(l =&gt; (l(2), l(3).toInt)).reduceByKey(_%2B_, 40).map(x =&gt; (x._2, x._1)).sortByKey(false).take(50)
+</code></pre>
+
+    <p>There is no hard and fast way to calculate the optimal number of reducers for a given problem; you will
+build up intuition over time by experimenting with different values.
+To leave the Spark shell, type <code>exit</code> at the prompt.</p>
+  </li>
+</ol>
+
+<h2 id="data-exploration-using-shark">Data Exploration Using Shark</h2>
+
+<p>We had fun with Scala, now let&rsquo;s try some SQL in Shark.
+First, launch the Shark console:</p>
+
+<pre><code>cd /root/
+/root/shark/bin/shark-withinfo
+</code></pre>
+
+<ol>
+  <li>
+    <p>Similar to Apache Hive, Shark can query external tables (tables that are not created in Shark).
+Before you do any querying, you will need to tell Shark where the data is and define its schema.</p>
+
+    <pre><code>shark&gt; CREATE EXTERNAL TABLE wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';
+</code></pre>
+
+    <p>FAQ: If you see the following errors, don’t worry. Things are still working under the hood.</p>
+
+    <pre class="nocode">
+12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.core.resources" but it cannot be resolved.
+12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.core.runtime" but it cannot be resolved.
+12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.text" but it cannot be resolved.
+</pre>
+  </li>
+  <li>
+    <p>Let&rsquo;s create a table containing all English records and cache it in the cluster&rsquo;s memory.</p>
+
+    <pre><code>shark&gt; create table wikistats_cached as select * from wikistats where project_code="en";
+</code></pre>
+  </li>
+  <li>
+    <p>Do a simple count to get the number of English records. If you have some familiarity working with databases, note that &ldquo;<code>count(1)</code>&rdquo; is the syntax in Hive for performing a count(*) operation. The Hive syntax is described at https://cwiki.apache.org/confluence/display/Hive/GettingStarted</p>
+
+    <pre><code>shark&gt; select count(1) from wikistats_cached;
+......
+122352588
+Time taken: 7.632 seconds
+12/08/18 21:23:13 INFO CliDriver: Time taken: 7.632 seconds
+</code></pre>
+  </li>
+  <li>
+    <p>Output the total traffic to Wikipedia English pages for each hour between May 7 and May 9, with one line per hour.</p>
+
+    <pre><code>shark&gt; select dt, sum(page_views) views from wikistats_cached group by dt;
+</code></pre>
+  </li>
+  <li>
+    <p>In the Spark section, we ran a very expensive query to compute the top 50 pages. It is fairly simple to d the same thing in SQL.</p>
+
+    <p>There are two steps we can take to make the query run faster. (1) In the first command below, we turn off map-side aggregation (a.k.a. combiners). Map-side aggregation doesn&rsquo;t improve run-time since each page appears only once in each partition, so we are building a giant hash table on each partition for nothing.
+(2) In the second command below, we increase the number of reducers used in this query to 50. Note that the
+default number of reducers, which we have been using so far in this section, is 1.</p>
+
+    <p>Also note that the &ldquo;50&rdquo; in the second command refers to the number of reducers while the &ldquo;50&rdquo; in the third command refers to the number of Wikipedia pages to return.</p>
+
+    <pre><code>shark&gt; set hive.map.aggr=false;
+shark&gt; set mapred.reduce.tasks=50;
+shark&gt; select page_name, sum(page_views) views from wikistats_cached group by page_name order by views desc limit 50;
+</code></pre>
+
+    <p><strong>Remember to turn hive.map.aggr back on after the query.</strong></p>
+  </li>
+  <li>
+    <p>With all the warm up, now it is your turn to write queries. Write Hive QL queries to answer the following questions:</p>
+  </li>
+</ol>
+
+<ul>
+  <li>
+    <p>Count the number of distinct date/times for English pages</p>
+  </li>
+  <li>
+    <p>How many hits are there on pages with Berkeley in the title throughout the entire period?</p>
+  </li>
+  <li>
+    <p>Generate a histogram for the number of hits for each hour on May 6, 2009; sort the output by date/time. Based on the output, which hour is Wikipedia most popular?</p>
+  </li>
+</ul>
+
+<p>To exit Shark, type the following at the Shark command line (and don&rsquo;t forget the semicolon!).</p>
+
+<pre><code>shark&gt; exit;
+</code></pre>
+
+<h1 id="intro-to-running-standalone-spark-programs">Intro to Running Standalone Spark Programs</h1>
+<p>So far we have been doing a lot of ad-hoc style analytics using the command line interfaces to Spark and Shark. For some tasks, it makes more sense to write a standalone Spark program. This section will walk you through the process of writing a stand alone program and running in on EC2.</p>
+
+<p>On our AMP Camp AMI we have included two &ldquo;template&rdquo; projects for Scala and Java standalone Spark programs.  These can be found in the <code>/root/scala-app-template</code> and <code>/root/java-app-template</code> directories.</p>
+
+<p>Feel free to browse through the contents of those directories. You can try to compile and run each of the apps with sbt/sbt run. For more details, see the slides from Matei Zaharia&rsquo;s AMP Camp talk on Standalone Spark Programs which are linked to from <a href="http://ampcamp.berkeley.edu/agenda">the AMP Camp Agenda page</a>.</p>
+
+<h1 id="machine-learning">Machine Learning</h1>
+
+<p>To allow you to complete the machine learning exercises within the relatively short time available during AMP Camp, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre- loaded in the HDFS on your cluster in <code>/wikistats_20090505-07_restricted</code>.</p>
+
+<h2 id="high-level-problem-statement">High-level Problem Statement</h2>
+
+<p>To allow you to complete the machine learning exercises within the relatively short time available during AMP Camp, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009.  In particular, we have restricted the dataset to only include a subset of the full set of articles.  This restricted dataset is pre-loaded in the HDFS on your cluster in <code>/wikistats_20090505-07_restricted</code>.</p>
+
+<h2 id="command-line-preprocessing-and-featurization">Command Line Preprocessing and Featurization</h2>
+
+<p>To apply most machine learning algorithms, we first must preprocess and featurize the data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of a unique Wikipedia article identifier (i.e., a unique combination of Wikipedia project code and page title) and associated traffic statistics.  We will generate 24-dimensional feature vectors, with each feature vector entry summarizing the page view counts for the corresponding hour of the day.</p>
+
+<p>Recall that each record in our dataset consists of a string with the format &ldquo;<code>&lt;date_time&gt; &lt;project_code&gt; &lt;page_title&gt; &lt;num_hits&gt; &lt;page_size&gt;</code>&rdquo;.  The format of the date-time field is YYYYMMDD-HHmmSS (where &lsquo;M&rsquo; denotes month, and &lsquo;m&rsquo; denotes minute).</p>
+
+<ol>
+  <li>
+    <p>You can preprocess and featurize the data yourself by following along with the parts of this exercise. To skip ahead to exercise 2 where we start examining the data set we will input to K means, just copy and paste all of the code from <a href="https://docs.google.com/document/pub?id=1ntZOrSHeT1QRMKJUcUh2a1F9KwUn0RmyLx0P4CflOvE#h.sixbakn14lw5">our solutions</a> to preprocess the data.</p>
+
+    <ul>
+      <li>
+        <p>We&rsquo;ll start by entering Spark and loading the data. First, launch a Spark shell.</p>
+
+        <pre><code>cd /root/
+/root/spark/spark-shell
+</code></pre>
+
+        <p>Next, load the data.</p>
+
+        <pre><code>val data = sc.textFile("/wikistats_20090505-07_restricted")
+</code></pre>
+      </li>
+      <li>
+        <p>Next, for every line of data, we collect a tuple with elements described next. The first element is what we will call the &ldquo;full document title&rdquo;, a concatenation of the project code and page title. The second element is a key-value pair whose key is the hour from the <code>&lt;date-time&gt;</code> field and whose value is the number of views that occurred in this hour.</p>
+
+        <p>There are a few new points to note about the code below. First, <code>data.map</code> takes each line of data in the RDD data and applies all of the code contained in the curly braces after the <code>=&gt;</code> symbol. The last line of code is automatically output. The first line of code within the curly braces splits the line of data into the five data fields we discussed in the Spark exercises above. The second line of code within the braces extracts the hour information from the <code>&lt;date-time&gt;</code> string. The final line forms the output tuple.</p>
+
+        <pre><code>val featureMap = data.map(line =&gt; {
+  val Array(dateTime, projectCode, pageTitle, numViews, numBytes) = line.trim.split("\\s+")
+  val hour = dateTime.substring(9, 11).toInt
+  (projectCode+" "+pageTitle, hour -&gt; numViews.toInt)
+})
+</code></pre>
+
+        <p>To double-check that your code did what you wanted it to do, you can print the first 10 output tuples:</p>
+
+        <pre><code>featureMap.take(10).foreach(println)
+</code></pre>
+
+        <p>Now we want to find the average hourly views for each article (average for the same hour across different days).</p>
+
+        <p>In the code below, we first take our tuples in the RDD <code>featureMap</code> and, treating the first elements as keys and the second elements as values, group all the values for a single key (i.e. a single article) together using <code>groupByKey</code>.  We put the article name in article and the multiple tuples of hours and pageviews in <code>hoursViews</code>. The syntax <code>Array.fill[Int](24)(0)</code> initializes an integer array of 24 elements with a value of 0 at every element. The for loop then collects the number of days for which we have a particular hour of data in <code>counts[hour]</code> and the total pageviews at hour across all these days in <code>sums[hour]</code>. Finally, we use the syntax sums zip counts to make an array of tuples with parallel elements from the sums and counts arrays and use this to calculate the average pageviews at particular hours across days in the data set.</p>
+
+        <pre><code>val featureGroup = featureMap.groupByKey.map(grouped =&gt; {
+  val (article, hoursViews) = grouped
+  val sums = Array.fill[Int](24)(0)
+  val counts = Array.fill[Int](24)(0)
+  for((hour, numViews) &lt;- hoursViews) {
+    sums(hour) += numViews
+    counts(hour) += 1
+  }
+  val avgs: Array[Double] =
+    for((sum, count) &lt;- sums zip counts) yield
+      if(count &gt; 0) sum/count.toDouble else 0.0
+  article -&gt; avgs
+})
+</code></pre>
+
+        <p>Using <code>println</code> directly here as above doesn&rsquo;t let us see what’s inside the arrays. The <code>mkString</code> method prints an array by concatenating all of its elements with some specified delimiter.  Note that when we use <code>_1</code> to access the first part of a tuple, the indexing is 1 and 2 for the first and second parts, not 0 and 1.</p>
+
+        <pre><code>featureGroup.take(10).foreach(x =&gt; println(x._1, x._2.mkString(" ")))
+</code></pre>
+      </li>
+      <li>
+        <p>Now suppose we’re only interested in those articles that were viewed at least once in each hour during the data collection time.</p>
+
+        <p>To do this, we filter to find those articles with an average number of views (the second tuple element in an article tuple) greater than zero in every hour.</p>
+
+        <pre><code>val featureGroupFiltered = featureGroup.filter(t =&gt; t._2.forall(_ &gt; 0))
+</code></pre>
+      </li>
+      <li>
+        <p>So far article popularity is still implicitly in our feature vector (the sum of the average views per hour is the average views per day if the number of days of data is constant across hours).  Since we are interested only in which times are more popular viewing times for each article, we next divide out by this sum.</p>
+
+        <p>If you were following along with the AMP Camp lectures, note that this normalization is different from standardizing each feature separately but accomplishes the goal that all features are on a comparable scale.</p>
+
+        <pre><code>val featurizedRDD = featureGroupFiltered.map(t =&gt; {
+  val avgsTotal = t._2.sum
+  t._1 -&gt; t._2.map(_ /avgsTotal)
+})
+</code></pre>
+
+        <p>We can use the same command as before to view the latest RDD.</p>
+
+        <pre><code>featurizedRDD.take(10).foreach(x =&gt; println(x._1, x._2.mkString(" ")))
+</code></pre>
+      </li>
+      <li>
+        <p>Save the RDD within Spark and to a file for later use.
+Locally, we just cache the RDD.</p>
+
+        <pre><code>featurizedRDD.cache
+</code></pre>
+
+        <p>To save to file, we first create a string of comma-separated values for each data point.</p>
+
+        <pre><code>featurizedRDD.map(t =&gt; t._1 -&gt; t._2.mkString(",")).saveAsSequenceFile("/wikistats_featurized")
+</code></pre>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>In this exercise, we examine the preprocessed data.</p>
+
+    <ul>
+      <li>
+        <p>Count the number of records in the preprocessed data.  Recall that we potentially threw away some data when we filtered out records with zero views in a given hour.</p>
+
+        <pre><code>featurizedRDD.count
+</code></pre>
+      </li>
+    </ul>
+
+    <p>Feel free to compare your answer to our <a href="https://docs.google.com/document/pub?id=1ntZOrSHeT1QRMKJUcUh2a1F9KwUn0RmyLx0P4CflOvE#h.y53wwtyrkow1">exercise solutions</a>.</p>
+
+    <ul>
+      <li>
+        <p>Print the feature vectors for the Wikipedia articles with project code “en” and the following titles: Computer_science, Machine_learning.  The second line below shows another option for printing arrays in a readable way at the command line.</p>
+
+        <pre><code>val featuresCSML = featurizedRDD.filter(t =&gt; t._1 == "en Computer_science" || t._1 == "en Machine_learning").collect
+featuresCSML.foreach(x =&gt; println(x._1 + "," + x._2.mkString(" ")))
+</code></pre>
+
+        <p>Again, you can compare to our <a href="https://docs.google.com/document/pub?id=1ntZOrSHeT1QRMKJUcUh2a1F9KwUn0RmyLx0P4CflOvE#h.y53wwtyrkow1">exercise solutions</a>.</p>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="clustering">Clustering</h2>
+
+<p>Now, try to solve the following problem using Spark. We provide less guidance for this problem. If you run out of time, or get stuck or are just curious, again feel free to jump straight to our <a href="https://docs.google.com/document/pub?id=1ntZOrSHeT1QRMKJUcUh2a1F9KwUn0RmyLx0P4CflOvE#h.xw4nq72va8nv">exercise solutions</a>.</p>
+
+<ol>
+  <li>
+    <p>We now further explore the featurized dataset via K-means clustering. Implement K-means clustering (as a standalone Spark program) and generate 10 clusters from the featurized dataset created above. For each cluster, print its centroid vector and the &ldquo; &ldquo; strings of 10 articles assigned to that cluster.</p>
+  </li>
+  <li>
+    <p>Run K-means again (so that the cluster centroids are initialized differently) and see how the clusters change.</p>
+  </li>
+  <li>
+    <p>Repeat #2, now using 50 clusters.</p>
+  </li>
+</ol>
+
+        </div> <!-- /container -->
+
+        <script src="js/vendor/jquery-1.8.0.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <!-- Table of contents plugin -->
+        <script src="js/vendor/toc.js" type="text/javascript"></script>
+        <script src="js/main.js"></script>
+
+        <!-- A script to fix internal hash links because we have an overlapping top bar.
+             Based on https://github.com/twitter/bootstrap/issues/193#issuecomment-2281510 -->
+        <script>
+          $(function() {
+            function maybeScrollToHash() {
+              if (window.location.hash && $(window.location.hash).length) {
+                var newTop = $(window.location.hash).offset().top - $('#topbar').height() - 5;
+                $(window).scrollTop(newTop);
+              }
+            }
+            $(window).bind('hashchange', function() {
+              maybeScrollToHash();
+            });
+            // Scroll now too in case we had opened the page on a hash, but wait 1 ms because some browsers
+            // will try to do *their* initial scroll after running the onReady handler.
+            setTimeout(function() { maybeScrollToHash(); }, 1)
+          })
+        </script>
+
+    </body>
+</html>
