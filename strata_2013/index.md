@@ -4,9 +4,9 @@ title: AMP Camp 2012 Exercises
 ---
 # Introduction to AMP Camp 2012 Exercises
 
-The following series of exercises will walk you through the process of setting up a 4-machine cluster on EC2 running [Spark](http://spark-project.org), [Shark](http://shark.cs.berkeley.edu) and [Mesos](http://mesos-project.org).
-Then loading and analyzing a real wikipedia dataset using your cluster.
-We begin with simple analysis techniques at the command-line, and progress to writing standalone programs, and then onto more advanced machine learning algorithms.
+The following series of exercises will walk you through the process of setting up a 4-machine cluster on EC2 running [Spark](http://spark-project.org), [Shark](http://shark.cs.berkeley.edu) and [Mesos](http://mesos-project.org),
+then loading and analyzing a real wikipedia dataset using your cluster.
+We will begin with simple interactive analysis techniques at the command-line, and progress to writing standalone programs, and then onto more advanced machine learning algorithms.
 
 # Launching a Spark/Shark Cluster on EC2
 
@@ -22,13 +22,19 @@ If you are using Windows, consider installing [Cygwin](http://www.cygwin.com/) (
 
 Make sure you have an Amazon EC2 account.
 Set the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to your Amazon EC2 access key ID and secret access key.
-These can be obtained from the [AWS homepage](http://aws.amazon.com/) by clicking `Account > Security Credentials > Access Credentials`.
+These can be obtained from the [AWS homepage](http://aws.amazon.com/) by clicking `Account > Security Credentials > Access Credentials`:
+
+![Downloading AWS access keys](img/aws-accesskey.png)
 
     export AWS_ACCESS_KEY_ID=<ACCESS_KEY_ID>
     export AWS_SECRET_ACCESS_KEY=<SECRET_ACCESS_KEY>
 
 Create an Amazon EC2 key pair for yourself.
-This can be done by logging into your Amazon Web Services account through the [AWS console](http://aws.amazon.com/console/), clicking `Key Pairs` on the left sidebar, and creating and downloading a key.
+This can be done by logging into your Amazon Web Services account through the [AWS console](http://aws.amazon.com/console/), selecting `EC2` from the `Services` menu,  selecting `Key Pairs` on the left sidebar, and creating and downloading a key:
+
+![Downloading an EC2 Keypair](img/aws-keypair.png)
+
+
 
 Make sure that you set the permissions for the private key file to `600` (i.e. only you can read and write it) so that `ssh` will work (commands to do this are provided farther below).
 
@@ -45,18 +51,18 @@ You can also obtain them by downloading the zip file at `http://github.com/ampla
 
 ## Launching the cluster
 Launch the cluster by running the following command.
-This will launch a cluster, create a HDFS cluster and configure Mesos, Spark and Shark.
+This script will launch a cluster, create a HDFS cluster and configure Mesos, Spark, and Shark.
 Finally, it will copy the datasets used in the exercises from S3 to the HDFS cluster.
 _This can take around 15-20 mins._
 
     cd ampcamp
-    ./spark-ec2 -i <key_file> -k <name_of_key_pair> –copy launch ampcamp
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy launch ampcamp
 
 Where `<name_of_key_pair>` is the name of your EC2 key pair (that you gave it when you created it), `<key_file>`is the private key file for your key pair.
 
 For example, if you created a key pair named `ampcamp-key` and the private key (`<key_file>`) is in your home directory and is called `ampcamp.pem`, then the command would be
 
-    ./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key –copy launch ampcamp
+    ./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key --copy launch ampcamp
 
 The following are some errors that you may encounter, and other frequently asked questions.
 Once you are able to successfully launch the cluster, continue to step 4.
@@ -133,16 +139,16 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
 __Question: Can I specify the instances types while creating the cluster?__
 
 __Answer:__ These exercises have been designed to work with at least 3 slave
-machines and using instances of type __m2.xlarge__.
+machines using instances of type __m2.xlarge__.
 You can also launch the cluster with different [instance types](http://aws.amazon.com/ec2/instance-types/).
-However, you should ensure two things.
+However, you should ensure two things:
 
 1. __Correct number of slaves:__ Make sure that the total memory in the slaves is about 54GB as the exercises are designed accordingly.
-   So if you are launching `m1.large` (which has 7.5 GB memory), then you should launch a cluster with at least 8 slaves.
+   So if you are using `m1.large` instances (which have 7.5 GB memory), then you should launch a cluster with at least 8 slaves.
 
    You can specify the instance type in the above command by setting the flag `-t <instance_type>` .
    Similarly, you can specify the number of slaves by setting the flag `-s <number of slaves>`.
-   For example, for launching cluster with 7 `m1.large` slaves, use
+   For example, to launching a cluster with 8 `m1.large` slaves, use
 
    ~~~
    ./spark-ec2 -i <key_file> -k <name_of_key_pair> -t m1.large -s 8 --copy launch ampcamp
@@ -158,10 +164,12 @@ However, you should ensure two things.
    ~~~
    /root/mesos-ec2/copy-dir /root/spark/conf/ .
    ~~~
+   
+   to copy the configuration directory to all slaves.
 
-__Information:__ Sometimes the EC2 instances don't initialize within the specified waiting time of 120 seconds.
-If that happens you will ssh errors (or check in the Amazon web console).
-Try to increase the waiting to 4 minutes using the `-w 240` switch.
+__Information:__ Sometimes the EC2 instances don't initialize within the standard waiting time of 120 seconds.
+If that happens you, will ssh errors (or check in the Amazon web console).
+In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
 
 ## Post-launch steps
 Your cluster should be ready to use.
@@ -210,7 +218,7 @@ We will use only sections 1-9.
 
 2. Launch the Scala console by typing `scala`.
 
-3. Declare a list of integers, numbers, as `val numbers = List(1, 2, 5, 4, 7, 3)`
+3. Declare a list of integers, `numbers`, as `val numbers = List(1, 2, 5, 4, 7, 3)`
 
 4. Declare a function, `cube`, that computes the cube (third power) of a number.
    See steps 2-4 of First Steps to Scala.
@@ -235,14 +243,17 @@ We will use only sections 1-9.
 
 # Spark Shell and Shark
 
-In this section of the exercise, we will walk you through using the Spark shell and/or the Shark console to interactively explore data.
+In this section, we will walk you through using the Spark shell and/or the Shark console to interactively explore data.
 We will be working with Wikipedia traffic statistics data obtained from http://aws.amazon.com/datasets/4182
 
-To make the analysis feasible (within the short timeframe of the exercise), AMP Camp organizers took three days worth of data (May 5 to May 7, 2009; roughly 20G and 329 million entries) and preloaded into an instance of HDFS running on your cluster.
+To make the analysis feasible (within the short timeframe of the exercise), AMP Camp organizers took three days worth of data (May 5 to May 7, 2009; roughly 20G and 329 million entries) and preloaded it into an instance of HDFS running on your cluster.
 We'll take a look at it in a minute.
 
 ## Data Set and Cluster
-If you have launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes.
+If you have launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes:
+
+![Running EC2 instances in AWS Management Console](img/aws-runninginstances.png)
+
 One of these 4 nodes is the master node, responsible for scheduling tasks as well as maintaining the HDFS metadata (a.k.a. HDFS name node).
 The other 3 are the slave nodes on which tasks are actually executed.
 You will mainly interact with the master node.
@@ -276,7 +287,7 @@ The data are partitioned by date and time.
 Each file contains traffic statistics for all pages in a specific hour.
 Let's take a look at the file:
 
-    ephemeral-hdfs/bin/hadoop fs -cat /wiki/pagecounts/part-00148less
+    ephemeral-hdfs/bin/hadoop fs -cat /wiki/pagecounts/part-00148 | less
 
 The first few lines of the file are copied here:
 
@@ -300,7 +311,7 @@ The `<page_title>` field gives the title of the Wikipedia page.
 The `<num_hits>` field gives the number of page views in the hour-long time slot starting at `<data_time>`.
 The `<page_size>` field gives the size in bytes of the Wikipedia page.
 
-To quit `less` and stop viewing the file and return to the command line, press `q`.
+To quit `less`, stop viewing the file, and return to the command line, press `q`.
 
 ## Data Exploration Using Spark
 
@@ -309,7 +320,7 @@ First, launch the Spark shell:
 
     /root/spark/spark-shell
 
-Wait for the scala prompt to appear.
+Wait for the Scala prompt to appear.
 
 1. Warm up by creating an RDD (Resilient Distributed Dataset) named `pagecounts` from the input files.
    In the Spark shell, the SparkContext is already created for you as variable `sc`.
@@ -366,11 +377,13 @@ Wait for the scala prompt to appear.
    Recall that during the Cluster Setup section, you copied `<master_node_hostname>` to a text file for easy access.
 
    `http://<master_node_hostname>:8080`
+   
+   ![Mesos web UI](img/mesos-webui640.png)
 
    When your count does finish running, it should return the following result: `res2: Long = 329641466`
 
-4.  Recall from above when we described the format of the data set, that the 2nd field is the "project code" and contains information about the language of the pages.
-    For example, project code "en" indicates an English page.
+4.  Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
+    For example, the project code "en" indicates an English page.
     Let's derive an RDD containing only English pages from `pagecounts`.
     This can be done by applying a filter function to `pagecounts`.
     For each record, we can split it by the field delimiter (i.e. a space) and get the second field-– and then compare it with the string "en".
@@ -384,8 +397,7 @@ Wait for the scala prompt to appear.
     ~~~
 
     When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
-    Next time any action is invoked on `enPages`, Spark will cache the data set in memory
-across the 3 slaves in your cluster.
+    Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 3 slaves in your cluster.
 
 5. How many records are there for English pages?
 
@@ -395,10 +407,10 @@ across the 3 slaves in your cluster.
    res: Long = 122352588
    ~~~
 
-   The first time this command is run, similar to the last count we did, it will take 2 - 3 mins while Spark scans through the entire data set on disk.
-   __But since enPages is marked as "cached" in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster__.
+   The first time this command is run, similar to the last count we did, it will take 2 - 3 minutes while Spark scans through the entire data set on disk.
+   __But since enPages was marked as "cached" in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster__.
 
-   If you examine the console log closely, you will see logs like this indicating some data is added to the cache:
+   If you examine the console log closely, you will see lines like this, indicating some data was added to the cache:
 
    `12/08/18 00:30:55 INFO spark.CacheTrackerActor: Cache entry added: (2, 0) on ip-10-92-69-90.ec2.internal (size added: 16.0B, available: 4.2GB)`
 
@@ -415,11 +427,11 @@ across the 3 slaves in your cluster.
    enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = spark.MappedRDD@142eda55
    ~~~
 
-   Then we shuffle the data and group all values of the same key together.
+   Next, we shuffle the data and group all values of the same key together.
    Finally we sum up the values for each key.
    There is a convenient method called `reduceByKey` in Spark for exactly this pattern.
    Note that the second argument to `reduceByKey` determines the number of reducers to use.
-   Spark by default assumes that the reduce function is algebraic and applies combiners on the mapper side.
+   By default, Spark assumes that the reduce function is algebraic and applies combiners on the mapper side.
    Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
 
    ~~~
@@ -439,7 +451,7 @@ across the 3 slaves in your cluster.
    res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
    ~~~
 
-7. Suppose we want to find out what the top 50 pages are during these three days.
+7. Suppose we want to find the top 50 most-viewed pages during these three days.
    Conceptually, this task is very similar to the previous query.
    But, given the large number of pages (23 million distinct page names), the new task is very expensive.
    We are doing a super expensive group-by with a lot of network shuffling of data.
@@ -454,22 +466,23 @@ across the 3 slaves in your cluster.
    Finally, we swap the key and values (`map(x => (x._2, x._1))`), sort by key in descending order (the `false` argument specifies descending order and `true` would specify ascending), and return the top 50 results (`take`). The full command is:
 
    ~~~
-   scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_%2B_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50)
+   scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50)
    ~~~
 
    There is no hard and fast way to calculate the optimal number of reducers for a given problem; you will
    build up intuition over time by experimenting with different values.
+   
    To leave the Spark shell, type `exit` at the prompt.
 
 ## Data Exploration Using Shark
 
-We had fun with Scala, now let's try some SQL in Shark.
+Now that we've had fun with Scala, let's try some SQL in Shark.
 First, launch the Shark console:
 
     cd /root/
     /root/shark/bin/shark-withinfo
 
-1. Similar to Apache Hive, Shark can query external tables (tables that are not created in Shark).
+1. Similar to [2Apache Hive, Shark can query external tables (tables that are not created in Shark).
    Before you do any querying, you will need to tell Shark where the data is and define its schema.
 
    ~~~
