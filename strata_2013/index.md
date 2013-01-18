@@ -38,8 +38,11 @@ This can be done by logging into your Amazon Web Services account through the [A
 
 Make sure that you set the permissions for the private key file to `600` (i.e. only you can read and write it) so that `ssh` will work (commands to do this are provided farther below).
 
-NOTE: The AMI we are using for this exercise is only available in the `us-east` region.
+<div class="alert alert-info">
+<i class="icon-info-sign"> 	</i>
+The AMI we are using for this exercise is only available in the `us-east` region.
 So make sure you create a key-pair in that region!
+</div>
 
 ## Getting the scripts to launch EC2 cluster
 
@@ -88,11 +91,12 @@ __Answer:__ Run the next two commands.
 __Question: I got the following error when I ran the above command. Help!__
 
 <pre class="nocode">
-￼"Your requested instance type (m2.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zonee or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
+￼"Your requested instance type (m2.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zone or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
 </pre>
 
-__Answer:__ Add the "-z" flag to your command line argument to specify which availability zone to use other than `us-east-1b`.
-You can set the value of that flag to "none" as in the following example command, which tells the script to pick a random availability zone, though it may randomly pick an availability zone that doesn't support this instance size (such as `us-east-1b`), so you may need to try this command a few times to get it to work.
+__Answer:__ Add the `-z` flag to your command line arguments to use an availability zone other than `us-east-1b`.
+You can set the value of that flag to "none", as in the following example command, which tells the script to pick a random availability zone.
+It may randomly pick an availability zone that doesn't support this instance size (such as `us-east-1b`), so you may need to try this command a few times to get it to work.
 
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> -z none --copy launch ampcamp
 
@@ -122,7 +126,7 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
    /root/ephemeral-hdfs/bin/start-dfs.sh
    ~~~
 
-4. Delete the directory the data was supposed to copied to
+4. Delete the directory the data was supposed to be copied to
 
    ~~~
    /root/ephemeral-hdfs/bin/hadoop fs -rmr /wiki
@@ -176,25 +180,18 @@ Your cluster should be ready to use.
 You can find the master hostname (`<master_node_hostname>` in the instructions below) by running
 
     ./spark-ec2 -i -k get-master ampcamp
-
+    
 At this point, it would be helpful to open a text file and copy `<master_node_hostname>` there.
-In a later exercises, you will want to have `<master_node_hostname>` ready at hand without having to scroll through your terminal history.
+In a later exercise, you will want to have `<master_node_hostname>` ready at hand without having to scroll through your terminal history.
 
-## When You're Ready to Terminate the Cluster (Not yet! Only after you do the exercises below.)
-__After you are done with your exercise__, you can terminate the cluster by running
+## Terminating the cluster (Not yet! Only after you do the exercises below.)
+__After you are done with your exercises__, you can terminate the cluster by running
 
     ./spark-ec2 -i <key_file> -k <key_pair> destroy ampcamp
+    
+# Logging into the Cluster
 
-# Intro to Scala
-
-This short exercise will teach you the basics of Scala and introduce you to functional programming with collections.
-Do as much as you feel you need.
-The exercise is based on a great and fast tutorial, [First Steps to Scala](http://www.artima.com/scalazine/articles/steps.html).
-Just reading that and trying the examples at the console might be enough!
-Open this in a separate browser window and look through it if you need help.
-We will use only sections 1-9.
-
-1. Log into your cluster via `ssh -i <key_file> -l root@<master_node_hostname>`
+Log into your cluster via `ssh -i <key_file> -l root@<master_node_hostname>`
 
    __Question: I got the following permission error when I ran the above command. Help!__
 
@@ -209,12 +206,22 @@ We will use only sections 1-9.
    Permission denied (publickey).
    </pre>
 
-   __Answer:__ Run the next two commands.
+__Answer:__ Run the next two commands, then try to log in again:
 
-   ~~~
-   chmod 600 ../ampcamp.pem
-   ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
-   ~~~
+    chmod 600 ../ampcamp.pem
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
+
+# Intro to Scala
+
+This short exercise will teach you the basics of Scala and introduce you to functional programming with collections.
+Do as much as you feel you need.
+
+If you're comfortable with Python, feel free to skip ahead to the next section.
+
+The exercise is based on a great and fast tutorial, [First Steps to Scala](http://www.artima.com/scalazine/articles/steps.html).
+Just reading that and trying the examples at the console might be enough!
+Open this in a separate browser window and look through it if you need help.
+We will use only sections 1-9.
 
 2. Launch the Scala console by typing `scala`.
 
