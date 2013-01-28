@@ -1123,70 +1123,70 @@ object Tutorial {
 ~~~
 As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, using `<new DStream>.print()` in the program and `run Tutorial` in the command prompt).
 
-    1. __Get the stream of hashtags from the stream of tweets__ : 
-    To get the hashtags from the status messages, each status messages need to first split by space into its words, 
-    and then consider only the words that start with "#". This can be done as follows.
-    ~~~
-        val words = statuses.flatMap(status => status.split(" "))
-        val hashtags = words.filter(word => word.startsWith("#"))
-    ~~~
-    The `flatMap` operation applies a one-to-many operation to each record in the original DStream and then flattens the records to create new DStream. 
-    In this case, each status string is split by space to produce a DStream whose each record is a word. 
-    Then we apply the `filter` function to retain only the hashtags. If you want to see the result, add `hashtags.print()` and try running the program. 
-    You should see something like this (assumging no other DStream has `print` on it).
-    ~~~
-    XXXX
-    YYYY
-    ZZZZ
-    ~~~
+1. __Get the stream of hashtags from the stream of tweets__ : 
+To get the hashtags from the status messages, each status messages need to first split by space into its words, 
+and then consider only the words that start with "#". This can be done as follows.
+~~~
+    val words = statuses.flatMap(status => status.split(" "))
+    val hashtags = words.filter(word => word.startsWith("#"))
+~~~
+The `flatMap` operation applies a one-to-many operation to each record in the original DStream and then flattens the records to create new DStream. 
+In this case, each status string is split by space to produce a DStream whose each record is a word. 
+Then we apply the `filter` function to retain only the hashtags. If you want to see the result, add `hashtags.print()` and try running the program. 
+You should see something like this (assumging no other DStream has `print` on it).
+~~~
+XXXX
+YYYY
+ZZZZ
+~~~
 
 
-    2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a window.  
-    TODO: decide which version to have, and accodingly elaborate this explanation
-    ~~~
-        val counts = hashtags.map(t => (t, 1))
-                             .reduceByKeyAndWindow(_ + _, Seconds(30), Seconds(1))
-    ~~~
-    __OR__
-    ~~~
-        val counts = hashtags.countValuesByWindow(Seconds(30), Seconds(1))
-    ~~~
-    The generated `counts` DStream will have records that are (hashtag, count) tuples.
-    If you `print` counts and run this program, you should see something like this. 
-    ~~~
-    XXXX
-    YYYY
-    ZZZZ
-    ~~~
+2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a window.  
+TODO: decide which version to have, and accodingly elaborate this explanation
+~~~
+    val counts = hashtags.map(t => (t, 1))
+                         .reduceByKeyAndWindow(_ + _, Seconds(30), Seconds(1))
+~~~
+__OR__
+~~~
+    val counts = hashtags.countValuesByWindow(Seconds(30), Seconds(1))
+~~~
+The generated `counts` DStream will have records that are (hashtag, count) tuples.
+If you `print` counts and run this program, you should see something like this. 
+~~~
+XXXX
+YYYY
+ZZZZ
+~~~
 
 
-    3. __Find the top 10 hashtags based on their counts__ : 
-    Finally, these counts has to be used to find the popular hashtags. 
-    A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
-    take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
-    (hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
-    then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
-    ~~~
-        val sortedCounts = counts.map { case(tag, count) => (count, tag) }
-                                 .transform(rdd => rdd.sortByKey(false))
-        sortedCounts60s.foreach(rdd => 
-          println("Top 10 hashtags:\n" + rdd.take(10).mkString("\n"))
-    ~~~
-    The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
-    As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
-    The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
-    for each batch of data having sorted hashtags, it gets the first 10 hashtags and prints them.  
-    If you run this program, you should see something like this. 
-    ~~~
-    XXXX
-    YYYY
-    ZZZZ
-    ~~~
+3. __Find the top 10 hashtags based on their counts__ : 
+Finally, these counts has to be used to find the popular hashtags. 
+A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
+take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
+(hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
+then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
+~~~
+    val sortedCounts = counts.map { case(tag, count) => (count, tag) }
+                             .transform(rdd => rdd.sortByKey(false))
+    sortedCounts60s.foreach(rdd => 
+      println("Top 10 hashtags:\n" + rdd.take(10).mkString("\n"))
+~~~
+The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
+As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
+The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
+for each batch of data having sorted hashtags, it gets the first 10 hashtags and prints them.  
+If you run this program, you should see something like this. 
+~~~
+XXXX
+YYYY
+ZZZZ
+~~~
 
-    Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of 
-    30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition, 
-    collect them together at the driver and then find the top 10 hashtags among them.
-    We leave this as an exercise for the reader to try out. 
+Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of 
+30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition, 
+collect them together at the driver and then find the top 10 hashtags among them.
+We leave this as an exercise for the reader to try out. 
 
 
 
