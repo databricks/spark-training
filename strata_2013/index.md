@@ -1018,7 +1018,7 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
 
 # Processing Live Data Streams with Spark Streaming
 
-In this section, we will walk you through using Spark Streaming to process live data streams. These exercises are designed as standalone Scala programs which will receive and process Twitter's sample tweet streams. If you are not familiar with Scala, then it is recommended that you see the [Intro to Scala](#intro-to-scala) section to familiarize yourself with the language. 
+In this section, we will walk you through using Spark Streaming to process live data streams. These exercises are designed as standalone Scala programs which will receive and process Twitter's sample tweet streams. If you are not familiar with Scala, it is recommended that you see the [Intro to Scala](#intro-to-scala) section to familiarize yourself with the language.
 
 ## Setup
     1. __Setup for standalone programs__ : Writing a standalone Spark / Spark Streaming program requires a bit of configuration in library paths, etc. Section XXX provides a detailed walk-through of setting this up. For convenience, we have already set up a directoy in the AMI (`/root/streaming/`), with all the required configurations. 
@@ -1027,19 +1027,22 @@ In this section, we will walk you through using Spark Streaming to process live 
     2. __Twitter authentication__ : Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
 ~~~
 my.fancy.username
-my_unforgettable_password
+my_uncrackable_password
 ~~~
-Be sure to delete this file after the exercises are over. Even if you dont delete them, these files will be completely destroyed along with the AMI, so your password will not fall into the wrong hands. 
+Be sure to delete this file after the exercises are over. Even if you don't delete them, these files will be completely destroyed along with the instance, so your password will not fall into wrong hands. 
 
 
-## Running you first Spark Streaming program
-Let's now try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. We need to create and edit a new file in the directory `/root/streaming`
+## Running your first Spark Streaming program
+Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. Unlike the Spark and Shark interactive-shell-based tutorials earlier, this is a standalone program. So  until the program is compiled and executed.
+
+
+We need to create a new file Tutorial.scala in the directory `/root/streaming`
 ~~~
 cd /root/streaming/
 vim Tutorial.scala
 ~~~
+You can use either vim or emacs for editing. Alternatively, you can use your favorite text editor to write your program and then copy-paste it to the file using vim or emacs before running it.
 
-You can use either vim or emacs for editing. Alternatively, you can use your own favorite text editor to write your program and then copy-paste it to the file using vim or emacs.
 In the program, we need to include the following packages.
 ~~~
 include spark.streaming._
@@ -1054,7 +1057,8 @@ object Tutorial {
   }
 }
 ~~~
-For those who are more familiar with Java than Scala, this similar to `class Tutorial { public static void main(String[] args) { ... } } ` . The rest of the code below is to be entereded within this main function.
+For those who are more familiar with Java than Scala, this similar to `class Tutorial { public static void main(String[] args) { ... } } ` . 
+The rest of the code below is to be entereded within this main function.
 
 To receive and process Twitter's data, we need to get the following information - (i) Twitter login information, and (ii) Spark cluster's URL.
 For the purpose of this tutorial, we have already provided a convenience function to make this easier. Add the following line inside the main function. 
@@ -1064,11 +1068,12 @@ For the purpose of this tutorial, we have already provided a convenience functio
 This function will read the username and password present in the file `/root/streaming/login.txt` as well as the cluster URL present in the file `/root/mesos-ec2/cluster-url`.
 
 
-Now we come to the more interesting part. To express any Spark Streaming computation, a StreamingContext object needs to be created using the Spark cluster URL and the batch size of the DStreams. 
+Now we come to the more interesting part. To express any Spark Streaming computation, a StreamingContext object needs to be created. 
+This object serves as the main entry point for all Spark Streaming functionality.
 ~~~
     val ssc = new StreamingContext(sparkUrl, "Tutorial", Seconds(1))
 ~~~
-This sets the context to receive and process data in batches of 1 second. The name "Tutorial" is a unique name given to this application to identify it the Spark's web UI.
+`sparkUrl` tells the context which cluster to use to launch Spark jobs for processing data. `Seconds(1)` tells the context to receive and process data in batches of 1 second. "Tutorial" is a unique name given to this application to identify it the Spark's web UI.
 
 
 Next, we use this context and the login information to create a stream of tweets.
@@ -1082,7 +1087,7 @@ The object `tweets` is a DStream of tweet statuses. More specifically, it is con
 ~~~
 Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each batch of data, which in this case, are the statuses. 
 
-Finally, we need to tell the context to start running this computation. 
+Finally, we need to tell the context to start running the computation we have setup. 
 ~~~
     ssc.start()
 ~~~
@@ -1124,15 +1129,15 @@ object Tutorial {
 As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, using `<new DStream>.print()` in the program and `run Tutorial` in the command prompt).
 
 1. __Get the stream of hashtags from the stream of tweets__ : 
-To get the hashtags from the status messages, each status messages need to first split by space into its words, 
-and then consider only the words that start with "#". This can be done as follows.
+To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
 ~~~
     val words = statuses.flatMap(status => status.split(" "))
     val hashtags = words.filter(word => word.startsWith("#"))
 ~~~
-The `flatMap` operation applies a one-to-many operation to each record in the original DStream and then flattens the records to create new DStream. 
+The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
 In this case, each status string is split by space to produce a DStream whose each record is a word. 
-Then we apply the `filter` function to retain only the hashtags. If you want to see the result, add `hashtags.print()` and try running the program. 
+Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
+If you want to see the result, add `hashtags.print()` and try running the program. 
 You should see something like this (assumging no other DStream has `print` on it).
 ~~~
 XXXX
@@ -1174,8 +1179,9 @@ then sort the hashtags. Finally, we need to get the top 10 hashtags and print th
 ~~~
 The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
 As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
+The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags. 
 The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
-for each batch of data having sorted hashtags, it gets the first 10 hashtags and prints them.  
+`foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.  
 If you run this program, you should see something like this. 
 ~~~
 XXXX
