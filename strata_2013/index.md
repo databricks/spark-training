@@ -1021,10 +1021,10 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
 In this section, we will walk you through using Spark Streaming to process live data streams. These exercises are designed as standalone Scala programs which will receive and process Twitter's sample tweet streams. If you are not familiar with Scala, it is recommended that you see the [Intro to Scala](#intro-to-scala) section to familiarize yourself with the language.
 
 ## Setup
-    1. __Setup for standalone programs__ : Writing a standalone Spark / Spark Streaming program requires a bit of configuration in library paths, etc. Section XXX provides a detailed walk-through of setting this up. For convenience, we have already set up a directoy in the AMI (`/root/streaming/`), with all the required configurations. 
+1. __Setup for standalone programs__ : Writing a standalone Spark / Spark Streaming program requires a bit of configuration in library paths, etc. Section XXX provides a detailed walk-through of setting this up. For convenience, we have already set up a directoy in the AMI (`/root/streaming/`), with all the required configurations. 
 
 
-    2. __Twitter authentication__ : Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
+2. __Twitter authentication__ : Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
 ~~~
 my.fancy.username
 my_uncrackable_password
