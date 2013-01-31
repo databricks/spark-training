@@ -1,8 +1,8 @@
 ---
 layout: global
-title: AMP Camp 2012 Exercises
+title: AMP Camp 2013 Exercises
 ---
-# Introduction to AMP Camp 2012 Exercises
+# Introduction to AMP Camp 2013 Exercises
 
 The following series of exercises will walk you through the process of setting up a 4-machine cluster on EC2 running [Spark](http://spark-project.org), [Shark](http://shark.cs.berkeley.edu) and [Mesos](http://mesos-project.org),
 then loading and analyzing a real wikipedia dataset using your cluster.
