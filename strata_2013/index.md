@@ -209,6 +209,12 @@ __Information:__ Sometimes the EC2 instances don't initialize within the standar
 If that happens you, will ssh errors (or check in the Amazon web console).
 In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
 
+</div>
+</div>
+
+</div>
+</div>
+
 ## Post-launch steps
 Your cluster should be ready to use.
 You can find the master hostname (`<master_node_hostname>` in the instructions below) by running
@@ -244,11 +250,7 @@ __Answer:__ Run the next two commands, then try to log in again:
 
     chmod 600 ../ampcamp.pem
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
-</div>
-</div>
 
-</div>
-</div>
 
 Once you are able to successfully launch the cluster, continue to step 4.
 
