@@ -80,7 +80,7 @@ The following are some errors that you may encounter, and other frequently asked
         I get an error when running this command: <code>Your requested instance type (m2.xlarge) is not supported...</code>
       </a>
       <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
-        I get an error when running this command:> <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
+        I get an error when running this command: <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
       </a>
       <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
         Can I specify the instances types while creating the cluster?
