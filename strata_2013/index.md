@@ -67,9 +67,28 @@ For example, if you created a key pair named `ampcamp-key` and the private key (
 
     ./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key --copy launch ampcamp
 
-The following are some errors that you may encounter, and other frequently asked questions.
-Once you are able to successfully launch the cluster, continue to step 4.
+The following are some errors that you may encounter, and other frequently asked questions:
 
+
+<div class="accordion" id="q-accordion">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q1" data-parent="#q-accordion">
+        I get an error when running this command: <code>UNPROTECTED KEY FILE...</code>
+      </a>
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q2" data-parent="#q-accordion">
+        I get an error when running this command: <code>Your requested instance type (m2.xlarge) is not supported...</code>
+      </a>
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
+        I get an error when running this command:> <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
+      </a>
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
+        Can I specify the instances types while creating the cluster?
+      </a>
+    </div>
+    <div id="collapse-q1" class="accordion-body collapse">
+      <div class="accordion-inner" markdown="1">
+      
 __Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
@@ -88,10 +107,17 @@ __Answer:__ Run the next two commands.
     chmod 600 ../ampcamp.pem
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
 
-__Question: I got the following error when I ran the above command. Help!__
+
+
+</div>
+</div>
+    <div id="collapse-q2" class="accordion-body collapse">
+      <div class="accordion-inner" markdown="1">
+      
+__Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
-￼"Your requested instance type (m2.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zone or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
+"Your requested instance type (m2.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zone or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
 </pre>
 
 __Answer:__ Add the `-z` flag to your command line arguments to use an availability zone other than `us-east-1b`.
@@ -100,6 +126,11 @@ It may randomly pick an availability zone that doesn't support this instance siz
 
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> -z none --copy launch ampcamp
 
+</div>
+</div>
+   <div id="collapse-q3" class="accordion-body collapse">
+      <div class="accordion-inner" markdown="1">
+      
 __Question: I got the following error when I ran the above command. Help!__
 
 <pre class="nocode">
@@ -138,8 +169,11 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
    ./spark-ec2 -i <key_file> -k <key_pair> copy-data ampcamp
    ~~~
 
-
-
+</div>
+</div>
+   <div id="collapse-q4" class="accordion-body collapse">
+      <div class="accordion-inner" markdown="1">
+      
 __Question: Can I specify the instances types while creating the cluster?__
 
 __Answer:__ These exercises have been designed to work with at least 3 slave
@@ -210,6 +244,13 @@ __Answer:__ Run the next two commands, then try to log in again:
 
     chmod 600 ../ampcamp.pem
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
+</div>
+</div>
+
+</div>
+</div>
+
+Once you are able to successfully launch the cluster, continue to step 4.
 
 # Intro to Scala
 
