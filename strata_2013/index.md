@@ -1,13 +1,13 @@
 ---
 layout: global
-title: AMP Camp 2012 Exercises
+title: AMP Camp 2013 Exercises
 ---
-# Introduction to AMP Camp 2012 Exercises
+# Introduction to AMP Camp 2013 Exercises
 
 The following series of exercises will walk you through the process of setting up a 4-machine cluster on EC2 running [Spark](http://spark-project.org), [Shark](http://shark.cs.berkeley.edu) and [Mesos](http://mesos-project.org),
 then loading and analyzing a real wikipedia dataset using your cluster.
 We will begin with simple interactive analysis techniques at the command-line, and progress to writing standalone programs, and then onto more advanced machine learning algorithms.
-
+ 
 # Launching a Spark/Shark Cluster on EC2
 
 This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this [intro to AMIs](https://aws.amazon.com/amis/)).
@@ -67,9 +67,28 @@ For example, if you created a key pair named `ampcamp-key` and the private key (
 
     ./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key --copy launch ampcamp
 
-The following are some errors that you may encounter, and other frequently asked questions.
-Once you are able to successfully launch the cluster, continue to step 4.
+The following are some errors that you may encounter, and other frequently asked questions:
 
+
+<div class="accordion" id="q-accordion">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q1" data-parent="#q-accordion">
+        I get an error when running this command: <code>UNPROTECTED KEY FILE...</code>
+      </a>
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q2" data-parent="#q-accordion">
+        I get an error when running this command: <code>Your requested instance type (m2.xlarge) is not supported...</code>
+      </a>
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
+        I get an error when running this command: <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
+      </a>
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
+        Can I specify the instances types while creating the cluster?
+      </a>
+    </div>
+    <div id="collapse-q1" class="accordion-body collapse">
+      <div class="accordion-inner" markdown="1">
+      
 __Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
@@ -88,10 +107,17 @@ __Answer:__ Run the next two commands.
     chmod 600 ../ampcamp.pem
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
 
-__Question: I got the following error when I ran the above command. Help!__
+
+
+</div>
+</div>
+    <div id="collapse-q2" class="accordion-body collapse">
+      <div class="accordion-inner" markdown="1">
+      
+__Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
-￼"Your requested instance type (m2.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zone or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
+"Your requested instance type (m2.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zone or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
 </pre>
 
 __Answer:__ Add the `-z` flag to your command line arguments to use an availability zone other than `us-east-1b`.
@@ -100,6 +126,11 @@ It may randomly pick an availability zone that doesn't support this instance siz
 
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> -z none --copy launch ampcamp
 
+</div>
+</div>
+   <div id="collapse-q3" class="accordion-body collapse">
+      <div class="accordion-inner" markdown="1">
+      
 __Question: I got the following error when I ran the above command. Help!__
 
 <pre class="nocode">
@@ -138,8 +169,11 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
    ./spark-ec2 -i <key_file> -k <key_pair> copy-data ampcamp
    ~~~
 
-
-
+</div>
+</div>
+   <div id="collapse-q4" class="accordion-body collapse">
+      <div class="accordion-inner" markdown="1">
+      
 __Question: Can I specify the instances types while creating the cluster?__
 
 __Answer:__ These exercises have been designed to work with at least 3 slave
@@ -174,6 +208,12 @@ However, you should ensure two things:
 __Information:__ Sometimes the EC2 instances don't initialize within the standard waiting time of 120 seconds.
 If that happens you, will ssh errors (or check in the Amazon web console).
 In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
+
+</div>
+</div>
+
+</div>
+</div>
 
 ## Post-launch steps
 Your cluster should be ready to use.
@@ -210,6 +250,9 @@ __Answer:__ Run the next two commands, then try to log in again:
 
     chmod 600 ../ampcamp.pem
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
+
+
+Once you are able to successfully launch the cluster, continue to step 4.
 
 # Intro to Scala
 
@@ -325,21 +368,48 @@ To quit `less`, stop viewing the file, and return to the command line, press `q`
 Let's now use Spark to do some order statistics on the data set.
 First, launch the Spark shell:
 
+<ul class="nav nav-tabs" data-tabs="tabs">
+  <li class="active"><a data-toggle="tab" href="#scala_shell">Scala</a></li>
+  <li><a data-toggle="tab" href="#python_shell">Python</a></li>
+</ul>
+ 
+<div class="tab-content">
+  <div class="tab-pane active" id="scala_shell" markdown="1">
     /root/spark/spark-shell
+  </div>
+  <div class="tab-pane" id="python_shell" markdown="1">
+    /root/spark/pyspark
+  </div>
+</div>
 
-Wait for the Scala prompt to appear.
+Wait for the prompt to appear.
 
 1. Warm up by creating an RDD (Resilient Distributed Dataset) named `pagecounts` from the input files.
    In the Spark shell, the SparkContext is already created for you as variable `sc`.
 
-   ~~~
-   scala> sc
-   res: spark.SparkContext = spark.SparkContext@470d1f30
+<ul class="nav nav-tabs" data-tabs="tabs">
+  <li class="active"><a data-toggle="tab" href="#scala_1">Scala</a></li>
+  <li><a data-toggle="tab" href="#python_1">Python</a></li>
+</ul>
 
-   scala> val pagecounts = sc.textFile("/wiki/pagecounts")
-   12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
-   pagecounts: spark.RDD[String] = spark.MappedRDD@34da7b85
-   ~~~
+<div class="tab-content">
+  <div class="tab-pane active" id="scala_1" markdown="1">
+    scala> sc
+    res: spark.SparkContext = spark.SparkContext@470d1f30
+
+    scala> val pagecounts = sc.textFile("/wiki/pagecounts")
+    12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
+    pagecounts: spark.RDD[String] = spark.MappedRDD@34da7b85
+  </div>
+  <div class="tab-pane" id="python_1" markdown="1">
+    >>> sc
+    <pyspark.context.SparkContext object at 0x7f7570783350>
+    >>> pagecounts = sc.textFile("wiki/pagecounts")
+    13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
+    >>> pagecounts
+    <pyspark.rdd.RDD object at 0x217d510>
+  </div>
+</div>
 
 2. Let's take a peek at the data. You can use the take operation of an RDD to get the first K records. Here, K = 10.
 
