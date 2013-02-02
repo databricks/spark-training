@@ -1,3 +1,4 @@
+import spark._
 import spark.streaming._
 import StreamingContext._
 import TutorialHelper._
@@ -12,13 +13,12 @@ object Tutorial {
     val sparkUrl = getSparkUrl()
 
     // Location of the required JAR files 
-    val jarFile = "target/scala-2.9.2/Tutorial_2.9.2-0.1-SNAPSHOT.jar"
+    val jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar"
 
     // Twitter credentials from login.txt
     val (twitterUsername, twitterPassword) = getTwitterCredentials()
    
     // Your code goes here
-
   }
 }
 
