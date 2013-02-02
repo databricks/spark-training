@@ -368,16 +368,11 @@ To quit `less`, stop viewing the file, and return to the command line, press `q`
 Let's now use Spark to do some order statistics on the data set.
 First, launch the Spark shell:
 
-<ul class="nav nav-tabs" data-tabs="tabs">
-  <li class="active"><a data-toggle="tab" href="#scala_shell">Scala</a></li>
-  <li><a data-toggle="tab" href="#python_shell">Python</a></li>
-</ul>
- 
-<div class="tab-content">
-  <div class="tab-pane active" id="scala_shell" markdown="1">
+<div class="codetabs">
+  <div data-lang="scala" markdown="1">
     /root/spark/spark-shell
   </div>
-  <div class="tab-pane" id="python_shell" markdown="1">
+  <div data-lang="python" markdown="1">
     /root/spark/pyspark
   </div>
 </div>
@@ -387,13 +382,8 @@ Wait for the prompt to appear.
 1. Warm up by creating an RDD (Resilient Distributed Dataset) named `pagecounts` from the input files.
    In the Spark shell, the SparkContext is already created for you as variable `sc`.
 
-<ul class="nav nav-tabs" data-tabs="tabs">
-  <li class="active"><a data-toggle="tab" href="#scala_1">Scala</a></li>
-  <li><a data-toggle="tab" href="#python_1">Python</a></li>
-</ul>
-
-<div class="tab-content">
-  <div class="tab-pane active" id="scala_1" markdown="1">
+<div class="codetabs">
+  <div data-lang="scala" markdown="1">
     scala> sc
     res: spark.SparkContext = spark.SparkContext@470d1f30
 
@@ -401,7 +391,7 @@ Wait for the prompt to appear.
     12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
     pagecounts: spark.RDD[String] = spark.MappedRDD@34da7b85
   </div>
-  <div class="tab-pane" id="python_1" markdown="1">
+  <div data-lang="python" markdown="1">
     >>> sc
     <pyspark.context.SparkContext object at 0x7f7570783350>
     >>> pagecounts = sc.textFile("wiki/pagecounts")
