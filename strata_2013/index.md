@@ -382,34 +382,40 @@ Wait for the prompt to appear.
 1. Warm up by creating an RDD (Resilient Distributed Dataset) named `pagecounts` from the input files.
    In the Spark shell, the SparkContext is already created for you as variable `sc`.
 
-<div class="codetabs">
-  <div data-lang="scala" markdown="1">
-    scala> sc
-    res: spark.SparkContext = spark.SparkContext@470d1f30
+   <div class="codetabs">
+     <div data-lang="scala" markdown="1">
+       scala> sc
+       res: spark.SparkContext = spark.SparkContext@470d1f30
 
-    scala> val pagecounts = sc.textFile("/wiki/pagecounts")
-    12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
-    pagecounts: spark.RDD[String] = spark.MappedRDD@34da7b85
-  </div>
-  <div data-lang="python" markdown="1">
-    >>> sc
-    <pyspark.context.SparkContext object at 0x7f7570783350>
-    >>> pagecounts = sc.textFile("wiki/pagecounts")
-    13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
-    >>> pagecounts
-    <pyspark.rdd.RDD object at 0x217d510>
-  </div>
-</div>
+       scala> val pagecounts = sc.textFile("/wiki/pagecounts")
+       12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
+       pagecounts: spark.RDD[String] = spark.MappedRDD@34da7b85
+     </div>
+     <div data-lang="python" markdown="1">
+       >>> sc
+       <pyspark.context.SparkContext object at 0x7f7570783350>
+       >>> pagecounts = sc.textFile("wiki/pagecounts")
+       13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
+       >>> pagecounts
+       <pyspark.rdd.RDD object at 0x217d510>
+     </div>
+   </div>
 
 2. Let's take a peek at the data. You can use the take operation of an RDD to get the first K records. Here, K = 10.
 
-   ~~~
-   scala> pagecounts.take(10)
-   ......
-   res: Array[String] = Array(20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463, 20090505-000000 aa.b Special:Statistics 1 840, 20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019, 20090505-000000 aa.b Wikibooks:About 1 15719, 20090505-000000 aa ?14mFX1ildVnBc 1 13205, 20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207, 20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199, 20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201, 20090505-000000 aa File:Wikinews-logo.svg 1 8357, 20090505-000000 aa Main_Page 2 9980, 20090505-000000 aa User:TottyBot 1 7998, 20090505-000000 aa Wikipedia:Community_Portal 1 9644, 20090505-000000 aa main_page 1 928, 20090505-000000 ab.d %D0%A1%D0%BB%D1%83%D0%B6%D0%B5%D0%B1%D0%BD%D0%B0%D1%8F: \
-   Recentchangeslinked/%D0%A3%D1%87%D0%B0%D1%81%D1%82%D0%BD%D0%B8%D0%BA: \
-   H%C3%A9g%C3%A9sippe_...
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> pagecounts.take(10)
+       ......
+       res: Array[String] = Array(20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463, 20090505-000000 aa.b Special:Statistics 1 840, 20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019, 20090505-000000 aa.b Wikibooks:About 1 15719, 20090505-000000 aa ?14mFX1ildVnBc 1 13205, 20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207, 20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199, 20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201, 20090505-000000 aa File:Wikinews-logo.svg 1 8357, 20090505-000000 aa Main_Page 2 9980, 20090505-000000 aa User:TottyBot 1 7998, 20090505-000000 aa Wikipedia:Community_Portal 1 9644, 20090505-000000 aa main_page 1 928, 20090505-000000 ab.d %D0%A1%D0%BB%D1%83%D0%B6%D0%B5%D0%B1%D0%BD%D0%B0%D1%8F: \
+       Recentchangeslinked/%D0%A3%D1%87%D0%B0%D1%81%D1%82%D0%BD%D0%B8%D0%BA: \
+       H%C3%A9g%C3%A9sippe_...
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> pagecounts.take(10)
+       ...
+   </div>
+   </div>
 
    Unfortunately this is not very readable because take returns an array and Scala simply prints the array with each element separated by a comma.
    We can make it prettier by traversing the array to print each record on its own line.
@@ -606,58 +612,20 @@ default number of reducers, which we have been using so far in this section, is 
 
 - Count the number of distinct date/times for English pages
 
-  <div class="accordion">
-  <div class="accordion-group">
-   <div class="accordion-heading">
-     <a class="accordion-toggle" data-toggle="collapse" href="#collapse-sql1">
-       <i class="icon-ok-sign"> </i>
-       View Solution
-     </a>
-   </div>
-   <div id="collapse-sql1" class="accordion-body collapse">
-     <div class="accordion-inner" markdown="1">
+   <div class="solution" markdown="1">
       select count(distinct dt) from wikistats_cached;
-     </div>
-   </div>
-   </div>
    </div>
 
 - How many hits are there on pages with Berkeley in the title throughout the entire period?
 
-  <div class="accordion">
-  <div class="accordion-group">
-   <div class="accordion-heading">
-     <a class="accordion-toggle" data-toggle="collapse" href="#collapse-sql2">
-       <i class="icon-ok-sign"> </i>
-       View Solution
-     </a>
-   </div>
-   <div id="collapse-sql2" class="accordion-body collapse">
-     <div class="accordion-inner" markdown="1">
-
+   <div class="solution" markdown="1">
       select count(page_views) from wikistats_cached where page_name like "%berkeley%";
-
-     </div>
-   </div>
-   </div>
    </div>
 
 - Generate a histogram for the number of hits for each hour on May 6, 2009; sort the output by date/time. Based on the output, which hour is Wikipedia most popular?
 
-  <div class="accordion">
-  <div class="accordion-group">
-   <div class="accordion-heading">
-     <a class="accordion-toggle" data-toggle="collapse" href="#collapse-sql3">
-       <i class="icon-ok-sign"> </i>
-       View Solution
-     </a>
-   </div>
-   <div id="collapse-sql3" class="accordion-body collapse">
-     <div class="accordion-inner" markdown="1">
+   <div class="solution" markdown="1">
       select dt, sum(page_views) from wikistats_cached where dt like "20090506%" group by dt order by dt;
-     </div>
-   </div>
-   </div>
    </div>
 
 To exit Shark, type the following at the Shark command line (and don't forget the semicolon!).
@@ -689,16 +657,7 @@ Recall that each record in our dataset consists of a string with the format "`<d
 
 1. You can preprocess and featurize the data yourself by following along with the parts of this exercise. To skip ahead to exercise 2 where we start examining the data set we will input to K means, just copy and paste all of the code from our solution to preprocess the data.
 
-   <div class="accordion">
-   <div class="accordion-group">
-   <div class="accordion-heading">
-     <a class="accordion-toggle" data-toggle="collapse" href="#collapse-ml0">
-       <i class="icon-ok-sign"> </i>
-       View Solution
-     </a>
-   </div>
-   <div id="collapse-ml0" class="accordion-body collapse">
-   <div class="accordion-inner" markdown="1">
+   <div class="solution" markdown="1">
 
    Place the following code within a Scala `object` and call the `featurization` function from a `main` function:
 
@@ -739,9 +698,6 @@ Recall that each record in our dataset consists of a string with the format "`<d
     featurizedRdd.map{t => t._1 -> t._2.mkString(",")}.saveAsSequenceFile("hdfs://"+hostname+":9000/wikistats_featurized")
    }
    ~~~
-   </div>
-   </div>
-   </div>
    </div>
 
 
@@ -848,20 +804,8 @@ Recall that each record in our dataset consists of a string with the format "`<d
       featurizedRDD.count
       ~~~
 
-      <div class="accordion">
-      <div class="accordion-group">
-       <div class="accordion-heading">
-         <a class="accordion-toggle" data-toggle="collapse" href="#collapse-ml1">
-           <i class="icon-ok-sign"> </i>
-           View Solution
-         </a>
-       </div>
-       <div id="collapse-ml1" class="accordion-body collapse">
-         <div class="accordion-inner" markdown="1">
-         Number of records in the preprocessed data: 802450
-         </div>
-      </div>
-      </div>
+      <div class="solution" markdown="1">
+      Number of records in the preprocessed data: 802450
       </div>
 
 
@@ -872,25 +816,12 @@ Recall that each record in our dataset consists of a string with the format "`<d
      featuresCSML.foreach(x => println(x._1 + "," + x._2.mkString(" ")))
      ~~~
 
-      <div class="accordion">
-      <div class="accordion-group">
-       <div class="accordion-heading">
-         <a class="accordion-toggle" data-toggle="collapse" href="#collapse-ml2">
-           <i class="icon-ok-sign"> </i>
-           View Solution
-         </a>
-       </div>
-       <div id="collapse-ml2" class="accordion-body collapse">
-         <div class="accordion-inner">
-         <textarea rows="12" style="width: 100%" readonly>
-         (en Machine_learning, [0.03708182184602984,0.027811366384522376,0.031035872632003234,0.033454252317613876,0.033051189036678766,0.023780733575171308,0.03224506247480856,0.029826682789197912,0.04997984683595326,0.04433696090286176,0.04997984683595326,0.04474002418379687,0.04272470777912134,0.054816606207174545,0.054816606207174545,0.04474002418379687,0.054010479645304324,0.049173720274083045,0.049173720274083045,0.05038291011688836,0.04594921402660219,0.04957678355501815,0.03667875856509473,0.030632809351068126])
-         (en Computer_science, [0.03265137425087828,0.057656540607563554,0.03306468278569953,0.033374664186815464,0.03709444100020666,0.03947096507542881,0.03502789832610044,0.03637115106426948,0.036577805331680105,0.0421574705517669,0.04267410622029345,0.03885100227319695,0.03885100227319695,0.046083901632568716,0.04691051870221121,0.050320314114486474,0.05259351105600331,0.04649721016738996,0.04732382723703245,0.048357098574085565,0.04236412481917752,0.043190741888820015,0.03626782393056417,0.03626782393056417])
-         </textarea>
-         </div>
-      </div>
-      </div>
-      </div>
-
+     <div class="solution">
+     <textarea rows="12" style="width: 100%" readonly>
+     (en Machine_learning, [0.03708182184602984,0.027811366384522376,0.031035872632003234,0.033454252317613876,0.033051189036678766,0.023780733575171308,0.03224506247480856,0.029826682789197912,0.04997984683595326,0.04433696090286176,0.04997984683595326,0.04474002418379687,0.04272470777912134,0.054816606207174545,0.054816606207174545,0.04474002418379687,0.054010479645304324,0.049173720274083045,0.049173720274083045,0.05038291011688836,0.04594921402660219,0.04957678355501815,0.03667875856509473,0.030632809351068126])
+     (en Computer_science, [0.03265137425087828,0.057656540607563554,0.03306468278569953,0.033374664186815464,0.03709444100020666,0.03947096507542881,0.03502789832610044,0.03637115106426948,0.036577805331680105,0.0421574705517669,0.04267410622029345,0.03885100227319695,0.03885100227319695,0.046083901632568716,0.04691051870221121,0.050320314114486474,0.05259351105600331,0.04649721016738996,0.04732382723703245,0.048357098574085565,0.04236412481917752,0.043190741888820015,0.03626782393056417,0.03626782393056417])
+     </textarea>
+     </div>
 
 ## Clustering
 
@@ -899,16 +830,7 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
 1. We now further explore the featurized dataset via K-means clustering. Implement K-means clustering (as a standalone Spark program) and generate 10 clusters from the featurized dataset created above. For each cluster, print its centroid vector and the " " strings of 10 articles assigned to that cluster.
 
 
-   <div class="accordion">
-   <div class="accordion-group">
-   <div class="accordion-heading">
-     <a class="accordion-toggle" data-toggle="collapse" href="#collapse-kmeans1">
-       <i class="icon-ok-sign"> </i>
-       View Solution
-     </a>
-   </div>
-   <div id="collapse-kmeans1" class="accordion-body collapse">
-   <div class="accordion-inner" markdown="1">
+   <div class="solution" markdown="1">
 
    Place the following code within a Scala `object` and call the `clustering` function from a `main` function:
 
@@ -1022,22 +944,10 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
    ~~~
 
    </div>
-   </div>
-   </div>
-   </div>
 
 2. Run K-means again (so that the cluster centroids are initialized differently) and see how the clusters change.
 
-   <div class="accordion">
-   <div class="accordion-group">
-   <div class="accordion-heading">
-     <a class="accordion-toggle" data-toggle="collapse" href="#collapse-kmeans2">
-       <i class="icon-ok-sign"> </i>
-       View Solution
-     </a>
-   </div>
-   <div id="collapse-kmeans2" class="accordion-body collapse">
-   <div class="accordion-inner">
+   <div class="solution" markdown="1">
 
    Centroids with some articles for K-means with K=10:
 
@@ -1046,23 +956,10 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
    </textarea>
 
    </div>
-   </div>
-   </div>
-   </div>
 
 3. Repeat #2, now using 50 clusters.
 
-
-   <div class="accordion">
-   <div class="accordion-group">
-   <div class="accordion-heading">
-     <a class="accordion-toggle" data-toggle="collapse" href="#collapse-kmeans3">
-       <i class="icon-ok-sign"> </i>
-       View Solution
-     </a>
-   </div>
-   <div id="collapse-kmeans3" class="accordion-body collapse">
-   <div class="accordion-inner">
+   <div class="solution" markdown="1">
 
    Centroids with some articles for K-means with K=50:
 
@@ -1070,7 +967,4 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
    {% include 50_clusters_solution.txt %}
    </textarea>
 
-   </div>
-   </div>
-   </div>
    </div>

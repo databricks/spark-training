@@ -18,6 +18,7 @@ function styleCode()
 		if (a) { prettyPrint() }
 }
 
+
 function codeTabs() {
 	var counter = 0
 	$("div.codetabs").each(function() {
@@ -50,8 +51,32 @@ function codeTabs() {
 }
 
 
+function viewSolution() {
+	var counter = 0
+	$("div.solution").each(function() {
+		var id = "solution_" + counter
+
+		$(this).addClass("accordion-inner");
+		$(this).wrap('<div class="accordion" />')
+		$(this).wrap('<div class="accordion-group" />')
+		$(this).wrap('<div id="' + id + '" class="accordion-body collapse" />')
+		$(this).parent().before(
+			 '<div class="accordion-heading">' +
+				 '<a class="accordion-toggle" data-toggle="collapse" href="#' + id + '">' +
+					 '<i class="icon-ok-sign"> </i>' +
+					 'View Solution' +
+				 '</a>' +
+			 '</div>'
+		);
+
+		counter++;
+	});
+}
+
+
 $(document).ready(function() {
 	codeTabs();
+	viewSolution();
 	$('#toc').toc({exclude: ''});
 	styleCode();
 });
