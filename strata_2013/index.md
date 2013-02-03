@@ -1,12 +1,12 @@
 ---
 layout: global
-title: AMP Camp 2013 Exercises
+title: Strata 2013 Exercises
 ---
-# Introduction to AMP Camp 2013 Exercises
+# Introduction to Strata 2013 Exercises
 
 The following series of exercises will walk you through the process of setting up a 4-machine cluster on EC2 running [Spark](http://spark-project.org), [Shark](http://shark.cs.berkeley.edu) and [Mesos](http://mesos-project.org),
 then loading and analyzing a real wikipedia dataset using your cluster.
-We will begin with simple interactive analysis techniques at the command-line, and progress to writing standalone programs, and then onto more advanced machine learning algorithms.
+We will begin with simple interactive analysis techniques at the command-line using Spark and Shark, and progress to writing standalone programs using Spark and Spark Streaming, and then onto more advanced machine learning algorithms.
  
 # Launching a Spark/Shark Cluster on EC2
 
@@ -254,52 +254,14 @@ __Answer:__ Run the next two commands, then try to log in again:
 
 Once you are able to successfully launch the cluster, continue to step 4.
 
-# Intro to Scala
+# Overview Of The Exercises
+The exercises in this tutorial are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming. 
+For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python. 
+For Shark, you will be using SQL in the Shark console to interactively explore the same data. 
+For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter's sample stream of tweets. 
+Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark. 
 
-This short exercise will teach you the basics of Scala and introduce you to functional programming with collections.
-Do as much as you feel you need.
-
-If you're comfortable with Python, feel free to skip ahead to the next section.
-
-The exercise is based on a great and fast tutorial, [First Steps to Scala](http://www.artima.com/scalazine/articles/steps.html).
-Just reading that and trying the examples at the console might be enough!
-Open this in a separate browser window and look through it if you need help.
-We will use only sections 1-9.
-
-2. Launch the Scala console by typing `scala`.
-
-3. Declare a list of integers, `numbers`, as `val numbers = List(1, 2, 5, 4, 7, 3)`
-
-4. Declare a function, `cube`, that computes the cube (third power) of a number.
-   See steps 2-4 of First Steps to Scala.
-   Then apply the function on the list using `map`.
-
-5. Then also try writing the function inline in a `map` call, using closure notation.
-
-6. Define a `factorial` function that computes n! = 1 * 2 * ... * n given input n.
-   You can use either a loop or recursion (see steps 5-7 of First Steps to Scala).
-   Then compute the sum of factorials in `numbers`.
-
-7. As a final exercise, implement a program that counts how many times a particular word occurs in a text file.
-   You can load a text file as an array of lines as shown below:
-
-   ~~~
-   import scala.io.Source
-   val lines = Source.fromFile("/root/mesos/README").getLines.toArray
-   ~~~
-
-   Then use functional methods to count the number of occurrences (steps 8-9 of First Steps to Scala).
-   Also add a flag to your program to perform case-insensitive search.
-
-# Spark Shell and Shark
-
-In this section, we will walk you through using the Spark shell and/or the Shark console to interactively explore data.
-We will be working with Wikipedia traffic statistics data obtained from http://aws.amazon.com/datasets/4182
-
-To make the analysis feasible (within the short timeframe of the exercise), AMP Camp organizers took three days worth of data (May 5 to May 7, 2009; roughly 20G and 329 million entries) and preloaded it into an instance of HDFS running on your cluster.
-We'll take a look at it in a minute.
-
-## Data Set and Cluster
+## Cluster Details
 If you have launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes:
 
 ![Running EC2 instances in AWS Management Console](img/aws-runninginstances.png)
@@ -316,17 +278,26 @@ Some of the more important ones are listed below:
 
 - `ephemeral-hdfs:` Hadoop installation.
 - `hive:` Hive installation
-- `java-app-template:` Some stand-alone Spark programs in java 4. mesos: Mesos installation
+- `java-app-template:` Some stand-alone Spark programs in Java
+- `mesos:` Mesos installation
 - `mesos-ec2:` A suite of scripts to manage Mesos on EC2
-- `scala-2.9.1.final:` Scala installation
-- `scala-app-template:` Some stand-alone Spark programs in scala 8. spark: Spark installation
+- `scala-2.9.2.final:` Scala installation
+- `scala-app-template:` Some stand-alone Spark programs in Scala 
+- `spark:` Spark installation
 - `shark:` Shark installation
+- `streaming:` Stand-alone program for Spark Streaming exercises  
 
 You can find a list of your 3 slave nodes in mesos-ec2/slaves:
 
     cat mesos-ec2/slaves
 
-Your HDFS cluster should come preloaded with 20GB of Wikipedia traffic statistics data for May 5 to May 7, 2009.
+For stand-alone Spark programs, you will have to know the Spark cluster URL. You can find that in mesos-ec2/cluster-url:
+
+    cat mesos-ec2/cluster-url
+
+## Dataset For Exploration
+Your HDFS cluster should come preloaded with 20GB of Wikipedia traffic statistics data obtained from http://aws.amazon.com/datasets/4182 .
+To make the analysis feasible (within the short timeframe of the exercise), we took three days worth of data (May 5 to May 7, 2009; roughly 20G and 329 million entries).
 You can list the files:
 
     ephemeral-hdfs/bin/hadoop fs -ls /wiki/pagecounts
@@ -363,7 +334,47 @@ The `<page_size>` field gives the size in bytes of the Wikipedia page.
 
 To quit `less`, stop viewing the file, and return to the command line, press `q`.
 
-## Data Exploration Using Spark
+# Introduction to Scala
+This short exercise will teach you the basics of Scala and introduce you to functional programming with collections.
+Do as much as you feel you need. 
+
+If you're comfortable with Python, feel free to skip ahead to the next section.
+
+The exercise is based on a great and fast tutorial, [First Steps to Scala](http://www.artima.com/scalazine/articles/steps.html).
+Just reading that and trying the examples at the console might be enough!
+Open this in a separate browser window and look through it if you need help.
+We will use only sections 1-9.
+
+2. Launch the Scala console by typing `scala`.
+
+3. Declare a list of integers, `numbers`, as `val numbers = List(1, 2, 5, 4, 7, 3)`
+
+4. Declare a function, `cube`, that computes the cube (third power) of a number.
+   See steps 2-4 of First Steps to Scala.
+   Then apply the function on the list using `map`.
+
+5. Then also try writing the function inline in a `map` call, using closure notation.
+
+6. Define a `factorial` function that computes n! = 1 * 2 * ... * n given input n.
+   You can use either a loop or recursion (see steps 5-7 of First Steps to Scala).
+   Then compute the sum of factorials in `numbers`.
+
+7. As a final exercise, implement a program that counts how many times a particular word occurs in a text file.
+   You can load a text file as an array of lines as shown below:
+
+   ~~~
+   import scala.io.Source
+   val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+   ~~~
+
+   Then use functional methods to count the number of occurrences (steps 8-9 of First Steps to Scala).
+   Also add a flag to your program to perform case-insensitive search.
+
+# Data Exploration Using Spark
+
+In this section, you are first going to use the Spark shell to interactively explore the Wikipedia data. Then we are going to give a bried introduction to writing standalone Spark programs.   
+
+## Interactive Analysis
 
 Let's now use Spark to do some order statistics on the data set.
 First, launch the Spark shell:
@@ -547,7 +558,29 @@ Wait for the prompt to appear.
 
    To leave the Spark shell, type `exit` at the prompt.
 
-## Data Exploration Using Shark
+
+## Introduction To Running Standalone Programs
+
+So far we have been doing a lot of ad-hoc style analytics using the command line interfaces to Spark and Shark. For some tasks, it makes more sense to write a standalone Spark program. 
+On our AMI we have included two "template" projects for Scala and Java standalone Spark programs. 
+These can be found in the `/root/scala-app-template` and `/root/java-app-template` directories. 
+These projects are built using [Simple Built Tool (SBT)](http://www.scala-sbt.org/), a popular scala build system. 
+You can try to compile your app into a JAR using  
+
+~~~
+$ sbt/sbt package
+~~~
+
+Then you can run your app using 
+
+~~~
+$ sbt/sbt run <arg1> <arg2> 
+~~~
+
+Feel free to browse through the contents of those directories. For more details, see the slides from Matei Zaharia's AMP Camp talk on Standalone Spark Programs which are linked to from [the AMP Camp Agenda page](http://ampcamp.berkeley.edu/agenda).
+
+
+# Data Exploration Using Shark
 
 Now that we've had fun with Scala, let's try some SQL in Shark.
 First, launch the Shark console:
@@ -570,7 +603,7 @@ First, launch the Shark console:
    12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.text" but it cannot be resolved.
    </pre>
 
-1. Let's create a table containing all English records and cache it in the cluster's memory.
+2. Let's create a table containing all English records and cache it in the cluster's memory.
 
    ~~~
    shark> create table wikistats_cached as select * from wikistats where project_code="en";
@@ -632,21 +665,9 @@ To exit Shark, type the following at the Shark command line (and don't forget th
 
     shark> exit;
 
-# Intro to Running Standalone Spark Programs
-So far we have been doing a lot of ad-hoc style analytics using the command line interfaces to Spark and Shark. For some tasks, it makes more sense to write a standalone Spark program. This section will walk you through the process of writing a stand alone program and running in on EC2.
-
-On our AMP Camp AMI we have included two "template" projects for Scala and Java standalone Spark programs.  These can be found in the `/root/scala-app-template` and `/root/java-app-template` directories.
-
-Feel free to browse through the contents of those directories. You can try to compile and run each of the apps with sbt/sbt run. For more details, see the slides from Matei Zaharia's AMP Camp talk on Standalone Spark Programs which are linked to from [the AMP Camp Agenda page](http://ampcamp.berkeley.edu/agenda).
-
 # Machine Learning
 
-To allow you to complete the machine learning exercises within the relatively short time available during AMP Camp, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre- loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
-
-## High-level Problem Statement
-
-To allow you to complete the machine learning exercises within the relatively short time available during AMP Camp, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009.  In particular, we have restricted the dataset to only include a subset of the full set of articles.  This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
-
+To allow you to complete the machine learning exercises within the relatively short time available, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre- loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
 
 
 ## Command Line Preprocessing and Featurization
@@ -974,84 +995,113 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
 
 In this section, we will walk you through using Spark Streaming to process live data streams. These exercises are designed as standalone Scala programs which will receive and process Twitter's sample tweet streams. If you are not familiar with Scala, it is recommended that you see the [Intro to Scala](#intro-to-scala) section to familiarize yourself with the language.
 
-## Setup
-1. __Setup for standalone programs__ : Writing a standalone Spark / Spark Streaming program requires a bit of configuration in library paths, etc. Section XXX provides a detailed walk-through of setting this up. For convenience, we have already set up a directoy in the AMI (`/root/streaming/`), with all the required configurations. 
+## Setup 
+We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#introduction-to-running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
 
+- `build.sbt:` SBT project file
+- `login.txt:` File containing Twitter username and password 
+- `sbt:` Directory containing the SBT tool
+- `Tutorial.scala:` Main Scala program that you are going to edit, compile and run
+- `TutorialHelper.scala:` Scala file containing few helper functions for Tutorial.scala
 
-2. __Twitter authentication__ : Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
+The main file you are going to edit, compile and run for the exercises is the Tutorial.scala. The file should the following.
+
+~~~
+import spark._
+import spark.streaming._
+import StreamingContext._
+import TutorialHelper._
+
+object Tutorial {
+  def main(args: Array[String]) {
+    
+    // Location of the Spark directory 
+    val sparkHome = "/root/spark"
+    
+    // URL of the Spark cluster
+    val sparkUrl = getSparkUrl()
+
+    // Location of the required JAR files 
+    val jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar"
+
+    // Twitter credentials from login.txt
+    val (twitterUsername, twitterPassword) = getTwitterCredentials()
+   
+    // Your code goes here
+  }
+}
+~~~
+
+For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
+
+- `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/mesos-ec2/cluster-url`. 
+- `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`. 
+
+Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
+
 ~~~
 my.fancy.username
 my_uncrackable_password
 ~~~
+
 Be sure to delete this file after the exercises are over. Even if you don't delete them, these files will be completely destroyed along with the instance, so your password will not fall into wrong hands. 
 
 
-## Running your first Spark Streaming program
+## First Spark Streaming program
 Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. Unlike the Spark and Shark interactive-shell-based tutorials earlier, this is a standalone program. So  until the program is compiled and executed.
 
 
-We need to create a new file Tutorial.scala in the directory `/root/streaming`
+We need to edit the file Tutorial.scala in the directory `/root/streaming`
+
 ~~~
 cd /root/streaming/
 vim Tutorial.scala
 ~~~
+
 You can use either vim or emacs for editing. Alternatively, you can use your favorite text editor to write your program and then copy-paste it to the file using vim or emacs before running it.
 
-In the program, we need to include the following packages.
-~~~
-include spark.streaming._
-include StreamingContext._
-~~~
 
-Then we need to define the class and the main function that will be executed. 
-~~~
-object Tutorial {
-  def main(args: Array[String]) {
-    // Spark Streaming program
-  }
-}
-~~~
-For those who are more familiar with Java than Scala, this similar to `class Tutorial { public static void main(String[] args) { ... } } ` . 
-The rest of the code below is to be entereded within this main function.
-
-To receive and process Twitter's data, we need to get the following information - (i) Twitter login information, and (ii) Spark cluster's URL.
-For the purpose of this tutorial, we have already provided a convenience function to make this easier. Add the following line inside the main function. 
-~~~
-    val (username, password, sparkUrl) = Utils.getParams()
-~~~
-This function will read the username and password present in the file `/root/streaming/login.txt` as well as the cluster URL present in the file `/root/mesos-ec2/cluster-url`.
-
-
-Now we come to the more interesting part. To express any Spark Streaming computation, a StreamingContext object needs to be created. 
+To express any Spark Streaming computation, a StreamingContext object needs to be created. 
 This object serves as the main entry point for all Spark Streaming functionality.
-~~~
-    val ssc = new StreamingContext(sparkUrl, "Tutorial", Seconds(1))
-~~~
-`sparkUrl` tells the context which cluster to use to launch Spark jobs for processing data. `Seconds(1)` tells the context to receive and process data in batches of 1 second. "Tutorial" is a unique name given to this application to identify it the Spark's web UI.
 
-
+~~~
+    val sc = new SparkContext(sparkUrl, "Tutorial", sparkHome, Seq(jarFile))
+    val ssc = new StreamingContext(sc, Seconds(1))
+~~~
+Here, a SparkContext object is first created by providing the Spark cluster URL, the Spark home directory and the list of JAR files that are necessary to run the program. 
+"Tutorial" is a unique name given to this application to identify it the Spark's web UI.
+Using this SparkContext object, a StreamingContext object is created. `Seconds(1)` tells the context to receive and process data in batches of 1 second. 
 Next, we use this context and the login information to create a stream of tweets.
+
 ~~~
     val tweets = ssc.twitterStream(username, password)
 ~~~
+
 The object `tweets` is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type [twitter4j.Status](http://twitter4j.org/javadoc/twitter4j/Status.html). As a very simple processing step, let's try to print the status text of the some of the tweets. 
+
 ~~~
     val statuses = tweets.map(status => status.getText())
     statuses.print()
 ~~~
-Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each batch of data, which in this case, are the statuses. 
+
+Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each RDD in a DStream, which in this case, are 1 second batches of received status texts. 
 
 Finally, we need to tell the context to start running the computation we have setup. 
+
 ~~~
     ssc.start()
 ~~~
+
 Note that all DStream operations must be done __before__ calling this statement.  
 
 After saving Tutorial.scala, it can be run from the command prompt using the following command (from within the `/root/streaming` directory).
+
 ~~~
-./run Tutorial
+$ sbt/sbt project run
 ~~~
-This command will automatically compile Tutorial.scala, distribute the generated class files to the worker nodes, and then run the program. You should find the following output on your screen.
+
+This command will automatically compile Tutorial.scala to create a JAR file in `/root/streaming/target/scala-2.9.2/` and then run the program. You should find the following output on your screen.
+
 ~~~
 XXXX
 YYYY
@@ -1060,39 +1110,22 @@ ZZZZ
 
 
 ## Further exercises
-Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 30 seconds. These next steps explain the set of the DStream operations required to achieve our goal. Let us continue to modify the Tutorial.scala, which should look like this. 
-~~~
-include spark.streaming._
-include StreamingContext._
-
-object Tutorial {
-  def main(args: Array[String]) {
-    val (username, password, sparkUrl) = Utils.getParams()
-    val ssc = new StreamingContext(sparkUrl, "Tutorial", Seconds(1))
-    val tweets = ssc.twitterStream(username, password)
-    val statuses = tweets.map(status => status.getText())
-    statuses.print()     // comment this line if you dont want this to be printed any more
-
-    // New operations from the exercises must go here
-
-    ssc.start()
-  }
-}
-
-~~~
-As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, using `<new DStream>.print()` in the program and `run Tutorial` in the command prompt).
+Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 30 seconds. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
 
 1. __Get the stream of hashtags from the stream of tweets__ : 
 To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
+
 ~~~
     val words = statuses.flatMap(status => status.split(" "))
     val hashtags = words.filter(word => word.startsWith("#"))
 ~~~
+
 The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
 In this case, each status string is split by space to produce a DStream whose each record is a word. 
 Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
 If you want to see the result, add `hashtags.print()` and try running the program. 
 You should see something like this (assumging no other DStream has `print` on it).
+
 ~~~
 XXXX
 YYYY
@@ -1102,16 +1135,20 @@ ZZZZ
 
 2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a window.  
 TODO: decide which version to have, and accodingly elaborate this explanation
+
 ~~~
     val counts = hashtags.map(t => (t, 1))
                          .reduceByKeyAndWindow(_ + _, Seconds(30), Seconds(1))
 ~~~
 __OR__
+
 ~~~
     val counts = hashtags.countValuesByWindow(Seconds(30), Seconds(1))
 ~~~
+
 The generated `counts` DStream will have records that are (hashtag, count) tuples.
 If you `print` counts and run this program, you should see something like this. 
+
 ~~~
 XXXX
 YYYY
@@ -1125,18 +1162,21 @@ A simple (but not the most efficient) way to do this is to sort the hashtags bas
 take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
 (hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
 then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
+
 ~~~
     val sortedCounts = counts.map { case(tag, count) => (count, tag) }
                              .transform(rdd => rdd.sortByKey(false))
     sortedCounts60s.foreach(rdd => 
       println("Top 10 hashtags:\n" + rdd.take(10).mkString("\n"))
 ~~~
+
 The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
 As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
 The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags. 
 The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
 `foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.  
 If you run this program, you should see something like this. 
+
 ~~~
 XXXX
 YYYY
