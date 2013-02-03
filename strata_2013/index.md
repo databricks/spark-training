@@ -665,6 +665,205 @@ To exit Shark, type the following at the Shark command line (and don't forget th
 
     shark> exit;
 
+
+# Processing Live Data Streams with Spark Streaming
+
+In this section, we will walk you through using Spark Streaming to process live data streams. These exercises are designed as standalone Scala programs which will receive and process Twitter's sample tweet streams. If you are not familiar with Scala, it is recommended that you see the [Intro to Scala](#intro-to-scala) section to familiarize yourself with the language.
+
+## Setup 
+We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#introduction-to-running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
+
+- `build.sbt:` SBT project file
+- `login.txt:` File containing Twitter username and password 
+- `sbt:` Directory containing the SBT tool
+- `Tutorial.scala:` Main Scala program that you are going to edit, compile and run
+- `TutorialHelper.scala:` Scala file containing few helper functions for Tutorial.scala
+
+The main file you are going to edit, compile and run for the exercises is the Tutorial.scala. The file should the following.
+
+~~~
+import spark._
+import spark.streaming._
+import StreamingContext._
+import TutorialHelper._
+
+object Tutorial {
+  def main(args: Array[String]) {
+    
+    // Location of the Spark directory 
+    val sparkHome = "/root/spark"
+    
+    // URL of the Spark cluster
+    val sparkUrl = getSparkUrl()
+
+    // Location of the required JAR files 
+    val jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar"
+
+    // Twitter credentials from login.txt
+    val (twitterUsername, twitterPassword) = getTwitterCredentials()
+   
+    // Your code goes here
+  }
+}
+~~~
+
+For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
+
+- `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/mesos-ec2/cluster-url`. 
+- `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`. 
+
+Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
+
+~~~
+my.fancy.username
+my_uncrackable_password
+~~~
+
+Be sure to delete this file after the exercises are over. Even if you don't delete them, these files will be completely destroyed along with the instance, so your password will not fall into wrong hands. 
+
+
+## First Spark Streaming program
+Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. Unlike the Spark and Shark interactive-shell-based tutorials earlier, this is a standalone program. So  until the program is compiled and executed.
+
+
+We need to edit the file Tutorial.scala in the directory `/root/streaming`
+
+~~~
+cd /root/streaming/
+vim Tutorial.scala
+~~~
+
+You can use either vim or emacs for editing. Alternatively, you can use your favorite text editor to write your program and then copy-paste it to the file using vim or emacs before running it.
+
+
+To express any Spark Streaming computation, a StreamingContext object needs to be created. 
+This object serves as the main entry point for all Spark Streaming functionality.
+
+~~~
+    val sc = new SparkContext(sparkUrl, "Tutorial", sparkHome, Seq(jarFile))
+    val ssc = new StreamingContext(sc, Seconds(1))
+~~~
+Here, a SparkContext object is first created by providing the Spark cluster URL, the Spark home directory and the list of JAR files that are necessary to run the program. 
+"Tutorial" is a unique name given to this application to identify it the Spark's web UI.
+Using this SparkContext object, a StreamingContext object is created. `Seconds(1)` tells the context to receive and process data in batches of 1 second. 
+Next, we use this context and the login information to create a stream of tweets.
+
+~~~
+    val tweets = ssc.twitterStream(username, password)
+~~~
+
+The object `tweets` is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type [twitter4j.Status](http://twitter4j.org/javadoc/twitter4j/Status.html). As a very simple processing step, let's try to print the status text of the some of the tweets. 
+
+~~~
+    val statuses = tweets.map(status => status.getText())
+    statuses.print()
+~~~
+
+Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each RDD in a DStream, which in this case, are 1 second batches of received status texts. 
+
+Finally, we need to tell the context to start running the computation we have setup. 
+
+~~~
+    ssc.start()
+~~~
+
+Note that all DStream operations must be done __before__ calling this statement.  
+
+After saving Tutorial.scala, it can be run from the command prompt using the following command (from within the `/root/streaming` directory).
+
+~~~
+$ sbt/sbt project run
+~~~
+
+This command will automatically compile Tutorial.scala to create a JAR file in `/root/streaming/target/scala-2.9.2/` and then run the program. You should find the following output on your screen.
+
+~~~
+XXXX
+YYYY
+ZZZZ
+~~~
+
+
+## Further exercises
+Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 30 seconds. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
+
+1. __Get the stream of hashtags from the stream of tweets__ : 
+To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
+
+~~~
+    val words = statuses.flatMap(status => status.split(" "))
+    val hashtags = words.filter(word => word.startsWith("#"))
+~~~
+
+The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
+In this case, each status string is split by space to produce a DStream whose each record is a word. 
+Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
+If you want to see the result, add `hashtags.print()` and try running the program. 
+You should see something like this (assumging no other DStream has `print` on it).
+
+~~~
+XXXX
+YYYY
+ZZZZ
+~~~
+
+
+2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a window.  
+TODO: decide which version to have, and accodingly elaborate this explanation
+
+~~~
+    val counts = hashtags.map(t => (t, 1))
+                         .reduceByKeyAndWindow(_ + _, Seconds(30), Seconds(1))
+~~~
+__OR__
+
+~~~
+    val counts = hashtags.countValuesByWindow(Seconds(30), Seconds(1))
+~~~
+
+The generated `counts` DStream will have records that are (hashtag, count) tuples.
+If you `print` counts and run this program, you should see something like this. 
+
+~~~
+XXXX
+YYYY
+ZZZZ
+~~~
+
+
+3. __Find the top 10 hashtags based on their counts__ : 
+Finally, these counts has to be used to find the popular hashtags. 
+A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
+take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
+(hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
+then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
+
+~~~
+    val sortedCounts = counts.map { case(tag, count) => (count, tag) }
+                             .transform(rdd => rdd.sortByKey(false))
+    sortedCounts60s.foreach(rdd => 
+      println("Top 10 hashtags:\n" + rdd.take(10).mkString("\n"))
+~~~
+
+The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
+As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
+The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags. 
+The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
+`foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.  
+If you run this program, you should see something like this. 
+
+~~~
+XXXX
+YYYY
+ZZZZ
+~~~
+
+Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of 
+30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition, 
+collect them together at the driver and then find the top 10 hashtags among them.
+We leave this as an exercise for the reader to try out. 
+
+
 # Machine Learning
 
 To allow you to complete the machine learning exercises within the relatively short time available, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre- loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
@@ -989,203 +1188,5 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
    </textarea>
 
    </div>
-
-
-# Processing Live Data Streams with Spark Streaming
-
-In this section, we will walk you through using Spark Streaming to process live data streams. These exercises are designed as standalone Scala programs which will receive and process Twitter's sample tweet streams. If you are not familiar with Scala, it is recommended that you see the [Intro to Scala](#intro-to-scala) section to familiarize yourself with the language.
-
-## Setup 
-We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#introduction-to-running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
-
-- `build.sbt:` SBT project file
-- `login.txt:` File containing Twitter username and password 
-- `sbt:` Directory containing the SBT tool
-- `Tutorial.scala:` Main Scala program that you are going to edit, compile and run
-- `TutorialHelper.scala:` Scala file containing few helper functions for Tutorial.scala
-
-The main file you are going to edit, compile and run for the exercises is the Tutorial.scala. The file should the following.
-
-~~~
-import spark._
-import spark.streaming._
-import StreamingContext._
-import TutorialHelper._
-
-object Tutorial {
-  def main(args: Array[String]) {
-    
-    // Location of the Spark directory 
-    val sparkHome = "/root/spark"
-    
-    // URL of the Spark cluster
-    val sparkUrl = getSparkUrl()
-
-    // Location of the required JAR files 
-    val jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar"
-
-    // Twitter credentials from login.txt
-    val (twitterUsername, twitterPassword) = getTwitterCredentials()
-   
-    // Your code goes here
-  }
-}
-~~~
-
-For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
-
-- `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/mesos-ec2/cluster-url`. 
-- `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`. 
-
-Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
-
-~~~
-my.fancy.username
-my_uncrackable_password
-~~~
-
-Be sure to delete this file after the exercises are over. Even if you don't delete them, these files will be completely destroyed along with the instance, so your password will not fall into wrong hands. 
-
-
-## First Spark Streaming program
-Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. Unlike the Spark and Shark interactive-shell-based tutorials earlier, this is a standalone program. So  until the program is compiled and executed.
-
-
-We need to edit the file Tutorial.scala in the directory `/root/streaming`
-
-~~~
-cd /root/streaming/
-vim Tutorial.scala
-~~~
-
-You can use either vim or emacs for editing. Alternatively, you can use your favorite text editor to write your program and then copy-paste it to the file using vim or emacs before running it.
-
-
-To express any Spark Streaming computation, a StreamingContext object needs to be created. 
-This object serves as the main entry point for all Spark Streaming functionality.
-
-~~~
-    val sc = new SparkContext(sparkUrl, "Tutorial", sparkHome, Seq(jarFile))
-    val ssc = new StreamingContext(sc, Seconds(1))
-~~~
-Here, a SparkContext object is first created by providing the Spark cluster URL, the Spark home directory and the list of JAR files that are necessary to run the program. 
-"Tutorial" is a unique name given to this application to identify it the Spark's web UI.
-Using this SparkContext object, a StreamingContext object is created. `Seconds(1)` tells the context to receive and process data in batches of 1 second. 
-Next, we use this context and the login information to create a stream of tweets.
-
-~~~
-    val tweets = ssc.twitterStream(username, password)
-~~~
-
-The object `tweets` is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type [twitter4j.Status](http://twitter4j.org/javadoc/twitter4j/Status.html). As a very simple processing step, let's try to print the status text of the some of the tweets. 
-
-~~~
-    val statuses = tweets.map(status => status.getText())
-    statuses.print()
-~~~
-
-Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each RDD in a DStream, which in this case, are 1 second batches of received status texts. 
-
-Finally, we need to tell the context to start running the computation we have setup. 
-
-~~~
-    ssc.start()
-~~~
-
-Note that all DStream operations must be done __before__ calling this statement.  
-
-After saving Tutorial.scala, it can be run from the command prompt using the following command (from within the `/root/streaming` directory).
-
-~~~
-$ sbt/sbt project run
-~~~
-
-This command will automatically compile Tutorial.scala to create a JAR file in `/root/streaming/target/scala-2.9.2/` and then run the program. You should find the following output on your screen.
-
-~~~
-XXXX
-YYYY
-ZZZZ
-~~~
-
-
-## Further exercises
-Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 30 seconds. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
-
-1. __Get the stream of hashtags from the stream of tweets__ : 
-To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
-
-~~~
-    val words = statuses.flatMap(status => status.split(" "))
-    val hashtags = words.filter(word => word.startsWith("#"))
-~~~
-
-The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
-In this case, each status string is split by space to produce a DStream whose each record is a word. 
-Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
-If you want to see the result, add `hashtags.print()` and try running the program. 
-You should see something like this (assumging no other DStream has `print` on it).
-
-~~~
-XXXX
-YYYY
-ZZZZ
-~~~
-
-
-2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a window.  
-TODO: decide which version to have, and accodingly elaborate this explanation
-
-~~~
-    val counts = hashtags.map(t => (t, 1))
-                         .reduceByKeyAndWindow(_ + _, Seconds(30), Seconds(1))
-~~~
-__OR__
-
-~~~
-    val counts = hashtags.countValuesByWindow(Seconds(30), Seconds(1))
-~~~
-
-The generated `counts` DStream will have records that are (hashtag, count) tuples.
-If you `print` counts and run this program, you should see something like this. 
-
-~~~
-XXXX
-YYYY
-ZZZZ
-~~~
-
-
-3. __Find the top 10 hashtags based on their counts__ : 
-Finally, these counts has to be used to find the popular hashtags. 
-A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
-take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
-(hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
-then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
-
-~~~
-    val sortedCounts = counts.map { case(tag, count) => (count, tag) }
-                             .transform(rdd => rdd.sortByKey(false))
-    sortedCounts60s.foreach(rdd => 
-      println("Top 10 hashtags:\n" + rdd.take(10).mkString("\n"))
-~~~
-
-The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
-As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
-The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags. 
-The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
-`foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.  
-If you run this program, you should see something like this. 
-
-~~~
-XXXX
-YYYY
-ZZZZ
-~~~
-
-Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of 
-30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition, 
-collect them together at the driver and then find the top 10 hashtags among them.
-We leave this as an exercise for the reader to try out. 
 
 
