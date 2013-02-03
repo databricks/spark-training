@@ -414,32 +414,55 @@ Wait for the prompt to appear.
    <div data-lang="python" markdown="1">
        >>> pagecounts.take(10)
        ...
+       [u'20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463', u'20090505-000000 aa.b Special:Statistics 1 840', u'20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019', u'20090505-000000 aa.b Wikibooks:About 1 15719', u'20090505-000000 aa ?14mFX1ildVnBc 1 13205', u'20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207', u'20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199', u'20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201', u'20090505-000000 aa File:Wikinews-logo.svg 1 8357', u'20090505-000000 aa Main_Page 2 9980']
    </div>
    </div>
 
    Unfortunately this is not very readable because take returns an array and Scala simply prints the array with each element separated by a comma.
    We can make it prettier by traversing the array to print each record on its own line.
 
-   ~~~
-   scala> pagecounts.take(10).foreach(println)
-   ......
-   20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
-   20090505-000000 aa.b Special:Statistics 1 840
-   20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
-   20090505-000000 aa.b Wikibooks:About 1 15719
-   20090505-000000 aa ?14mFX1ildVnBc 1 13205
-   20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
-   20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
-   20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
-   20090505-000000 aa File:Wikinews-logo.svg 1 8357
-   20090505-000000 aa Main_Page 2 9980
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> pagecounts.take(10).foreach(println)
+       ......
+       20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
+       20090505-000000 aa.b Special:Statistics 1 840
+       20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
+       20090505-000000 aa.b Wikibooks:About 1 15719
+       20090505-000000 aa ?14mFX1ildVnBc 1 13205
+       20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
+       20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
+       20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
+       20090505-000000 aa File:Wikinews-logo.svg 1 8357
+       20090505-000000 aa Main_Page 2 9980
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> for x in pagecounts.take(10):
+       ...    print x
+       ...
+       20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
+       20090505-000000 aa.b Special:Statistics 1 840
+       20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
+       20090505-000000 aa.b Wikibooks:About 1 15719
+       20090505-000000 aa ?14mFX1ildVnBc 1 13205
+       20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
+       20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
+       20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
+       20090505-000000 aa File:Wikinews-logo.svg 1 8357
+       20090505-000000 aa Main_Page 2 9980
+   </div>
+   </div>
 
 2. Let's see how many records in total are in this data set (this command will take a while, so read ahead while it is running).
 
-   ~~~
-   scala> pagecounts.count
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> pagecounts.count
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> pagecounts.count()
+   </div>
+   </div>
 
    This should launch 177 Spark tasks on the Mesos cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
@@ -455,30 +478,42 @@ Wait for the prompt to appear.
 
    When your count does finish running, it should return the following result: `res2: Long = 329641466`
 
-4.  Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
-    For example, the project code "en" indicates an English page.
-    Let's derive an RDD containing only English pages from `pagecounts`.
-    This can be done by applying a filter function to `pagecounts`.
-    For each record, we can split it by the field delimiter (i.e. a space) and get the second field-– and then compare it with the string "en".
+4. Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
+   For example, the project code "en" indicates an English page.
+   Let's derive an RDD containing only English pages from `pagecounts`.
+   This can be done by applying a filter function to `pagecounts`.
+   For each record, we can split it by the field delimiter (i.e. a space) and get the second field-– and then compare it with the string "en".
 
-    To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
+   To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
     This is where Spark really starts to to shine.
 
-    ~~~
-    scala> val enPages = pagecounts.filter(_.split(" ")(1) == "en").cache
-    enPages: spark.RDD[String] = spark.FilteredRDD@8262adc
-    ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> val enPages = pagecounts.filter(_.split(" ")(1) == "en").cache
+       enPages: spark.RDD[String] = spark.FilteredRDD@8262adc
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enPages = pagecounts.filter(lambda x: x.split(" ")[1] == "en").cache()
+   </div>
+   </div>
 
-    When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
-    Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 3 slaves in your cluster.
+   When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
+   Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 3 slaves in your cluster.
 
 5. How many records are there for English pages?
 
-   ~~~
-   scala> enPages.count
-   ......
-   res: Long = 122352588
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> enPages.count
+       ......
+       res: Long = 122352588
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enPages.count()
+       ...
+       122352588
+   </div>
+   </div>
 
    The first time this command is run, similar to the last count we did, it will take 2 - 3 minutes while Spark scans through the entire data set on disk.
    __But since enPages was marked as "cached" in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster__.
@@ -492,13 +527,19 @@ Wait for the prompt to appear.
    The high level idea of what we'll be doing is as follows.
    First, we generate a key value pair for each line; the key is the date (the first eight characters of the first field), and the value is the number of pageviews for that date (the fourth field).
 
-   ~~~
-   scala> val enTuples = enPages.map(line => line.split(" "))
-   enTuples: spark.RDD[Array[java.lang.String]] = spark.MappedRDD@5a62a404
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> val enTuples = enPages.map(line => line.split(" "))
+       enTuples: spark.RDD[Array[java.lang.String]] = spark.MappedRDD@5a62a404
 
-   scala> val enKeyValuePairs = enTuples.map(line => (line(0).substring(0, 8), line(3).toInt))
-   enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = spark.MappedRDD@142eda55
-   ~~~
+       scala> val enKeyValuePairs = enTuples.map(line => (line(0).substring(0, 8), line(3).toInt))
+       enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = spark.MappedRDD@142eda55
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enTuples = enPages.map(lambda x: x.split(" "))
+       >>> enKeyValuePairs = enTuples.map(lambda x: (x[0][:8], int(x[3])))
+   </div>
+   </div>
 
    Next, we shuffle the data and group all values of the same key together.
    Finally we sum up the values for each key.
@@ -507,22 +548,36 @@ Wait for the prompt to appear.
    By default, Spark assumes that the reduce function is algebraic and applies combiners on the mapper side.
    Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
 
-   ~~~
-   scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
-   ......
-   res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
+       ......
+       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enKeyValuePairs.reduceByKey(lambda x, y: x + y, 1).collect()
+       ...
+       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+   </div>
+   </div>
 
    The `collect` method at the end converts the result from an RDD to a Scala array.
    Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res` is automatically created.
 
    We can combine the previous three commands into one:
 
-   ~~~
-   scala> enPages.map(line => line.split(" ")).map(line => (line(0).substring(0, 8), line(3).toInt)).reduceByKey(_+_, 1).collect
-   ......
-   res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> enPages.map(line => line.split(" ")).map(line => (line(0).substring(0, 8), line(3).toInt)).reduceByKey(_+_, 1).collect
+       ......
+       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[0][:8], int(x[3]))).reduceByKey(lambda x, y: x + y, 1).collect()
+       ...
+       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+   </div>
+   </div>
 
 7. Suppose we want to find the top 50 most-viewed pages during these three days.
    Conceptually, this task is very similar to the previous query.
@@ -538,9 +593,16 @@ Wait for the prompt to appear.
    We reduce by key again, this time with 40 reducers (`reduceByKey(_+_, 40)`).
    Finally, we swap the key and values (`map(x => (x._2, x._1))`), sort by key in descending order (the `false` argument specifies descending order and `true` would specify ascending), and return the top 50 results (`take`). The full command is:
 
-   ~~~
-   scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50)
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50)
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> # TODO: sortByKey() isn't implemented in PySpark yet.
+       >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[2], int(x[3]))).reduceByKey(lambda x, y: x + y, 40).map(lambda x: (x[1], x[0])).sortByKey(false).take(50)
+       TODO
+   </div>
+   </div>
 
    There is no hard and fast way to calculate the optimal number of reducers for a given problem; you will
    build up intuition over time by experimenting with different values.
