@@ -565,16 +565,16 @@ So far we have been doing a lot of ad-hoc style analytics using the command line
 On our AMI we have included two "template" projects for Scala and Java standalone Spark programs. 
 These can be found in the `/root/scala-app-template` and `/root/java-app-template` directories. 
 These projects are built using [Simple Built Tool (SBT)](http://www.scala-sbt.org/), a popular scala build system. 
-You can try to compile your app into a JAR using  
+You can try to compile your application into a JAR using  
 
 ~~~
-$ sbt/sbt package
+sbt/sbt package
 ~~~
 
-Then you can run your app using 
+Then, you can run your application with command line parameters using 
 
 ~~~
-$ sbt/sbt run <arg1> <arg2> 
+sbt/sbt run <arg1> <arg2> 
 ~~~
 
 Feel free to browse through the contents of those directories. For more details, see the slides from Matei Zaharia's AMP Camp talk on Standalone Spark Programs which are linked to from [the AMP Camp Agenda page](http://ampcamp.berkeley.edu/agenda).
@@ -677,9 +677,9 @@ We use a modified version of the Scala standalone project template introduced in
 - `login.txt:` File containing Twitter username and password 
 - `sbt:` Directory containing the SBT tool
 - `Tutorial.scala:` Main Scala program that you are going to edit, compile and run
-- `TutorialHelper.scala:` Scala file containing few helper functions for Tutorial.scala
+- `TutorialHelper.scala:` Scala file containing few helper functions for `Tutorial.scala`
 
-The main file you are going to edit, compile and run for the exercises is the Tutorial.scala. The file should the following.
+The main file you are going to edit, compile and run for the exercises is the `Tutorial.scala`. The file should the following.
 
 ~~~
 import spark._
@@ -714,10 +714,10 @@ For your convenience, we have added a couple of helper function to get the param
 
 Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
 
-~~~
+<pre class="nocode">
 my.fancy.username
 my_uncrackable_password
-~~~
+</pre>
 
 Be sure to delete this file after the exercises are over. Even if you don't delete them, these files will be completely destroyed along with the instance, so your password will not fall into wrong hands. 
 
@@ -726,12 +726,12 @@ Be sure to delete this file after the exercises are over. Even if you don't dele
 Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. Unlike the Spark and Shark interactive-shell-based tutorials earlier, this is a standalone program. So  until the program is compiled and executed.
 
 
-We need to edit the file Tutorial.scala in the directory `/root/streaming`
+We need to edit the file `Tutorial.scala` in the directory `/root/streaming/`
 
-~~~
+<pre>
 cd /root/streaming/
 vim Tutorial.scala
-~~~
+</pre>
 
 You can use either vim or emacs for editing. Alternatively, you can use your favorite text editor to write your program and then copy-paste it to the file using vim or emacs before running it.
 
@@ -767,101 +767,156 @@ Finally, we need to tell the context to start running the computation we have se
     ssc.start()
 ~~~
 
-Note that all DStream operations must be done __before__ calling this statement.  
+__Note that all DStream operations must be done before calling this statement.__
 
-After saving Tutorial.scala, it can be run from the command prompt using the following command (from within the `/root/streaming` directory).
-
-~~~
-$ sbt/sbt project run
-~~~
-
-This command will automatically compile Tutorial.scala to create a JAR file in `/root/streaming/target/scala-2.9.2/` and then run the program. You should find the following output on your screen.
+After saving `Tutorial.scala`, it can be run from the command prompt using the following command (from within the `/root/streaming` directory).
 
 ~~~
-XXXX
-YYYY
-ZZZZ
+sbt/sbt project run
 ~~~
 
+This command will automatically compile `Tutorial.scala` to create a JAR file in `/root/streaming/target/scala-2.9.2/` and then run the program. You should find the following output on your screen.
+
+<pre class="nocode">
+-------------------------------------------
+Time: 1359886325000 ms
+-------------------------------------------
+RT @__PiscesBabyyy: You Dont Wanna Hurt Me But Your Constantly Doing It
+@Shu_Inukai ?????????????????????????????????????????
+@Condormoda Us vaig descobrir a la @080_bcn_fashion. Molt bona desfilada. Salutacions des de #Manresa
+RT @dragon_itou: ?RT???????3000???????????????????????????????????10???????
+
+?????????????????2?3???9???? #???? http://t.co/PwyA5dsI ? h ...
+Sini aku antar ke RSJ ya "@NiieSiiRenii: Memang (?? ?`? )"@RiskiMaris: Stresss"@NiieSiiRenii: Sukasuka aku donk:p"@RiskiMaris: Makanya jgn"
+@brennn_star lol I would love to come back, you seem pretty cool! I just dont know if I could ever do graveyard again :( It KILLs me
+????????????????????????????????????????????????????????????????????????????????????????ww
+??????????
+When the first boats left the rock with the artificers employed on.
+@tgs_nth ????????????????????????????
+...
+
+
+-------------------------------------------
+Time: 1359886326000 ms
+-------------------------------------------
+???????????
+???????????
+@amatuki007 ????????????????????????????????
+?????????????????
+RT @BrunoMars: Wooh!
+Lo malo es qe no tiene toallitas
+Sayang beb RT @enjaaangg Piye ya perasaanmu nyg aku :o
+Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
+?????????????MTV???????the HIATUS??
+@anisyifaa haha. Cukupla merepek sikit2 :3
+@RemyBot ?????????
+...
+</pre>
+
+To stop the application, use `Ctrl + c` .
 
 ## Further exercises
 Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 30 seconds. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
 
 1. __Get the stream of hashtags from the stream of tweets__ : 
-To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
+   To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
+    
+   ~~~
+      val words = statuses.flatMap(status => status.split(" "))
+      val hashtags = words.filter(word => word.startsWith("#"))
+   ~~~
 
-~~~
-    val words = statuses.flatMap(status => status.split(" "))
-    val hashtags = words.filter(word => word.startsWith("#"))
-~~~
+   The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
+   In this case, each status string is split by space to produce a DStream whose each record is a word. 
+   Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
+   If you want to see the result, add `hashtags.print()` and try running the program. 
+   You should see something like this (assumging no other DStream has `print` on it).
 
-The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
-In this case, each status string is split by space to produce a DStream whose each record is a word. 
-Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
-If you want to see the result, add `hashtags.print()` and try running the program. 
-You should see something like this (assumging no other DStream has `print` on it).
+   <pre class="nocode">
+   -------------------------------------------
+   Time: 1359886521000 ms
+   -------------------------------------------
+   #njnbg
+   #njpw
+   #?????
+   #algeria
+   #Annaba
 
-~~~
-XXXX
-YYYY
-ZZZZ
-~~~
-
+   </pre>
 
 2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a window.  
-TODO: decide which version to have, and accodingly elaborate this explanation
+   TODO: decide which version to have, and accodingly elaborate this explanation
 
-~~~
-    val counts = hashtags.map(t => (t, 1))
-                         .reduceByKeyAndWindow(_ + _, Seconds(30), Seconds(1))
-~~~
-__OR__
+   ~~~
+      val counts = hashtags.map(t => (t, 1))
+                           .reduceByKeyAndWindow(_ + _, Seconds(30), Seconds(1))
+   ~~~
+   __OR__
 
-~~~
-    val counts = hashtags.countValuesByWindow(Seconds(30), Seconds(1))
-~~~
+   ~~~
+      val counts = hashtags.countValuesByWindow(Seconds(30), Seconds(1))
+   ~~~
 
-The generated `counts` DStream will have records that are (hashtag, count) tuples.
-If you `print` counts and run this program, you should see something like this. 
+   The generated `counts` DStream will have records that are (hashtag, count) tuples.
+   If you `print` counts and run this program, you should see something like this. 
 
-~~~
-XXXX
-YYYY
-ZZZZ
-~~~
+   <pre class="nocode">
+   -------------------------------------------
+   Time: 1359886694000 ms
+   -------------------------------------------
+   (#epic,1)
+   (#WOWSetanYangTerbaik,1)
+   (#recharged,1)
+   (#??????????,1)
+   (#jaco,1)
+   (#Blondie,1)
+   (#TOKIO,1)
+   (#fili,1)
+   (#jackiechanisamazing,1)
+   (#DASH,1)
+   ...
+   </pre>
 
 
 3. __Find the top 10 hashtags based on their counts__ : 
-Finally, these counts has to be used to find the popular hashtags. 
-A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
-take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
-(hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
-then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
+   Finally, these counts has to be used to find the popular hashtags. 
+   A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
+   take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
+   (hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
+   then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
 
-~~~
-    val sortedCounts = counts.map { case(tag, count) => (count, tag) }
-                             .transform(rdd => rdd.sortByKey(false))
-    sortedCounts60s.foreach(rdd => 
-      println("Top 10 hashtags:\n" + rdd.take(10).mkString("\n"))
-~~~
+   ~~~
+       val sortedCounts = counts.map { case(tag, count) => (count, tag) }
+                                .transform(rdd => rdd.sortByKey(false))
+       sortedCounts.foreach(rdd => 
+         println("Top 10 hashtags:\n" + rdd.take(10).mkString("\n")))
+   ~~~
 
-The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
-As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
-The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags. 
-The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
-`foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.  
-If you run this program, you should see something like this. 
+   The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
+   As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
+   The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags. 
+   The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
+   `foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.  
+   If you run this program, you should see something like this. 
 
-~~~
-XXXX
-YYYY
-ZZZZ
-~~~
+   <pre class="nocode">
+   Top 10 hashtags:
+   (2,#buzzer)
+   (1,#LawsonComp)
+   (1,#wizkidleftEMEcos)
+   (1,#???????)
+   (1,#NEVERSHUTMEUP)
+   (1,#reseteo.)
+   (1,#casisomoslamismapersona)
+   (1,#job)
+   (1,#????_??_?????_??????)
+   (1,#?????RT(*^^*))
+   </pre>
 
-Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of 
-30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition, 
-collect them together at the driver and then find the top 10 hashtags among them.
-We leave this as an exercise for the reader to try out. 
+   Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of 
+   30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition, 
+   collect them together at the driver and then find the top 10 hashtags among them.
+   We leave this as an exercise for the reader to try out. 
 
 
 # Machine Learning
