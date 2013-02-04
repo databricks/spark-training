@@ -425,32 +425,55 @@ Wait for the prompt to appear.
    <div data-lang="python" markdown="1">
        >>> pagecounts.take(10)
        ...
+       [u'20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463', u'20090505-000000 aa.b Special:Statistics 1 840', u'20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019', u'20090505-000000 aa.b Wikibooks:About 1 15719', u'20090505-000000 aa ?14mFX1ildVnBc 1 13205', u'20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207', u'20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199', u'20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201', u'20090505-000000 aa File:Wikinews-logo.svg 1 8357', u'20090505-000000 aa Main_Page 2 9980']
    </div>
    </div>
 
    Unfortunately this is not very readable because take returns an array and Scala simply prints the array with each element separated by a comma.
    We can make it prettier by traversing the array to print each record on its own line.
 
-   ~~~
-   scala> pagecounts.take(10).foreach(println)
-   ......
-   20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
-   20090505-000000 aa.b Special:Statistics 1 840
-   20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
-   20090505-000000 aa.b Wikibooks:About 1 15719
-   20090505-000000 aa ?14mFX1ildVnBc 1 13205
-   20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
-   20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
-   20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
-   20090505-000000 aa File:Wikinews-logo.svg 1 8357
-   20090505-000000 aa Main_Page 2 9980
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> pagecounts.take(10).foreach(println)
+       ......
+       20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
+       20090505-000000 aa.b Special:Statistics 1 840
+       20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
+       20090505-000000 aa.b Wikibooks:About 1 15719
+       20090505-000000 aa ?14mFX1ildVnBc 1 13205
+       20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
+       20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
+       20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
+       20090505-000000 aa File:Wikinews-logo.svg 1 8357
+       20090505-000000 aa Main_Page 2 9980
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> for x in pagecounts.take(10):
+       ...    print x
+       ...
+       20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
+       20090505-000000 aa.b Special:Statistics 1 840
+       20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
+       20090505-000000 aa.b Wikibooks:About 1 15719
+       20090505-000000 aa ?14mFX1ildVnBc 1 13205
+       20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207
+       20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199
+       20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201
+       20090505-000000 aa File:Wikinews-logo.svg 1 8357
+       20090505-000000 aa Main_Page 2 9980
+   </div>
+   </div>
 
 2. Let's see how many records in total are in this data set (this command will take a while, so read ahead while it is running).
 
-   ~~~
-   scala> pagecounts.count
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> pagecounts.count
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> pagecounts.count()
+   </div>
+   </div>
 
    This should launch 177 Spark tasks on the Mesos cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
@@ -466,30 +489,42 @@ Wait for the prompt to appear.
 
    When your count does finish running, it should return the following result: `res2: Long = 329641466`
 
-4.  Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
-    For example, the project code "en" indicates an English page.
-    Let's derive an RDD containing only English pages from `pagecounts`.
-    This can be done by applying a filter function to `pagecounts`.
-    For each record, we can split it by the field delimiter (i.e. a space) and get the second field-– and then compare it with the string "en".
+4. Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
+   For example, the project code "en" indicates an English page.
+   Let's derive an RDD containing only English pages from `pagecounts`.
+   This can be done by applying a filter function to `pagecounts`.
+   For each record, we can split it by the field delimiter (i.e. a space) and get the second field-– and then compare it with the string "en".
 
-    To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
+   To avoid reading from disks each time we perform any operations on the RDD, we also __cache the RDD into memory__.
     This is where Spark really starts to to shine.
 
-    ~~~
-    scala> val enPages = pagecounts.filter(_.split(" ")(1) == "en").cache
-    enPages: spark.RDD[String] = spark.FilteredRDD@8262adc
-    ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> val enPages = pagecounts.filter(_.split(" ")(1) == "en").cache
+       enPages: spark.RDD[String] = spark.FilteredRDD@8262adc
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enPages = pagecounts.filter(lambda x: x.split(" ")[1] == "en").cache()
+   </div>
+   </div>
 
-    When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
-    Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 3 slaves in your cluster.
+   When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
+   Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 3 slaves in your cluster.
 
 5. How many records are there for English pages?
 
-   ~~~
-   scala> enPages.count
-   ......
-   res: Long = 122352588
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> enPages.count
+       ......
+       res: Long = 122352588
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enPages.count()
+       ...
+       122352588
+   </div>
+   </div>
 
    The first time this command is run, similar to the last count we did, it will take 2 - 3 minutes while Spark scans through the entire data set on disk.
    __But since enPages was marked as "cached" in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster__.
@@ -503,13 +538,19 @@ Wait for the prompt to appear.
    The high level idea of what we'll be doing is as follows.
    First, we generate a key value pair for each line; the key is the date (the first eight characters of the first field), and the value is the number of pageviews for that date (the fourth field).
 
-   ~~~
-   scala> val enTuples = enPages.map(line => line.split(" "))
-   enTuples: spark.RDD[Array[java.lang.String]] = spark.MappedRDD@5a62a404
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> val enTuples = enPages.map(line => line.split(" "))
+       enTuples: spark.RDD[Array[java.lang.String]] = spark.MappedRDD@5a62a404
 
-   scala> val enKeyValuePairs = enTuples.map(line => (line(0).substring(0, 8), line(3).toInt))
-   enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = spark.MappedRDD@142eda55
-   ~~~
+       scala> val enKeyValuePairs = enTuples.map(line => (line(0).substring(0, 8), line(3).toInt))
+       enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = spark.MappedRDD@142eda55
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enTuples = enPages.map(lambda x: x.split(" "))
+       >>> enKeyValuePairs = enTuples.map(lambda x: (x[0][:8], int(x[3])))
+   </div>
+   </div>
 
    Next, we shuffle the data and group all values of the same key together.
    Finally we sum up the values for each key.
@@ -518,22 +559,36 @@ Wait for the prompt to appear.
    By default, Spark assumes that the reduce function is algebraic and applies combiners on the mapper side.
    Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
 
-   ~~~
-   scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
-   ......
-   res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
+       ......
+       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enKeyValuePairs.reduceByKey(lambda x, y: x + y, 1).collect()
+       ...
+       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+   </div>
+   </div>
 
    The `collect` method at the end converts the result from an RDD to a Scala array.
    Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res` is automatically created.
 
    We can combine the previous three commands into one:
 
-   ~~~
-   scala> enPages.map(line => line.split(" ")).map(line => (line(0).substring(0, 8), line(3).toInt)).reduceByKey(_+_, 1).collect
-   ......
-   res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> enPages.map(line => line.split(" ")).map(line => (line(0).substring(0, 8), line(3).toInt)).reduceByKey(_+_, 1).collect
+       ......
+       res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[0][:8], int(x[3]))).reduceByKey(lambda x, y: x + y, 1).collect()
+       ...
+       [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+   </div>
+   </div>
 
 7. Suppose we want to find the top 50 most-viewed pages during these three days.
    Conceptually, this task is very similar to the previous query.
@@ -549,9 +604,16 @@ Wait for the prompt to appear.
    We reduce by key again, this time with 40 reducers (`reduceByKey(_+_, 40)`).
    Finally, we swap the key and values (`map(x => (x._2, x._1))`), sort by key in descending order (the `false` argument specifies descending order and `true` would specify ascending), and return the top 50 results (`take`). The full command is:
 
-   ~~~
-   scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50)
-   ~~~
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50)
+   </div>
+   <div data-lang="python" markdown="1">
+       >>> # TODO: sortByKey() isn't implemented in PySpark yet.
+       >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[2], int(x[3]))).reduceByKey(lambda x, y: x + y, 40).map(lambda x: (x[1], x[0])).sortByKey(false).take(50)
+       TODO
+   </div>
+   </div>
 
    There is no hard and fast way to calculate the optimal number of reducers for a given problem; you will
    build up intuition over time by experimenting with different values.
@@ -1107,113 +1169,90 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
 
    <div class="solution" markdown="1">
 
-   Place the following code within a Scala `object` and call the `clustering` function from a `main` function:
+   Place the following code in a file and use `sbt/sbt run` to run it:
 
    ~~~
-   import scala.io.Source
-   import scala.util.Random
    import spark.SparkContext
-   import SparkContext._
-   lazy val hostname = Source.fromFile("/root/mesos-ec2/masters").mkString.trim
-   //computes the Euclidean distance between vectors a1 and a2
-   def distL2(a1: Array[Double], a2: Array[Double]): Double = {
-     require(a1.size == a2.size)
-     var sum: Double = 0.0
-     for(i <- a1.indices) sum += math.pow(a1(i) - a2(i), 2)
-     math.sqrt(sum)
-   }
-   //class for computing running averages of real vectors
-   class ArrAvg extends Serializable {
-     private var avg: Array[Double] = null
-     private var count: Int = 0      //number of vectors averaged thus far
-     //constructor initializing this ArrAvg to be the average of the single vector arr
-     def this(arr: Array[Double]) { this(); this += arr }
-     //incorporate arr into this running average
-     def +=(arr: Array[Double]): ArrAvg = {
-       if(avg == null) avg = arr.clone    //if this average is currently empty
-       else {
-         //update avg to include arr
-         require(avg.size == arr.size)
-         for(i <- avg.indices) avg(i) = avg(i)*count/(count+1).toDouble + arr(i)/(count+1).toDouble
-       }
-       count += 1
-       this
+   import spark.SparkContext._
+   import spark.util.Vector
+   
+   import scala.util.Random
+   import scala.io.Source
+   
+   object WikipediaKMeans {
+     def parseVector(line: String): Vector = {
+         return new Vector(line.split(',').map(_.toDouble))
      }
-     //incorporate all vectors averaged in other into this running average
-     def ++=(other: ArrAvg): ArrAvg = {
-       if(other.count == 0) return this   //if other is empty
-       else if(avg == null) {
-         //if this average is currently empty, set it equal to other
-         avg = other.avg.clone
-         count = other.count
-       }
-       else {
-         //update this.avg and this.count based on the contents of other
-         require(avg.size == other.avg.size)
-         for(i <- avg.indices) {
-           avg(i) *= count.toDouble/(count+other.count)
-           avg(i) += other.avg(i)*other.count/(count+other.count).toDouble
+     
+     def closestPoint(p: Vector, centers: Array[Vector]): Int = {
+       var index = 0
+       var bestIndex = 0
+       var closest = Double.PositiveInfinity
+     
+       for (i <- 0 until centers.length) {
+         val tempDist = p.squaredDist(centers(i))
+         if (tempDist < closest) {
+           closest = tempDist
+           bestIndex = i
          }
-         count += other.count
        }
-       this
+     
+       return bestIndex
      }
-     def getAvg = avg
-   }
-   def clustering(sc: SparkContext) {
-     //define settings
-     //desired number of clusters
-     val K = 10
-     //stopping criterion for K-means iterations (threshold on average centroid change)
-     val eps = 1e-6
-     //load and cache the featurized data
-     val rdd = sc.sequenceFile[String, String]("hdfs://"+hostname+":9000/wikistats_featurized").map{t => {
-       //parse the string representation of the feature vectors used for data storage
-       t._1 -> t._2.split(",").map(_.toDouble)
-     }}.cache()
-     //select a random subset of the data points as initial centroids
-     var centroids = rdd.sample(false, 0.005, 23789).map(_._2).collect.map(_ -> Random.nextDouble).sortBy(_._2).map(_._1).take(K)
-     println("Done selecting initial centroids")
-     //run the K-means iterative procedure to find centroids
-     var iterI = 0
-     var oldCentroids = centroids
-     var delta = 0.0
-     //iterate until average centroid change (measured by Euclidean distance) is <= eps
-     do {
-       //store the previous set of centroids
-       oldCentroids = centroids
-       //compute new centroids; the aggregate() function on RDDs is analogous to
-       //  the aggregate() function on Iterables
-       centroids = rdd.map(_._2).aggregate(Array.fill(K)(new ArrAvg))((aa: Array[ArrAvg], arr: Array[Double]) => {
-         //determine the centroid closest to feature vector arr
-         val centroidI = centroids.indices.minBy{i => distL2(centroids(i), arr)}
-         //incorporate arr into the ArrAvg corresponding to this closest centroid
-         aa(centroidI) += arr
-         aa
-       }, (aa1: Array[ArrAvg], aa2: Array[ArrAvg]) => {
-         //combine ArrAvgs computed for each new centroid
-         (aa1 zip aa2).map(t => t._1 ++= t._2)
-       }).map(_.getAvg)
-       /* NOTE: if no points are assigned to a given centroid, then _.getAvg above will
-                yield null; we do not currently handle this case, as this is only an
-                exercise, and this situation is unlikely to occur on the given data;
-                however, a proper implementation should handle this case */
-       //compute the average change between elements of oldCentroids and new centroids
-       delta = (centroids zip oldCentroids).map{t => distL2(t._1, t._2)}.reduce(_+_)/K.toDouble
-       println("Finished iteration "+iterI+" (delta="+delta+")")
-       iterI += 1
-     } while(delta > eps)
-     //print results
-     println("Centroids with some articles:")
-     val numArticles = 10
-     for((centroid, centroidI) <- centroids.zipWithIndex) {
-       //print centroid
-       println(centroid mkString ("[",",","]"))
-       //print numArticles articles which are assigned to this centroid’s cluster
-       rdd.filter{t => {
-         centroids.indices.minBy{i => distL2(centroids(i), t._2)} == centroidI
-       }}.take(numArticles).foreach(println)
-       println()
+   
+     def main(args: Array[String]) {
+       val sparkHome = "/root/spark"
+       val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
+       val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
+       val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
+   
+       val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+   
+       val K = 4
+       val convergeDist = 1e-6
+       var iter = 0
+   
+       val data = sc.sequenceFile[String, String](
+           "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+               t => (t._1,  parseVector(t._2))).cache()
+   
+       var centroids = data.sample(false, 0.005, 23789).map(x => x._2).collect().take(K)
+       println("Done selecting initial centroids")
+   
+       var tempDist = 1.0
+       while(tempDist > convergeDist) {
+         var closest = data.map(p => (closestPoint(p._2, centroids), (p._2, 1)))
+         
+         var pointStats = closest.reduceByKey{case ((x1, y1), (x2, y2)) => (x1 + x2, y1 + y2)}
+         
+         var newCentroids = pointStats.map {pair => (pair._1, pair._2._1 / pair._2._2)}.collectAsMap()
+         
+         tempDist = 0.0
+         for (i <- 0 until K) {
+           tempDist += centroids(i).squaredDist(newCentroids(i))
+         }
+         
+         for (newP <- newCentroids) {
+           centroids(newP._1) = newP._2
+         }
+         iter += 1
+         println("Finished iteration " + iter + " (delta = " + tempDist + ")")
+       }
+   
+       println("Centroids with some articles:")
+       val numArticles = 10
+       for((centroid, centroidI) <- centroids.zipWithIndex) {
+         // print centroid
+         println(centroid.elements.mkString("[",",","]"))
+   
+         // print numArticles articles which are assigned to this centroid’s cluster
+         data.filter(p => (closestPoint(p._2, centroids) == centroidI)).take(numArticles).foreach(
+             x => println(x._1))
+         println()
+       }
+   
+       sc.stop()
+       System.exit(0)
      }
    }
    ~~~
