@@ -1,0 +1,3 @@
+#!/bin/bash
+export MESOS_NATIVE_LIBRARY=/usr/local/lib/libmesos.so
+java -Xmx1000M $EXTRA_ARGS -jar $(dirname $0)/sbt-launch-*.jar "$@"
