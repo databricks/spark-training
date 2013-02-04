@@ -830,7 +830,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    In this case, each status string is split by space to produce a DStream whose each record is a word. 
    Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
    If you want to see the result, add `hashtags.print()` and try running the program. 
-   You should see something like this (assumging no other DStream has `print` on it).
+   You should see something like this (assuming no other DStream has `print` on it).
 
    <pre class="nocode">
    -------------------------------------------
@@ -879,7 +879,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
 
 3. __Find the top 10 hashtags based on their counts__ : 
-   Finally, these counts has to be used to find the popular hashtags. 
+   Finally, these counts have to be used to find the popular hashtags. 
    A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
    take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
    (hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
