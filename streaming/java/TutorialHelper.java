@@ -20,7 +20,7 @@ class TutorialHelper {
       List<String> lines = readLines(file);
       if (lines.size() < 2)
         throw new Exception("Error parsing " + file + " - it does not have two lines");
-      return lines.get(0);
+      return lines.get(0).trim();
     } else {
       throw new Exception("Could not find " + file);
     }
@@ -32,7 +32,7 @@ class TutorialHelper {
       List<String> lines = readLines(file);
       if (lines.size() < 2)
         throw new Exception("Error parsing " + file + " - it does not have two lines");
-      return lines.get(1);
+      return lines.get(1).trim();
     } else {
       throw new Exception("Could not find " + file);
     }
@@ -72,20 +72,5 @@ class TutorialHelper {
     bufferedReader.close();
     return lines;
   }
-
-
-  private JavaStreamingContext jsc;
-  public TutorialHelper(JavaStreamingContext jsc) {
-    this.jsc = jsc;
-  }
-
-/*  
-  JavaDStream twitterStream(String username, String password, List<String> filters) {
-    val stream = new JavaTwitterInputDStream(ssc, username, password, filters, StorageLevel.MEMORY_ONLY_SER_2);
-    ssc.registerInputStream(stream);
-    return stream;
-
-  }
-*/
 }
 

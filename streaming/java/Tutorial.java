@@ -1,4 +1,10 @@
+import spark.api.java.*;
+import spark.api.java.function.*;
+import spark.streaming.*;
 import spark.streaming.api.java.*;
+import twitter4j.*;
+import java.util.Arrays;
+import scala.Tuple2;
 
 public class Tutorial {
   public static void main(String[] args) throws Exception {
@@ -12,14 +18,14 @@ public class Tutorial {
     String jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar";
 
     // HDFS directory for checkpointing
-    String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
+    // TODO put back    String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
+    String checkpointDir = "/tmp";
 
     // Twitter credentials from login.txt
-    String twitterUsername = TutorialHelper.getTwitterPassword();
-    String twitterPassword = TutorialHelper.getTwitterUsername();
+    String twitterUsername = TutorialHelper.getTwitterUsername();
+    String twitterPassword = TutorialHelper.getTwitterPassword();
    
     // Your code goes here
-
   }
 }
 
