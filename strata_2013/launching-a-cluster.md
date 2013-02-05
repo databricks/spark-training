@@ -60,6 +60,8 @@ For example, if you created a key pair named `ampcamp-key` and the private key (
 
     ./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key --copy launch ampcamp
 
+This command may take a 30-40 minutes or longer and should produce a bunch of output as it first spins up the nodes for your cluster, sets up <a href="http://amplab.cs.berkeley.edu/bdas">BDAS</a> on them, and performs a large distributed file copy of the wikipedia files we'll use in these training documents from S3 to your instance of HDFS.
+
 The following are some errors that you may encounter, and other frequently asked questions:
 
 
@@ -208,7 +210,7 @@ In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
 </div>
 </div>
 
-If you have launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes. 
+If launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes. 
 
 ![Running EC2 instances in AWS Management Console](img/aws-runninginstances.png)
 
