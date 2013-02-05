@@ -18,8 +18,7 @@ public class Tutorial {
     String jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar";
 
     // HDFS directory for checkpointing
-    // TODO put back    String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
-    String checkpointDir = "/tmp";
+    String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
 
     // Twitter credentials from login.txt
     String twitterUsername = TutorialHelper.getTwitterUsername();
