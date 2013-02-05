@@ -577,14 +577,23 @@ In this section, we will walk you through using Spark Streaming to process live 
 ## Setup 
 We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#introduction-to-running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
 
-- `build.sbt:` SBT project file
 - `login.txt:` File containing Twitter username and password 
-- `sbt:` Directory containing the SBT tool
-- `Tutorial.scala:` Main Scala program that you are going to edit, compile and run
-- `TutorialHelper.scala:` Scala file containing few helper functions for `Tutorial.scala`
+- For Scala users
+  - `scala/sbt:` Directory containing the SBT tool
+  - `scala/build.sbt:` SBT project file
+  - `scala/Tutorial.scala:` Main Scala program that you are going to edit, compile and run
+  - `scala/TutorialHelper.scala:` Scala file containing few helper functions for `Tutorial.scala`
+- For Java users
+  - `java/sbt:` Directory containing the SBT tool
+  - `java/build.sbt:` SBT project file
+  - `java/Tutorial.java` Main Java program that you are going to edit, compile and run
+  - `java/TutorialHeler.java:` Java file containing a few helper functions
+  - `java/ScalaHelper.java:` Scala file containing a few helper functions
 
-The main file you are going to edit, compile and run for the exercises is the `Tutorial.scala`. The file should the following.
+The main file you are going to edit, compile and run for the exercises is `Tutorial.scala` or `Tutorial.java`. It should look as follows:
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
 ~~~
 import spark._
 import spark.streaming._
@@ -613,6 +622,41 @@ object Tutorial {
   }
 }
 ~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+import spark.api.java.*;
+import spark.api.java.function.*;
+import spark.streaming.*;
+import spark.streaming.api.java.*;
+import twitter4j.*;
+import java.util.Arrays;
+import scala.Tuple2;
+
+public class Tutorial {
+  public static void main(String[] args) throws Exception {
+    // Location of the Spark directory 
+    String sparkHome = "/root/spark";
+
+    // URL of the Spark cluster
+    String sparkUrl = TutorialHelper.getSparkUrl();
+
+    // Location of the required JAR files 
+    String jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar";
+
+    // HDFS directory for checkpointing
+    String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
+
+    // Twitter credentials from login.txt
+    String twitterUsername = TutorialHelper.getTwitterUsername();
+    String twitterPassword = TutorialHelper.getTwitterPassword();
+
+    // Your code goes here
+  }
+}
+~~~
+</div>
+</div>
 
 For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
 
@@ -630,63 +674,126 @@ Be sure to delete this file after the exercises are over. Even if you don't dele
 
 
 ## First Spark Streaming program
-Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. 
-We will edit the file `Tutorial.scala` in the directory `/root/streaming/`
+Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the
+`Tutorial` class and open it with a text editor.
 
+<div class="codetabs">
+<div data-lang="scala">
 <pre>
-cd /root/streaming/
+cd /root/streaming/scala/
 vim Tutorial.scala
 </pre>
+</div>
+<div data-lang="java">
+<pre>
+cd /root/streaming/java/
+vim Tutorial.java
+</pre>
+</div>
+</div>
 
-You can use either vim or emacs for editing. Alternatively, you can use your favorite text editor to write your program and then copy-paste it to the file using vim or emacs before running it.
+The cluster machines have both vim and emacs installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim or emacs before running it.
 
 
 To express any Spark Streaming computation, a StreamingContext object needs to be created. 
 This object serves as the main entry point for all Spark Streaming functionality.
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
 ~~~
     val sc = new SparkContext(sparkUrl, "Tutorial", sparkHome, Seq(jarFile))
     val ssc = new StreamingContext(sc, Seconds(1))
 ~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+    JavaSparkContext sc = new JavaSparkContext(sparkUrl, "Tutorial", sparkHome, jarFile);
+    JavaStreamingContext ssc = new JavaStreamingContext(sc, new Duration(1000));
+~~~
+</div>
+</div>
 
 Here, a SparkContext object is first created by providing the Spark cluster URL, the Spark home directory and the list of JAR files that are necessary to run the program. 
 "Tutorial" is a unique name given to this application to identify it the Spark's web UI.
 Using this SparkContext object, a StreamingContext object is created. `Seconds(1)` tells the context to receive and process data in batches of 1 second. 
 Next, we use this context and the login information to create a stream of tweets.
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
 ~~~
     val tweets = ssc.twitterStream(twitterUsername, twitterPassword)
 ~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+    JavaDStream<Status> tweets =
+      ScalaHelper.twitterStream(twitterUsername, twitterPassword, ssc);
+~~~
+</div>
+</div>
 
 The object `tweets` is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type [twitter4j.Status](http://twitter4j.org/javadoc/twitter4j/Status.html). As a very simple processing step, let's try to print the status text of the some of the tweets. 
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
 ~~~
     val statuses = tweets.map(status => status.getText())
     statuses.print()
 ~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+    JavaDStream<String> statuses = tweets.map(
+      new Function<Status, String>() {
+        public String call(Status status) { return status.getText(); }
+      }
+    );
+    statuses.print();
+~~~
+</div>
+</div>
 
 Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each RDD in a DStream, which in this case, are 1 second batches of received status texts. 
 
 We also need to set an HDFS for periodic checkpointing of the intermediate data. 
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
 ~~~
     ssc.checkpoint(checkpointDir)
 ~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+    ssc.checkpoint(checkpointDir, new Duration(10000));
+~~~
+</div>
+</div>
+
 Finally, we need to tell the context to start running the computation we have setup. 
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
 ~~~
     ssc.start()
 ~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+    ssc.start();
+~~~
+</div>
+</div>
 
 __Note that all DStream operations must be done before calling this statement.__
 
-After saving `Tutorial.scala`, it can be run from the command prompt using the following command (from within the `/root/streaming` directory).
+After saving `Tutorial.scala`, it can be run from the command prompt using the following command (from within the `/root/streaming/[language]` directory).
 
 ~~~
 sbt/sbt project run
 ~~~
 
-This command will automatically compile `Tutorial.scala` to create a JAR file in `/root/streaming/target/scala-2.9.2/` and then run the program. You should find the following output on your screen.
+This command will automatically compile the `Tutorial` class and create a JAR file in `/root/streaming/[language]/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
 
 <pre class="nocode">
 -------------------------------------------
@@ -759,11 +866,37 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
 1. __Get the stream of hashtags from the stream of tweets__ : 
    To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
+   
+
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
     
    ~~~
-      val words = statuses.flatMap(status => status.split(" "))
-      val hashtags = words.filter(word => word.startsWith("#"))
+       val words = statuses.flatMap(status => status.split(" "))
+       val hashtags = words.filter(word => word.startsWith("#"))
    ~~~
+    
+   </div>
+   <div data-lang="java" markdown="1">
+    
+   ~~~
+      JavaDStream<String> words = statuses.flatMap(
+        new FlatMapFunction<String, String>() {
+          public Iterable<String> call(String in) {
+            return Arrays.asList(in.split(" "));
+          }
+        }
+      );
+
+      JavaDStream<String> hashTags = words.filter(
+        new Function<String, Boolean>() {
+          public Boolean call(String word) { return word.startsWith("#"); }
+        }
+      );
+   ~~~
+    
+   </div>
+   </div>
 
    The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
    In this case, each status string is split by space to produce a DStream whose each record is a word. 
@@ -789,12 +922,47 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    be added to the previous window's counts, and the counts of the old data that falls out of the window can be 'subtracted' from the previous window's counts. This can be 
    done using DStreams as follows.
 
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+
    ~~~
-      val counts = hashtags.map(tag => (tag, 1))
-                           .reduceByKeyAndWindow(_ + _, _ - _, Seconds(30), Seconds(1))
+       val counts = hashtags.map(tag => (tag, 1))
+                            .reduceByKeyAndWindow(_ + _, _ - _, Seconds(30), Seconds(1))
    ~~~
+   
    The `_ + _` and `_ - _` are Scala short-hands for specifying functions to add and subtract two numbers. `Seconds(30)` specifies 
    the window size and `Seconds(1)` specifies the movement of the window.
+   
+   </div>
+   <div data-lang="java" markdown="1">
+   
+   ~~~
+      JavaPairDStream<String, Integer> tuples = hashTags.map(
+         new PairFunction<String, String, Integer>() {
+           public Tuple2<String, Integer> call(String in) {
+             return new Tuple2<String, Integer>(in, 1);
+           }
+         }
+       );
+
+       JavaPairDStream<String, Integer> counts = tuples.reduceByKeyAndWindow(
+         new Function2<Integer, Integer, Integer>() {
+           public Integer call(Integer i1, Integer i2) { return i1 + i2; }
+         },
+         new Function2<Integer, Integer, Integer>() {
+           public Integer call(Integer i1, Integer i2) { return i1 - i2; }
+         },
+         new Duration(30 * 1000),
+         new Duration(1 * 1000)
+       );
+   ~~~
+    
+   There are two functions that are being defined for adding and subtracting the counts. `new Duration(30 * 1000)` 
+   specifies the window size and `new Duration(1 * 1000)` specifies the movement of the window.
+  
+   </div>
+   </div>
+   
    Note, that only 'invertible' reduce operations that have 'inverse' functions (like subtracting is the inverse function of adding) 
    can be optimized in this manner. The generated `counts` DStream will have records that are (hashtag, count) tuples.
    If you `print` counts and run this program, you should see something like this. 
@@ -817,7 +985,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    </pre>
 
 
-3. __Find the top 10 hashtags based on their counts__ : 
+3. __Find the top 10 hashtags based on their counts (Scala only)__ : 
    Finally, these counts have to be used to find the popular hashtags. 
    A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
    take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 

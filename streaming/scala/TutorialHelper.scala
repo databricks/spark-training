@@ -22,7 +22,7 @@ object TutorialHelper {
   
   /** Returns the Twitter username and password from the file login.txt */
   def getTwitterCredentials (): (String, String) = {
-    val file = new File("./login.txt")
+    val file = new File("../login.txt")
     if (file.exists) {
       val lines = Source.fromFile(file.toString).getLines.toSeq
       if (lines.size < 2) 

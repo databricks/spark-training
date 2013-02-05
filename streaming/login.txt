@@ -1,2 +1,2 @@
 my.fancy.username
-my_unbreakable_password
+my_uncrackable_password
