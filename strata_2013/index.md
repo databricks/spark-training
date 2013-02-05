@@ -941,15 +941,20 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
    </pre>
 
-2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a window.  
-  This can be done by first mapping 
+2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a 30 second moving window. 
+   A simple way to do this would be to gather together last 30 seconds of data and process them using the usual map-reduce way - map each tag to a (tag, 1) key-value pair and 
+   then reduce by adding the counts. However, in this case, counting over a sliding window can be done more intelligently. As the window moves, the counts of the new data can 
+   be added to the previous window's counts, and the counts of the old data that falls out of the window can be 'subtracted' from the previous window's counts. This can be 
+   done using DStreams as follows.
 
    ~~~
-      val counts = hashtags.map(t => (t, 1))
+      val counts = hashtags.map(tag => (tag, 1))
                            .reduceByKeyAndWindow(_ + _, _ - _, Seconds(30), Seconds(1))
    ~~~
-
-   The generated `counts` DStream will have records that are (hashtag, count) tuples.
+   The `_ + _` and `_ - _` are Scala short-hands for specifying functions to add and subtract two numbers. `Seconds(30)` specifies 
+   the window size and `Seconds(1)` specifies the movement of the window.
+   Note, that only 'invertible' reduce operations that have 'inverse' functions (like subtracting is the inverse function of adding) 
+   can be optimized in this manner. The generated `counts` DStream will have records that are (hashtag, count) tuples.
    If you `print` counts and run this program, you should see something like this. 
 
    <pre class="nocode">
