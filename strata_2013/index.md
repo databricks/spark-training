@@ -76,16 +76,24 @@ If you haven't already, let's ssh onto the master node:
 On the cluster, run the `ls` command and you will see a number of directories.
 Some of the more important ones are listed below:
 
-- `ephemeral-hdfs:` Hadoop installation.
-- `hive:` Hive installation
-- `java-app-template:` Some stand-alone Spark programs in Java
-- `mesos:` Mesos installation
-- `mesos-ec2:` A suite of scripts to manage Mesos on EC2
-- `scala-2.9.2.final:` Scala installation
-- `scala-app-template:` Some stand-alone Spark programs in Scala 
-- `spark:` Spark installation
-- `shark:` Shark installation
-- `streaming:` Stand-alone program for Spark Streaming exercises  
+- Templates for exercises:
+   - `kmeans`: Template for the k-means clustering exercise
+   - `streaming`: Standalone program for Spark Streaming exercises
+   - `java-app-template`: Template for standalone Spark programs written in Java
+   - `scala-app-template`: Template for standalone Spark programs written in Scala
+   - `shark-0.2`: Shark installation
+   - `spark`: Spark installation
+
+- Useful scripts/documentation:
+   - `mesos-ec2`: Suite of scripts to manage Mesos on EC2
+   - `spark-ec2`: Suite of scripts to manage Spark on EC2
+   - `training`: Documentation and code used for training exercises
+
+- Infrastructure:
+   - `ephemeral-hdfs`: Hadoop installation
+   - `scala-2.9.2`: Scala installation
+   - `hive-0.9.0-bin`: Hive installation
+   - `mesos`: Mesos installation
 
 You can find a list of your 3 slave nodes in mesos-ec2/slaves:
 
