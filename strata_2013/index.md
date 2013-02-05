@@ -231,28 +231,46 @@ __After you are done with your exercises__, you can terminate the cluster by run
 
 # Logging into the Cluster
 
+## Using Linux or Cygwin
+
 Log into your cluster via `ssh -i <key_file> -l root@<master_node_hostname>`
 
-   __Question: I got the following permission error when I ran the above command. Help!__
+__Question: I got the following permission error when I ran the above command. Help!__
 
-   <pre class="nocode">
-   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-   @             WARNING: UNPROTECTED PRIVATE KEY FILE!              @
-   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-   Permissions 0644 for '../ampcamp.pem' are too open.
-   It is recommended that your private key files are NOT accessible by others.
-   This private key will be ignored.
-   bad permissions: ignore key: ../ampcamp.pem
-   Permission denied (publickey).
-   </pre>
+<pre class="nocode">
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@             WARNING: UNPROTECTED PRIVATE KEY FILE!              @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Permissions 0644 for '../ampcamp.pem' are too open.
+It is recommended that your private key files are NOT accessible by others.
+This private key will be ignored.
+bad permissions: ignore key: ../ampcamp.pem
+Permission denied (publickey).
+</pre>
 
 __Answer:__ Run the next two commands, then try to log in again:
 
-    chmod 600 ../ampcamp.pem
-    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
+chmod 600 ../ampcamp.pem
+./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
 
 
 Once you are able to successfully launch the cluster, continue to step 4.
+
+## Using Windows
+You can use [PuTTY](http://www.putty.org/) to log into the cluster from Windows. 
+
+1. Download PuTTY from [here](http://the.earth.li/~sgtatham/putty/latest/x86/putty.exe)
+
+2. Start PuTTY and enter the hostname that was mailed to you, as shown in the screenshot below.
+   ![Enter username in PuTTY](img/putty-host.png)
+
+3. Click on Connection > Data in the Category area and enter `root` as the username`
+   ![Enter login in PuTTY](img/putty-login.png)
+
+4. Click on Connection > SSH > Auth in the Category area and enter the path to the private key file (ampcamp-all.ppk) that was sent to you by mail. 
+   ![Enter login in PuTTY](img/putty-private-key.png)
+
+5. Click on Open 
 
 # Overview Of The Exercises
 The exercises in this tutorial are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming. 
