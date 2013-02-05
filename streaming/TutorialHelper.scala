@@ -35,7 +35,7 @@ object TutorialHelper {
 
   /** Returns the Spark URL */
   def getSparkUrl(): String = {
-    val file = new File("/root/mesos-ec2/cluster-url")
+    val file = new File("/root/spark-ec2/cluster-url")
     if (file.exists) {
       val url = Source.fromFile(file.toString).getLines.toSeq.head
       url
