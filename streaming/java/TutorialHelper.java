@@ -40,14 +40,7 @@ class TutorialHelper {
 
   /** Returns the HDFS URL */
   static String getHdfsUrl() throws Exception {
-    Runtime run = Runtime.getRuntime() ;
-    String cmd = "bash -c 'curl -s  http://169.254.169.254/latest/meta-data/hostname'";
-    Process pr = run.exec(cmd) ;
-    pr.waitFor();
-    BufferedReader buf = new BufferedReader(new InputStreamReader(pr.getInputStream())) ;
-    String name = buf.readLine();
-    System.out.println("Hostname = " + name);
-    return "hdfs://" + name.trim() + ":9000";
+    return ScalaHelper.getHdfsUrl(); 
   }
 
   /** Returns the Spark URL */
