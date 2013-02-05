@@ -6,7 +6,7 @@ import spark.api.java.function.*;
 public class Main {
   public static void main(String[] args) {
     String sparkHome = "/root/spark-dev";
-    String jarFile = "target/scala-2.9.1/java-app-template_2.9.1-0.0.jar";
+    String jarFile = "target/scala-2.9.2/java-app-template_2.9.2-0.0.jar";
     JavaSparkContext sc = new JavaSparkContext(
       "local", "TestJob", sparkHome, jarFile);
 
