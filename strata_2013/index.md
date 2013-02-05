@@ -38,8 +38,6 @@ chmod 600 ../ampcamp.pem
 ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
 
 
-Once you are able to successfully launch the cluster, continue to step 4.
-
 ## Using Windows
 You can use [PuTTY](http://www.putty.org/) to log into the cluster from Windows. 
 
