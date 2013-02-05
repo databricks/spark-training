@@ -222,7 +222,7 @@ Wait for the prompt to appear.
      <div data-lang="python" markdown="1">
        >>> sc
        <pyspark.context.SparkContext object at 0x7f7570783350>
-       >>> pagecounts = sc.textFile("wiki/pagecounts")
+       >>> pagecounts = sc.textFile("/wiki/pagecounts")
        13/02/01 05:30:43 INFO mapred.FileInputFormat: Total input paths to process : 74
        >>> pagecounts
        <pyspark.rdd.RDD object at 0x217d510>
