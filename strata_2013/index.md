@@ -761,6 +761,9 @@ object Tutorial {
     // Location of the required JAR files 
     val jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar"
 
+    // HDFS directory for checkpointing
+    val checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/"
+
     // Twitter credentials from login.txt
     val (twitterUsername, twitterPassword) = getTwitterCredentials()
    
@@ -785,10 +788,8 @@ Be sure to delete this file after the exercises are over. Even if you don't dele
 
 
 ## First Spark Streaming program
-Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. Unlike the Spark and Shark interactive-shell-based tutorials earlier, this is a standalone program. So  until the program is compiled and executed.
-
-
-We need to edit the file `Tutorial.scala` in the directory `/root/streaming/`
+Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. 
+We will edit the file `Tutorial.scala` in the directory `/root/streaming/`
 
 <pre>
 cd /root/streaming/
@@ -805,13 +806,14 @@ This object serves as the main entry point for all Spark Streaming functionality
     val sc = new SparkContext(sparkUrl, "Tutorial", sparkHome, Seq(jarFile))
     val ssc = new StreamingContext(sc, Seconds(1))
 ~~~
+
 Here, a SparkContext object is first created by providing the Spark cluster URL, the Spark home directory and the list of JAR files that are necessary to run the program. 
 "Tutorial" is a unique name given to this application to identify it the Spark's web UI.
 Using this SparkContext object, a StreamingContext object is created. `Seconds(1)` tells the context to receive and process data in batches of 1 second. 
 Next, we use this context and the login information to create a stream of tweets.
 
 ~~~
-    val tweets = ssc.twitterStream(username, password)
+    val tweets = ssc.twitterStream(twitterUsername, twitterPassword)
 ~~~
 
 The object `tweets` is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type [twitter4j.Status](http://twitter4j.org/javadoc/twitter4j/Status.html). As a very simple processing step, let's try to print the status text of the some of the tweets. 
@@ -823,6 +825,11 @@ The object `tweets` is a DStream of tweet statuses. More specifically, it is con
 
 Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each RDD in a DStream, which in this case, are 1 second batches of received status texts. 
 
+We also need to set an HDFS for periodic checkpointing of the intermediate data. 
+
+~~~
+    ssc.checkpoint(checkpointDir)
+~~~
 Finally, we need to tell the context to start running the computation we have setup. 
 
 ~~~
@@ -875,7 +882,35 @@ Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
 ...
 </pre>
 
-To stop the application, use `Ctrl + c` .
+To stop the application, use `Ctrl + c` . Instead of this, if you see the following on your screen, it means that the authentication with Twitter failed. 
+
+<pre class="nocode">
+13/02/04 23:41:57 INFO streaming.NetworkInputTracker: De-registered receiver for network stream 0 with message 401:Authentication credentials (https://dev.twitter.com/pages/auth) were missing or incorrect. Ensure that you have set valid consumer key/secret, access token/secret, and the system clock is in sync.
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;
+&lt;title&gt;Error 401 Unauthorized&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h2&gt;HTTP ERROR: 401&lt;/h2&gt;
+&lt;p&gt;Problem accessing '/1.1/statuses/sample.json?stall_warnings=true'. Reason:
+&lt;pre&gt;    Unauthorized&lt;/pre&gt;
+
+
+
+&lt;/body&gt;
+&lt;/html&gt;
+
+
+Relevant discussions can be found on the Internet at:
+	http://www.google.co.jp/search?q=d0031b0b or
+	http://www.google.co.jp/search?q=1db75513
+TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
+</pre>
+
+Please verify whether the Twitter username and password has been set correctly in the file `login.txt` as instructed earlier. Make sure you do not have unnecessary trailing spaces. 
+
+
 
 ## Further exercises
 Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 30 seconds. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
@@ -892,7 +927,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    In this case, each status string is split by space to produce a DStream whose each record is a word. 
    Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
    If you want to see the result, add `hashtags.print()` and try running the program. 
-   You should see something like this (assumging no other DStream has `print` on it).
+   You should see something like this (assuming no other DStream has `print` on it).
 
    <pre class="nocode">
    -------------------------------------------
@@ -907,16 +942,11 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    </pre>
 
 2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a window.  
-   TODO: decide which version to have, and accodingly elaborate this explanation
+  This can be done by first mapping 
 
    ~~~
       val counts = hashtags.map(t => (t, 1))
-                           .reduceByKeyAndWindow(_ + _, Seconds(30), Seconds(1))
-   ~~~
-   __OR__
-
-   ~~~
-      val counts = hashtags.countValuesByWindow(Seconds(30), Seconds(1))
+                           .reduceByKeyAndWindow(_ + _, _ - _, Seconds(30), Seconds(1))
    ~~~
 
    The generated `counts` DStream will have records that are (hashtag, count) tuples.
@@ -941,7 +971,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
 
 3. __Find the top 10 hashtags based on their counts__ : 
-   Finally, these counts has to be used to find the popular hashtags. 
+   Finally, these counts have to be used to find the popular hashtags. 
    A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
    take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
    (hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
@@ -951,7 +981,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
        val sortedCounts = counts.map { case(tag, count) => (count, tag) }
                                 .transform(rdd => rdd.sortByKey(false))
        sortedCounts.foreach(rdd => 
-         println("Top 10 hashtags:\n" + rdd.take(10).mkString("\n")))
+         println("\nTop 10 hashtags:\n" + rdd.take(10).mkString("\n")))
    ~~~
 
    The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 

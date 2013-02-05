@@ -2,6 +2,9 @@ import spark.streaming._
 import spark.storage.StorageLevel
 import scala.io.Source
 import java.io.File
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
+import sys.process.stringSeqToProcess
 
 class TutorialHelper(ssc: StreamingContext) {
   def twitterStream(username: String, password: String, filters: Seq[String] = Nil) = {
@@ -12,7 +15,9 @@ class TutorialHelper(ssc: StreamingContext) {
   }
 
 object TutorialHelper {
-
+  Logger.getLogger("spark").setLevel(Level.WARN)
+  Logger.getLogger("spark.streaming.NetworkInputTracker").setLevel(Level.INFO)
+    
   implicit def convert(ssc: StreamingContext) = new TutorialHelper(ssc)
   
   /** Returns the Twitter username and password from the file login.txt */
@@ -38,6 +43,13 @@ object TutorialHelper {
       throw new Exception("Could not find " + file)
     }
     
+  }
+
+  /** Returns the HDFS URL */
+  def getHdfsUrl(): String = {
+    val name : String = Seq("bash", "-c", "curl -s http://169.254.169.254/latest/meta-data/hostname") !! ;
+    println("Hostname = " + name)
+    "hdfs://" + name.trim + ":9000"
   }
 }
 
