@@ -156,7 +156,8 @@ We will use only sections 1-9.
 
 # Data Exploration Using Spark
 
-In this section, you are first going to use the Spark shell to interactively explore the Wikipedia data. Then we are going to give a bried introduction to writing standalone Spark programs.   
+In this section, we will first use the Spark shell to interactively explore the Wikipedia data.
+Then, we will give a brief introduction to writing standalone Spark programs.
 
 ## Interactive Analysis
 
