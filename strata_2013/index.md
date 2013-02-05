@@ -938,7 +938,7 @@ Finally, we need to tell the context to start running the computation we have se
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    ssc.start()
+    ssc.start();
 ~~~
 </div>
 </div>
@@ -1026,31 +1026,35 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
    
 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-    val words = statuses.flatMap(status => status.split(" "))
-    val hashtags = words.filter(word => word.startsWith("#"))
-~~~
-</div>
-<div data-lang="java" markdown="1">
-~~~
-    JavaDStream<String> words = statuses.flatMap(
-      new FlatMapFunction<String, String>() {
-        public Iterable<String> call(String in) {
-          return Arrays.asList(in.split(" "));
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
+    
+   ~~~
+       val words = statuses.flatMap(status => status.split(" "))
+       val hashtags = words.filter(word => word.startsWith("#"))
+   ~~~
+    
+   </div>
+   <div data-lang="java" markdown="1">
+    
+   ~~~
+      JavaDStream<String> words = statuses.flatMap(
+        new FlatMapFunction<String, String>() {
+          public Iterable<String> call(String in) {
+            return Arrays.asList(in.split(" "));
+          }
         }
-      }
-    );
+      );
 
-    JavaDStream<String> hashTags = words.filter(
-      new Function<String, Boolean>() {
-        public Boolean call(String word) { return word.startsWith("#"); }
-      }
-    );
-~~~
-</div>
-</div>
+      JavaDStream<String> hashTags = words.filter(
+        new Function<String, Boolean>() {
+          public Boolean call(String word) { return word.startsWith("#"); }
+        }
+      );
+   ~~~
+    
+   </div>
+   </div>
 
    The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
    In this case, each status string is split by space to produce a DStream whose each record is a word. 
@@ -1076,37 +1080,47 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    be added to the previous window's counts, and the counts of the old data that falls out of the window can be 'subtracted' from the previous window's counts. This can be 
    done using DStreams as follows.
 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-    val counts = hashtags.map(tag => (tag, 1))
-                         .reduceByKeyAndWindow(_ + _, _ - _, Seconds(30), Seconds(1))
-~~~
-</div>
-<div data-lang="java" markdown="1">
-~~~
-   JavaPairDStream<String, Integer> tuples = hashTags.map(
-      new PairFunction<String, String, Integer>() {
-        public Tuple2<String, Integer> call(String in) {
-          return new Tuple2<String, Integer>(in, 1);
-        }
-      }
-    );
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
 
-    JavaPairDStream<String, Integer> counts = tuples.reduceByKeyAndWindow(
-      new Function2<Integer, Integer, Integer>() {
-        public Integer call(Integer i1, Integer i2) { return i1 + i2; }
-      },
-      new Function2<Integer, Integer, Integer>() {
-        public Integer call(Integer i1, Integer i2) { return i1 - i2; }
-      },
-      new Duration(30 * 1000),
-      new Duration(1 * 1000));
-~~~
-</div>
-</div>
+   ~~~
+       val counts = hashtags.map(tag => (tag, 1))
+                            .reduceByKeyAndWindow(_ + _, _ - _, Seconds(30), Seconds(1))
+   ~~~
+   
    The `_ + _` and `_ - _` are Scala short-hands for specifying functions to add and subtract two numbers. `Seconds(30)` specifies 
    the window size and `Seconds(1)` specifies the movement of the window.
+   
+   </div>
+   <div data-lang="java" markdown="1">
+   
+   ~~~
+      JavaPairDStream<String, Integer> tuples = hashTags.map(
+         new PairFunction<String, String, Integer>() {
+           public Tuple2<String, Integer> call(String in) {
+             return new Tuple2<String, Integer>(in, 1);
+           }
+         }
+       );
+
+       JavaPairDStream<String, Integer> counts = tuples.reduceByKeyAndWindow(
+         new Function2<Integer, Integer, Integer>() {
+           public Integer call(Integer i1, Integer i2) { return i1 + i2; }
+         },
+         new Function2<Integer, Integer, Integer>() {
+           public Integer call(Integer i1, Integer i2) { return i1 - i2; }
+         },
+         new Duration(30 * 1000),
+         new Duration(1 * 1000)
+       );
+   ~~~
+    
+   There are two functions that are being defined for adding and subtracting the counts. `new Duration(30 * 1000)` 
+   specifies the window size and `new Duration(1 * 1000)` specifies the movement of the window.
+  
+   </div>
+   </div>
+   
    Note, that only 'invertible' reduce operations that have 'inverse' functions (like subtracting is the inverse function of adding) 
    can be optimized in this manner. The generated `counts` DStream will have records that are (hashtag, count) tuples.
    If you `print` counts and run this program, you should see something like this. 
