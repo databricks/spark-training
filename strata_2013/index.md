@@ -201,7 +201,7 @@ Wait for the prompt to appear.
 
        scala> val pagecounts = sc.textFile("/wiki/pagecounts")
        12/08/17 23:35:14 INFO mapred.FileInputFormat: Total input paths to process : 74
-       pagecounts: spark.RDD[String] = spark.MappedRDD@34da7b85
+       pagecounts: spark.RDD[String] = MappedRDD[1] at textFile at <console>:12
      </div>
      <div data-lang="python" markdown="1">
        >>> sc
@@ -219,9 +219,7 @@ Wait for the prompt to appear.
    <div data-lang="scala" markdown="1">
        scala> pagecounts.take(10)
        ......
-       res: Array[String] = Array(20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463, 20090505-000000 aa.b Special:Statistics 1 840, 20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019, 20090505-000000 aa.b Wikibooks:About 1 15719, 20090505-000000 aa ?14mFX1ildVnBc 1 13205, 20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207, 20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199, 20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201, 20090505-000000 aa File:Wikinews-logo.svg 1 8357, 20090505-000000 aa Main_Page 2 9980, 20090505-000000 aa User:TottyBot 1 7998, 20090505-000000 aa Wikipedia:Community_Portal 1 9644, 20090505-000000 aa main_page 1 928, 20090505-000000 ab.d %D0%A1%D0%BB%D1%83%D0%B6%D0%B5%D0%B1%D0%BD%D0%B0%D1%8F: \
-       Recentchangeslinked/%D0%A3%D1%87%D0%B0%D1%81%D1%82%D0%BD%D0%B8%D0%BA: \
-       H%C3%A9g%C3%A9sippe_...
+       res: Array[String] = Array(20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463, 20090505-000000 aa.b Special:Statistics 1 840, 20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019, 20090505-000000 aa.b Wikibooks:About 1 15719, 20090505-000000 aa ?14mFX1ildVnBc 1 13205, 20090505-000000 aa ?53A%2FuYP3FfnKM 1 13207, 20090505-000000 aa ?93HqrnFc%2EiqRU 1 13199, 20090505-000000 aa ?95iZ%2Fjuimv31g 1 13201, 20090505-000000 aa File:Wikinews-logo.svg 1 8357, 20090505-000000 aa Main_Page 2 9980)
    </div>
    <div data-lang="python" markdown="1">
        >>> pagecounts.take(10)
@@ -230,7 +228,7 @@ Wait for the prompt to appear.
    </div>
    </div>
 
-   Unfortunately this is not very readable because take returns an array and Scala simply prints the array with each element separated by a comma.
+   Unfortunately this is not very readable because `take()` returns an array and Scala simply prints the array with each element separated by a comma.
    We can make it prettier by traversing the array to print each record on its own line.
 
    <div class="codetabs">
@@ -280,7 +278,7 @@ Wait for the prompt to appear.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
    Because we are reading 20G of data from HDFS, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).
 ￼
-   While it's running, you can open the Mesos web console to see the progress.
+   While it's running, you can open the Spark web console to see the progress.
    To do this, open your favorite browser, and type in the following URL.
    Recall that during the Cluster Setup section, you copied `<master_node_hostname>` to a text file for easy access.
 
@@ -288,7 +286,7 @@ Wait for the prompt to appear.
 
    ![Spark Standalone Web UI](img/standalone-webui640.png)
 
-   When your count does finish running, it should return the following result: `res2: Long = 329641466`
+   When your count does finish running, it should return the following result: `res: Long = 329641466`
 
 4. Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
    For example, the project code "en" indicates an English page.
@@ -302,7 +300,7 @@ Wait for the prompt to appear.
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
        scala> val enPages = pagecounts.filter(_.split(" ")(1) == "en").cache
-       enPages: spark.RDD[String] = spark.FilteredRDD@8262adc
+       enPages: spark.RDD[String] = FilteredRDD[2] at filter at <console>:14
    </div>
    <div data-lang="python" markdown="1">
        >>> enPages = pagecounts.filter(lambda x: x.split(" ")[1] == "en").cache()
@@ -332,7 +330,7 @@ Wait for the prompt to appear.
 
    If you examine the console log closely, you will see lines like this, indicating some data was added to the cache:
 
-   `12/08/18 00:30:55 INFO spark.CacheTrackerActor: Cache entry added: (2, 0) on ip-10-92-69-90.ec2.internal (size added: 16.0B, available: 4.2GB)`
+   `13/02/05 20:29:01 INFO storage.BlockManagerMasterActor$BlockManagerInfo: Added rdd_2_172 in memory on ip-10-188-18-127.ec2.internal:42068 (size: 271.8 MB, free: 5.5 GB)`
 
 6. Let's try something fancier.
    Generate a histogram of total page views on Wikipedia English pages for May to May 7, 2009.
@@ -342,10 +340,10 @@ Wait for the prompt to appear.
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
        scala> val enTuples = enPages.map(line => line.split(" "))
-       enTuples: spark.RDD[Array[java.lang.String]] = spark.MappedRDD@5a62a404
+       enTuples: spark.RDD[Array[java.lang.String]] = MappedRDD[3] at map at <console>:16 
 
        scala> val enKeyValuePairs = enTuples.map(line => (line(0).substring(0, 8), line(3).toInt))
-       enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = spark.MappedRDD@142eda55
+       enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = MappedRDD[4] at map at <console>:18
    </div>
    <div data-lang="python" markdown="1">
        >>> enTuples = enPages.map(lambda x: x.split(" "))
@@ -407,7 +405,31 @@ Wait for the prompt to appear.
 
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
-       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50)
+       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50).foreach(println)
+       ......
+       (43822489,404_error/)
+       (18730347,Main_Page)
+       (17657352,Special:Search)
+       (5816953,Special:Random)
+       (3521336,Special:Randompage)
+       (695817,Cinco_de_Mayo)
+       (534253,Swine_influenza)
+       (464935,Wiki)
+       (396776,Dom_DeLuise)
+       (382510,Deadpool_(comics))
+       (317708,The_Beatles)
+       (311465,Special:Watchlist)
+       (310642,index.html)
+       (248624,Special:Export)
+       (237677,2009_swine_flu_outbreak)
+       (234855,Scrubs_(TV_series))
+       (204604,X-Men_Origins:_Wolverine)
+       (203378,YouTube)
+       (193648,Mother%27s_Day)
+       (192157,Kwan_Yin)
+       (176646,Search)
+       (176173,Star_Trek_(film))
+       ...
    </div>
    <div data-lang="python" markdown="1">
        >>> # TODO: sortByKey() isn't implemented in PySpark yet.
@@ -422,43 +444,24 @@ Wait for the prompt to appear.
    To leave the Spark shell, type `exit` at the prompt.
 
 
-## Introduction To Running Standalone Programs
-
-So far we have been doing a lot of ad-hoc style analytics using the command line interfaces to Spark and Shark. For some tasks, it makes more sense to write a standalone Spark program. 
-On our AMI we have included two "template" projects for Scala and Java standalone Spark programs. 
-These can be found in the `/root/scala-app-template` and `/root/java-app-template` directories. 
-These projects are built using [Simple Built Tool (SBT)](http://www.scala-sbt.org/), a popular scala build system. 
-You can try to compile your application into a JAR using  
-
-~~~
-sbt/sbt package
-~~~
-
-Then, you can run your application with command line parameters using 
-
-~~~
-sbt/sbt run <arg1> <arg2> 
-~~~
-
-Feel free to browse through the contents of those directories. For more details, see the slides from Matei Zaharia's AMP Camp talk on Standalone Spark Programs which are linked to from [the AMP Camp Agenda page](http://ampcamp.berkeley.edu/agenda).
-
-
 # Data Exploration Using Shark
 
 Now that we've had fun with Scala, let's try some SQL in Shark.
 First, launch the Shark console:
 
-    cd /root/
-    /root/shark/bin/shark-withinfo
+    /root/shark-0.2/bin/shark-withinfo
 
-1. Similar to [2Apache Hive, Shark can query external tables (tables that are not created in Shark).
+1. Similar to Apache Hive, Shark can query external tables (i.e., tables that are not created in Shark).
    Before you do any querying, you will need to tell Shark where the data is and define its schema.
 
    ~~~
    shark> CREATE EXTERNAL TABLE wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';
+   ......
+   Time taken: 0.232 seconds
+   13/02/05 21:31:25 INFO CliDriver: Time taken: 0.232 seconds
    ~~~
 
-   FAQ: If you see the following errors, don’t worry. Things are still working under the hood.
+   <b>FAQ:</b> If you see the following errors, don’t worry. Things are still working under the hood.
 
    <pre class="nocode">
    12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.core.resources" but it cannot be resolved.
@@ -466,10 +469,18 @@ First, launch the Shark console:
    12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.text" but it cannot be resolved.
    </pre>
 
+   <b>FAQ:</b> If you see errors like these, you might have copied and pasted a line break, and should be able to remove it to get rid of the errors.
+
+   <pre>13/02/05 21:22:16 INFO parse.ParseDriver: Parsing command: CR
+   FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '<EOF>' '<EOF>'</pre>
+
 2. Let's create a table containing all English records and cache it in the cluster's memory.
 
    ~~~
    shark> create table wikistats_cached as select * from wikistats where project_code="en";
+   ......
+   Time taken: 127.5 seconds
+   13/02/05 21:57:34 INFO CliDriver: Time taken: 127.5 seconds
    ~~~
 
 3. Do a simple count to get the number of English records. If you have some familiarity working with databases, note that "`count(1)`" is the syntax in Hive for performing a count(*) operation. The Hive syntax is described at https://cwiki.apache.org/confluence/display/Hive/GettingStarted
@@ -486,9 +497,15 @@ First, launch the Shark console:
 
    ~~~
    shark> select dt, sum(page_views) views from wikistats_cached group by dt;
+   ......
+   20090507-070000	6292754
+   20090505-120000	7304485
+   20090506-110000	6609124
+   Time taken: 12.614 seconds
+   13/02/05 22:05:18 INFO CliDriver: Time taken: 12.614 seconds
    ~~~
 
-5. In the Spark section, we ran a very expensive query to compute the top 50 pages. It is fairly simple to d the same thing in SQL.
+5. In the Spark section, we ran a very expensive query to compute the top 50 pages. It is fairly simple to do the same thing in SQL.
 
    There are two steps we can take to make the query run faster. (1) In the first command below, we turn off map-side aggregation (a.k.a. combiners). Map-side aggregation doesn't improve run-time since each page appears only once in each partition, so we are building a giant hash table on each partition for nothing.
 (2) In the second command below, we increase the number of reducers used in this query to 50. Note that the
@@ -500,6 +517,17 @@ default number of reducers, which we have been using so far in this section, is 
    shark> set hive.map.aggr=false;
    shark> set mapred.reduce.tasks=50;
    shark> select page_name, sum(page_views) views from wikistats_cached group by page_name order by views desc limit 50;
+   ......
+   Lost_(TV_series)	121689
+   World_War_II	121262
+   Sabretooth_(comics)	118382
+   USS_Freedom_(LCS-1)	115561
+   external.png	115239
+   Tin_Man_%28Stargate_SG-1%29	115134
+   Necrotizing_fasciitis	114939
+   List_of_Scrubs_episodes	114932
+   Time taken: 129.217 seconds
+   13/02/05 22:11:56 INFO CliDriver: Time taken: 129.217 seconds
    ~~~
 
    __Remember to turn hive.map.aggr back on after the query.__
