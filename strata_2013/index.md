@@ -832,15 +832,25 @@ Be sure to delete this file after the exercises are over. Even if you don't dele
 
 
 ## First Spark Streaming program
-Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. 
-We will edit the file `Tutorial.scala` in the directory `/root/streaming/`
+Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the
+`Tutorial` class and open it with a text editor.
 
+<div class="codetabs">
+<div data-lang="scala">
 <pre>
-cd /root/streaming/
+cd /root/streaming/scala/
 vim Tutorial.scala
 </pre>
+</div>
+<div data-lang="java">
+<pre>
+cd /root/streaming/java/
+vim Tutorial.java
+</pre>
+</div>
+</div>
 
-You can use either vim or emacs for editing. Alternatively, you can use your favorite text editor to write your program and then copy-paste it to the file using vim or emacs before running it.
+The cluster machines have both vim and emacs installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim or emacs before running it.
 
 
 To express any Spark Streaming computation, a StreamingContext object needs to be created. 
