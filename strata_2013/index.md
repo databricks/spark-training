@@ -735,11 +735,11 @@ In this section, we will walk you through using Spark Streaming to process live 
 ## Setup 
 We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#introduction-to-running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
 
-- `build.sbt:` SBT project file
+- `scala/build.sbt:` SBT project file
 - `login.txt:` File containing Twitter username and password 
-- `sbt:` Directory containing the SBT tool
-- `Tutorial.scala:` Main Scala program that you are going to edit, compile and run
-- `TutorialHelper.scala:` Scala file containing few helper functions for `Tutorial.scala`
+- `scala/sbt:` Directory containing the SBT tool
+- `scala/Tutorial.scala:` Main Scala program that you are going to edit, compile and run
+- `scala/TutorialHelper.scala:` Scala file containing few helper functions for `Tutorial.scala`
 
 The main file you are going to edit, compile and run for the exercises is the `Tutorial.scala`. The file should the following.
 
