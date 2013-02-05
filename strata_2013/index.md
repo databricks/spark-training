@@ -269,7 +269,7 @@ Wait for the prompt to appear.
 
    `http://<master_node_hostname>:8080`
 
-   ![Mesos web UI](img/mesos-webui640.png)
+   ![Spark Standalone Web UI](img/standalone-webui640.png)
 
    When your count does finish running, it should return the following result: `res2: Long = 329641466`
 
