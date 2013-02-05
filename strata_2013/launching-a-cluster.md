@@ -208,6 +208,10 @@ In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
 </div>
 </div>
 
+If you have launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes. 
+
+![Running EC2 instances in AWS Management Console](img/aws-runninginstances.png)
+
 ## Post-launch steps
 Your cluster should be ready to use.
 You can find the master hostname (`<master_node_hostname>` in the instructions below) by running

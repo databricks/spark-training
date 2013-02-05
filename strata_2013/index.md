@@ -70,10 +70,7 @@ For Spark Streaming, we will walk you through writing stand alone Spark programs
 Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark. 
 
 ## Cluster Details
-If you have launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes:
-
-![Running EC2 instances in AWS Management Console](img/aws-runninginstances.png)
-
+Your cluster contains 4 m2.xlarge Amazon EC2 nodes.
 One of these 4 nodes is the master node, responsible for scheduling tasks as well as maintaining the HDFS metadata (a.k.a. HDFS name node).
 The other 3 are the slave nodes on which tasks are actually executed.
 You will mainly interact with the master node.
@@ -154,7 +151,7 @@ To quit `less`, stop viewing the file, and return to the command line, press `q`
 This short exercise will teach you the basics of Scala and introduce you to functional programming with collections.
 Do as much as you feel you need. 
 
-If you're comfortable with Python, feel free to skip ahead to the next section.
+If you're already comfortable with Scala, feel free to skip ahead to the next section.
 
 The exercise is based on a great and fast tutorial, [First Steps to Scala](http://www.artima.com/scalazine/articles/steps.html).
 Just reading that and trying the examples at the console might be enough!
@@ -165,7 +162,7 @@ We will use only sections 1-9.
 
 3. Declare a list of integers, `numbers`, as `val numbers = List(1, 2, 5, 4, 7, 3)`
 
-4. Declare a function, `cube`, that computes the cube (third power) of a number.
+4. Declare a function, `cube`, that computes the cube (third power) of an Int.
    See steps 2-4 of First Steps to Scala.
    Then apply the function on the list using `map`.
 
