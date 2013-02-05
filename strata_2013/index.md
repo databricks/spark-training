@@ -15,10 +15,14 @@ To launch your own cluster (after the event, for example), follow [these instruc
 
 # Logging into the Cluster
 
-## Using Linux or Cygwin
+<ul class="nav nav-tabs" data-tabs="tabs">
+  <li class="active"><a data-toggle="tab" href="#login_linux">Linux, Cygwin, or OS X</a></li>
+  <li><a data-toggle="tab" href="#login_windows">Windows</a></li>
+</ul>
 
+<div class="tab-content">
+<div class="tab-pane active" id="login_linux" markdown="1">
 Log into your cluster via `ssh -i <key_file> -l root@<master_node_hostname>`
-
 __Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
@@ -34,25 +38,29 @@ Permission denied (publickey).
 
 __Answer:__ Run the next two commands, then try to log in again:
 
-chmod 600 ../ampcamp.pem
-./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
+    chmod 600 ../ampcamp.pem
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
+</div>
+<div class="tab-pane" id="login_windows" markdown="1">
+You can use [PuTTY](http://www.putty.org/) to log into the cluster from Windows.
 
-
-## Using Windows
-You can use [PuTTY](http://www.putty.org/) to log into the cluster from Windows. 
-
-1. Download PuTTY from [here](http://the.earth.li/~sgtatham/putty/latest/x86/putty.exe)
+1. Download PuTTY from [here](http://the.earth.li/~sgtatham/putty/latest/x86/putty.exe).
 
 2. Start PuTTY and enter the hostname that was mailed to you, as shown in the screenshot below.
+
    ![Enter username in PuTTY](img/putty-host.png)
 
-3. Click on Connection > Data in the Category area and enter `root` as the username`
+3. Click on Connection > Data in the Category area and enter `root` as the username
+
    ![Enter login in PuTTY](img/putty-login.png)
 
-4. Click on Connection > SSH > Auth in the Category area and enter the path to the private key file (ampcamp-all.ppk) that was sent to you by mail. 
+4. Click on Connection > SSH > Auth in the Category area and enter the path to the private key file (`ampcamp-all.ppk`) that was sent to you by mail.
+
    ![Enter login in PuTTY](img/putty-private-key.png)
 
-5. Click on Open 
+5. Click on Open
+</div>
+</div>
 
 # Overview Of The Exercises
 The exercises in this tutorial are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming. 
@@ -76,16 +84,24 @@ If you haven't already, let's ssh onto the master node:
 On the cluster, run the `ls` command and you will see a number of directories.
 Some of the more important ones are listed below:
 
-- `ephemeral-hdfs:` Hadoop installation.
-- `hive:` Hive installation
-- `java-app-template:` Some stand-alone Spark programs in Java
-- `mesos:` Mesos installation
-- `mesos-ec2:` A suite of scripts to manage Mesos on EC2
-- `scala-2.9.2.final:` Scala installation
-- `scala-app-template:` Some stand-alone Spark programs in Scala 
-- `spark:` Spark installation
-- `shark:` Shark installation
-- `streaming:` Stand-alone program for Spark Streaming exercises  
+- Templates for exercises:
+   - `kmeans`: Template for the k-means clustering exercise
+   - `streaming`: Standalone program for Spark Streaming exercises
+   - `java-app-template`: Template for standalone Spark programs written in Java
+   - `scala-app-template`: Template for standalone Spark programs written in Scala
+   - `shark-0.2`: Shark installation
+   - `spark`: Spark installation
+
+- Useful scripts/documentation:
+   - `mesos-ec2`: Suite of scripts to manage Mesos on EC2
+   - `spark-ec2`: Suite of scripts to manage Spark on EC2
+   - `training`: Documentation and code used for training exercises
+
+- Infrastructure:
+   - `ephemeral-hdfs`: Hadoop installation
+   - `scala-2.9.2`: Scala installation
+   - `hive-0.9.0-bin`: Hive installation
+   - `mesos`: Mesos installation
 
 You can find a list of your 3 slave nodes in mesos-ec2/slaves:
 
