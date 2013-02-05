@@ -2,6 +2,9 @@ import spark.streaming._
 import spark.storage.StorageLevel
 import scala.io.Source
 import java.io.File
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
+
 
 class TutorialHelper(ssc: StreamingContext) {
   def twitterStream(username: String, password: String, filters: Seq[String] = Nil) = {
@@ -12,6 +15,9 @@ class TutorialHelper(ssc: StreamingContext) {
   }
 
 object TutorialHelper {
+  Logger.getLogger("spark").setLevel(Level.WARN)
+  Logger.getLogger("spark.streaming.NetworkInputTracker").setLevel(Level.INFO)
+    
 
   implicit def convert(ssc: StreamingContext) = new TutorialHelper(ssc)
   
