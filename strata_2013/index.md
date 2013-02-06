@@ -790,7 +790,7 @@ __Note that all DStream operations must be done before calling this statement.__
 After saving `Tutorial.scala`, it can be run from the command prompt using the following command (from within the `/root/streaming/[language]` directory).
 
 ~~~
-sbt/sbt project run
+sbt/sbt package run
 ~~~
 
 This command will automatically compile the `Tutorial` class and create a JAR file in `/root/streaming/[language]/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
