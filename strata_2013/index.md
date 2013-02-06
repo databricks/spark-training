@@ -63,11 +63,11 @@ You can use [PuTTY](http://www.putty.org/) to log into the cluster from Windows.
 </div>
 
 # Overview Of The Exercises
-The exercises in this tutorial are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming. 
-For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python. 
-For Shark, you will be using SQL in the Shark console to interactively explore the same data. 
-For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter's sample stream of tweets. 
-Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark. 
+The exercises in this tutorial are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming.
+For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python.
+For Shark, you will be using SQL in the Shark console to interactively explore the same data.
+For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter's sample stream of tweets.
+Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark.
 
 ## Cluster Details
 Your cluster contains 4 m2.xlarge Amazon EC2 nodes.
@@ -149,7 +149,7 @@ To quit `less`, stop viewing the file, and return to the command line, press `q`
 
 # Introduction to Scala
 This short exercise will teach you the basics of Scala and introduce you to functional programming with collections.
-Do as much as you feel you need. 
+Do as much as you feel you need.
 
 If you're already comfortable with Scala, feel free to skip ahead to the next section.
 
@@ -353,7 +353,7 @@ Wait for the prompt to appear.
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
        scala> val enTuples = enPages.map(line => line.split(" "))
-       enTuples: spark.RDD[Array[java.lang.String]] = MappedRDD[3] at map at <console>:16 
+       enTuples: spark.RDD[Array[java.lang.String]] = MappedRDD[3] at map at <console>:16
 
        scala> val enKeyValuePairs = enTuples.map(line => (line(0).substring(0, 8), line(3).toInt))
        enKeyValuePairs: spark.RDD[(java.lang.String, Int)] = MappedRDD[4] at map at <console>:18
@@ -509,7 +509,7 @@ First, launch the Shark console:
 4. Output the total traffic to Wikipedia English pages for each hour between May 7 and May 9, with one line per hour.
 
    ~~~
-   shark> select dt, sum(page_views) views from wikistats_cached group by dt;
+   shark> select dt, sum(page_views) from wikistats_cached group by dt;
    ......
    20090507-070000	6292754
    20090505-120000	7304485
@@ -529,7 +529,7 @@ default number of reducers, which we have been using so far in this section, is 
    ~~~
    shark> set hive.map.aggr=false;
    shark> set mapred.reduce.tasks=50;
-   shark> select page_name, sum(page_views) views from wikistats_cached group by page_name order by views desc limit 50;
+   shark> select page_name, sum(page_views) from wikistats_cached group by page_name order by views desc limit 50;
    ......
    Lost_(TV_series)	121689
    World_War_II	121262
@@ -557,6 +557,8 @@ default number of reducers, which we have been using so far in this section, is 
 
    <div class="solution" markdown="1">
       select count(page_views) from wikistats_cached where page_name like "%berkeley%";
+
+      "%" in SQL is a wildcard matching all characters.
    </div>
 
 - Generate a histogram for the number of hits for each hour on May 6, 2009; sort the output by date/time. Based on the output, which hour is Wikipedia most popular?
@@ -574,10 +576,10 @@ To exit Shark, type the following at the Shark command line (and don't forget th
 
 In this section, we will walk you through using Spark Streaming to process live data streams. These exercises are designed as standalone Scala programs which will receive and process Twitter's sample tweet streams. If you are not familiar with Scala, it is recommended that you see the [Intro to Scala](#intro-to-scala) section to familiarize yourself with the language.
 
-## Setup 
+## Setup
 We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#introduction-to-running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
 
-- `login.txt:` File containing Twitter username and password 
+- `login.txt:` File containing Twitter username and password
 - For Scala users
   - `scala/sbt:` Directory containing the SBT tool
   - `scala/build.sbt:` SBT project file
@@ -602,14 +604,14 @@ import TutorialHelper._
 
 object Tutorial {
   def main(args: Array[String]) {
-    
-    // Location of the Spark directory 
+
+    // Location of the Spark directory
     val sparkHome = "/root/spark"
-    
+
     // URL of the Spark cluster
     val sparkUrl = getSparkUrl()
 
-    // Location of the required JAR files 
+    // Location of the required JAR files
     val jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar"
 
     // HDFS directory for checkpointing
@@ -617,7 +619,7 @@ object Tutorial {
 
     // Twitter credentials from login.txt
     val (twitterUsername, twitterPassword) = getTwitterCredentials()
-   
+
     // Your code goes here
   }
 }
@@ -635,13 +637,13 @@ import scala.Tuple2;
 
 public class Tutorial {
   public static void main(String[] args) throws Exception {
-    // Location of the Spark directory 
+    // Location of the Spark directory
     String sparkHome = "/root/spark";
 
     // URL of the Spark cluster
     String sparkUrl = TutorialHelper.getSparkUrl();
 
-    // Location of the required JAR files 
+    // Location of the required JAR files
     String jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar";
 
     // HDFS directory for checkpointing
@@ -660,8 +662,8 @@ public class Tutorial {
 
 For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
 
-- `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/mesos-ec2/cluster-url`. 
-- `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`. 
+- `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/mesos-ec2/cluster-url`.
+- `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`.
 
 Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
 
@@ -670,7 +672,7 @@ my.fancy.username
 my_uncrackable_password
 </pre>
 
-Be sure to delete this file after the exercises are over. Even if you don't delete them, these files will be completely destroyed along with the instance, so your password will not fall into wrong hands. 
+Be sure to delete this file after the exercises are over. Even if you don't delete them, these files will be completely destroyed along with the instance, so your password will not fall into wrong hands.
 
 
 ## First Spark Streaming program
@@ -695,7 +697,7 @@ vim Tutorial.java
 The cluster machines have both vim and emacs installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim or emacs before running it.
 
 
-To express any Spark Streaming computation, a StreamingContext object needs to be created. 
+To express any Spark Streaming computation, a StreamingContext object needs to be created.
 This object serves as the main entry point for all Spark Streaming functionality.
 
 <div class="codetabs">
@@ -713,9 +715,9 @@ This object serves as the main entry point for all Spark Streaming functionality
 </div>
 </div>
 
-Here, a SparkContext object is first created by providing the Spark cluster URL, the Spark home directory and the list of JAR files that are necessary to run the program. 
+Here, a SparkContext object is first created by providing the Spark cluster URL, the Spark home directory and the list of JAR files that are necessary to run the program.
 "Tutorial" is a unique name given to this application to identify it the Spark's web UI.
-Using this SparkContext object, a StreamingContext object is created. `Seconds(1)` tells the context to receive and process data in batches of 1 second. 
+Using this SparkContext object, a StreamingContext object is created. `Seconds(1)` tells the context to receive and process data in batches of 1 second.
 Next, we use this context and the login information to create a stream of tweets.
 
 <div class="codetabs">
@@ -732,7 +734,7 @@ Next, we use this context and the login information to create a stream of tweets
 </div>
 </div>
 
-The object `tweets` is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type [twitter4j.Status](http://twitter4j.org/javadoc/twitter4j/Status.html). As a very simple processing step, let's try to print the status text of the some of the tweets. 
+The object `tweets` is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type [twitter4j.Status](http://twitter4j.org/javadoc/twitter4j/Status.html). As a very simple processing step, let's try to print the status text of the some of the tweets.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -753,9 +755,9 @@ The object `tweets` is a DStream of tweet statuses. More specifically, it is con
 </div>
 </div>
 
-Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each RDD in a DStream, which in this case, are 1 second batches of received status texts. 
+Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each RDD in a DStream, which in this case, are 1 second batches of received status texts.
 
-We also need to set an HDFS for periodic checkpointing of the intermediate data. 
+We also need to set an HDFS for periodic checkpointing of the intermediate data.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -770,7 +772,7 @@ We also need to set an HDFS for periodic checkpointing of the intermediate data.
 </div>
 </div>
 
-Finally, we need to tell the context to start running the computation we have setup. 
+Finally, we need to tell the context to start running the computation we have setup.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -831,7 +833,7 @@ Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
 ...
 </pre>
 
-To stop the application, use `Ctrl + c` . Instead of this, if you see the following on your screen, it means that the authentication with Twitter failed. 
+To stop the application, use `Ctrl + c` . Instead of this, if you see the following on your screen, it means that the authentication with Twitter failed.
 
 <pre class="nocode">
 13/02/04 23:41:57 INFO streaming.NetworkInputTracker: De-registered receiver for network stream 0 with message 401:Authentication credentials (https://dev.twitter.com/pages/auth) were missing or incorrect. Ensure that you have set valid consumer key/secret, access token/secret, and the system clock is in sync.
@@ -857,28 +859,28 @@ Relevant discussions can be found on the Internet at:
 TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
 </pre>
 
-Please verify whether the Twitter username and password has been set correctly in the file `login.txt` as instructed earlier. Make sure you do not have unnecessary trailing spaces. 
+Please verify whether the Twitter username and password has been set correctly in the file `login.txt` as instructed earlier. Make sure you do not have unnecessary trailing spaces.
 
 
 
 ## Further exercises
 Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 30 seconds. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
 
-1. __Get the stream of hashtags from the stream of tweets__ : 
+1. __Get the stream of hashtags from the stream of tweets__ :
    To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
-   
+
 
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
-    
+
    ~~~
        val words = statuses.flatMap(status => status.split(" "))
        val hashtags = words.filter(word => word.startsWith("#"))
    ~~~
-    
+
    </div>
    <div data-lang="java" markdown="1">
-    
+
    ~~~
       JavaDStream<String> words = statuses.flatMap(
         new FlatMapFunction<String, String>() {
@@ -894,14 +896,14 @@ Next, let's try something more interesting, say, try printing the 10 most popula
         }
       );
    ~~~
-    
+
    </div>
    </div>
 
-   The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream. 
-   In this case, each status string is split by space to produce a DStream whose each record is a word. 
+   The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream.
+   In this case, each status string is split by space to produce a DStream whose each record is a word.
    Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
-   If you want to see the result, add `hashtags.print()` and try running the program. 
+   If you want to see the result, add `hashtags.print()` and try running the program.
    You should see something like this (assuming no other DStream has `print` on it).
 
    <pre class="nocode">
@@ -916,10 +918,10 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
    </pre>
 
-2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a 30 second moving window. 
-   A simple way to do this would be to gather together last 30 seconds of data and process them using the usual map-reduce way - map each tag to a (tag, 1) key-value pair and 
-   then reduce by adding the counts. However, in this case, counting over a sliding window can be done more intelligently. As the window moves, the counts of the new data can 
-   be added to the previous window's counts, and the counts of the old data that falls out of the window can be 'subtracted' from the previous window's counts. This can be 
+2. __Count the hashtags over a window 30 seconds__ : Next, these hashtags need to be counted over a 30 second moving window.
+   A simple way to do this would be to gather together last 30 seconds of data and process them using the usual map-reduce way - map each tag to a (tag, 1) key-value pair and
+   then reduce by adding the counts. However, in this case, counting over a sliding window can be done more intelligently. As the window moves, the counts of the new data can
+   be added to the previous window's counts, and the counts of the old data that falls out of the window can be 'subtracted' from the previous window's counts. This can be
    done using DStreams as follows.
 
    <div class="codetabs">
@@ -929,13 +931,13 @@ Next, let's try something more interesting, say, try printing the 10 most popula
        val counts = hashtags.map(tag => (tag, 1))
                             .reduceByKeyAndWindow(_ + _, _ - _, Seconds(30), Seconds(1))
    ~~~
-   
-   The `_ + _` and `_ - _` are Scala short-hands for specifying functions to add and subtract two numbers. `Seconds(30)` specifies 
+
+   The `_ + _` and `_ - _` are Scala short-hands for specifying functions to add and subtract two numbers. `Seconds(30)` specifies
    the window size and `Seconds(1)` specifies the movement of the window.
-   
+
    </div>
    <div data-lang="java" markdown="1">
-   
+
    ~~~
       JavaPairDStream<String, Integer> tuples = hashTags.map(
          new PairFunction<String, String, Integer>() {
@@ -956,16 +958,16 @@ Next, let's try something more interesting, say, try printing the 10 most popula
          new Duration(1 * 1000)
        );
    ~~~
-    
-   There are two functions that are being defined for adding and subtracting the counts. `new Duration(30 * 1000)` 
+
+   There are two functions that are being defined for adding and subtracting the counts. `new Duration(30 * 1000)`
    specifies the window size and `new Duration(1 * 1000)` specifies the movement of the window.
-  
+
    </div>
    </div>
-   
-   Note, that only 'invertible' reduce operations that have 'inverse' functions (like subtracting is the inverse function of adding) 
+
+   Note, that only 'invertible' reduce operations that have 'inverse' functions (like subtracting is the inverse function of adding)
    can be optimized in this manner. The generated `counts` DStream will have records that are (hashtag, count) tuples.
-   If you `print` counts and run this program, you should see something like this. 
+   If you `print` counts and run this program, you should see something like this.
 
    <pre class="nocode">
    -------------------------------------------
@@ -985,26 +987,26 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    </pre>
 
 
-3. __Find the top 10 hashtags based on their counts (Scala only)__ : 
-   Finally, these counts have to be used to find the popular hashtags. 
+3. __Find the top 10 hashtags based on their counts (Scala only)__ :
+   Finally, these counts have to be used to find the popular hashtags.
    A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
-   take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the 
-   (hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and 
+   take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the
+   (hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and
    then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
 
    ~~~
        val sortedCounts = counts.map { case(tag, count) => (count, tag) }
                                 .transform(rdd => rdd.sortByKey(false))
-       sortedCounts.foreach(rdd => 
+       sortedCounts.foreach(rdd =>
          println("\nTop 10 hashtags:\n" + rdd.take(10).mkString("\n")))
    ~~~
 
-   The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream. 
-   As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order). 
-   The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags. 
-   The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case, 
-   `foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.  
-   If you run this program, you should see something like this. 
+   The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream.
+   As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order).
+   The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags.
+   The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case,
+   `foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.
+   If you run this program, you should see something like this.
 
    <pre class="nocode">
    Top 10 hashtags:
@@ -1020,10 +1022,10 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    (1,#?????RT(*^^*))
    </pre>
 
-   Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of 
-   30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition, 
+   Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of
+   30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition,
    collect them together at the driver and then find the top 10 hashtags among them.
-   We leave this as an exercise for the reader to try out. 
+   We leave this as an exercise for the reader to try out.
 
 
 # Machine Learning
@@ -1220,20 +1222,20 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
    import spark.SparkContext
    import spark.SparkContext._
    import spark.util.Vector
-   
+
    import scala.util.Random
    import scala.io.Source
-   
+
    object WikipediaKMeans {
      def parseVector(line: String): Vector = {
          return new Vector(line.split(',').map(_.toDouble))
      }
-     
+
      def closestPoint(p: Vector, centers: Array[Vector]): Int = {
        var index = 0
        var bestIndex = 0
        var closest = Double.PositiveInfinity
-     
+
        for (i <- 0 until centers.length) {
          val tempDist = p.squaredDist(centers(i))
          if (tempDist < closest) {
@@ -1241,61 +1243,61 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
            bestIndex = i
          }
        }
-     
+
        return bestIndex
      }
-   
+
      def main(args: Array[String]) {
        val sparkHome = "/root/spark"
        val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
        val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
        val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
-   
+
        val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
-   
+
        val K = 4
        val convergeDist = 1e-6
        var iter = 0
-   
+
        val data = sc.sequenceFile[String, String](
            "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
                t => (t._1,  parseVector(t._2))).cache()
-   
+
        var centroids = data.sample(false, 0.005, 23789).map(x => x._2).collect().take(K)
        println("Done selecting initial centroids")
-   
+
        var tempDist = 1.0
        while(tempDist > convergeDist) {
          var closest = data.map(p => (closestPoint(p._2, centroids), (p._2, 1)))
-         
+
          var pointStats = closest.reduceByKey{case ((x1, y1), (x2, y2)) => (x1 + x2, y1 + y2)}
-         
+
          var newCentroids = pointStats.map {pair => (pair._1, pair._2._1 / pair._2._2)}.collectAsMap()
-         
+
          tempDist = 0.0
          for (i <- 0 until K) {
            tempDist += centroids(i).squaredDist(newCentroids(i))
          }
-         
+
          for (newP <- newCentroids) {
            centroids(newP._1) = newP._2
          }
          iter += 1
          println("Finished iteration " + iter + " (delta = " + tempDist + ")")
        }
-   
+
        println("Centroids with some articles:")
        val numArticles = 10
        for((centroid, centroidI) <- centroids.zipWithIndex) {
          // print centroid
          println(centroid.elements.mkString("[",",","]"))
-   
+
          // print numArticles articles which are assigned to this centroid’s cluster
          data.filter(p => (closestPoint(p._2, centroids) == centroidI)).take(numArticles).foreach(
              x => println(x._1))
          println()
        }
-   
+
        sc.stop()
        System.exit(0)
      }
