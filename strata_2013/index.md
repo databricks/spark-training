@@ -22,7 +22,7 @@ To launch your own cluster (after the event, for example), follow [these instruc
 
 <div class="tab-content">
 <div class="tab-pane active" id="login_linux" markdown="1">
-Log into your cluster via `ssh -i <key_file> -l root@<master_node_hostname>`
+Log into your cluster via `ssh -i <key_file> root@<master_node_hostname>`
 __Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
@@ -76,7 +76,7 @@ The other 3 are the slave nodes on which tasks are actually executed.
 You will mainly interact with the master node.
 If you haven't already, let's ssh onto the master node:
 
-    ssh -i <key_file> -l root <master_node_hostname>
+    ssh -i <key_file> root@<master_node_hostname>
 
 On the cluster, run the `ls` command and you will see a number of directories.
 Some of the more important ones are listed below:
