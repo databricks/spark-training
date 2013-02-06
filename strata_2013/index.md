@@ -527,7 +527,6 @@ default number of reducers, which we have been using so far in this section, is 
    Also note that the "50" in the second command refers to the number of reducers while the "50" in the third command refers to the number of Wikipedia pages to return.
 
    ~~~
-   shark> set hive.map.aggr=false;
    shark> set mapred.reduce.tasks=50;
    shark> select page_name, sum(page_views) from wikistats_cached group by page_name order by views desc limit 50;
    ......
@@ -543,7 +542,6 @@ default number of reducers, which we have been using so far in this section, is 
    13/02/05 22:11:56 INFO CliDriver: Time taken: 129.217 seconds
    ~~~
 
-   __Remember to turn hive.map.aggr back on after the query.__
 
 6. With all the warm up, now it is your turn to write queries. Write Hive QL queries to answer the following questions:
 
