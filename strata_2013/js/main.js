@@ -48,7 +48,7 @@ function codeTabs() {
 			}
 			tabBar.append(
 				'<li>' +
-				'<a data-toggle="tab" href="#' + id + '">' +
+				'<a class="tab_' + lang + '" href="#' + id + '">' +
 				buttonLabel +
 				'</a></li>'
 			);
@@ -57,6 +57,14 @@ function codeTabs() {
 		codeSamples.first().addClass("active");
 		tabBar.children("li").first().addClass("active");
 		counter++;
+	});
+	$("ul.nav-tabs a").click(function (e) {
+		// Toggling a tab should switch all tabs corresponding to the same language
+		// while retaining the scroll position
+		e.preventDefault();
+		var scrollOffset = $(this).offset().top - $(document).scrollTop();
+		$("." + $(this).attr('class')).tab('show');
+		$(document).scrollTop($(this).offset().top - scrollOffset);
 	});
 }
 
