@@ -20,7 +20,11 @@ function styleCode()
 
 
 function codeTabs() {
-	var counter = 0
+	var counter = 0;
+	var langImages = {
+		"scala": "img/scala-sm.png",
+		"python": "img/python-sm.gif"
+	};
 	$("div.codetabs").each(function() {
 		$(this).addClass("tab-content");
 
@@ -33,13 +37,19 @@ function codeTabs() {
 		codeSamples.each(function() {
 			$(this).addClass("tab-pane");
 			var lang = $(this).data("lang");
-			lang = lang.substr(0, 1).toUpperCase() + lang.substr(1); // capitalize
+			var capitalizedLang = lang.substr(0, 1).toUpperCase() + lang.substr(1);
 			var id = "tab_" + lang + "_" + counter;
 			$(this).attr("id", id);
+			if (langImages[lang]) {
+				var buttonLabel =
+					"<img src='" +langImages[lang] + "' alt='" + capitalizedLang + "' />";
+			} else {
+				var buttonLabel = capitalizedLang;
+			}
 			tabBar.append(
 				'<li>' +
 				'<a data-toggle="tab" href="#' + id + '">' +
-				lang +
+				buttonLabel +
 				'</a></li>'
 			);
 		});
