@@ -23,6 +23,7 @@ To launch your own cluster (after the event, for example), follow [these instruc
 <div class="tab-content">
 <div class="tab-pane active" id="login_linux" markdown="1">
 Log into your cluster via `ssh -i <key_file> root@<master_node_hostname>`
+
 __Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
