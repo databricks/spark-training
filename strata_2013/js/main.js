@@ -23,7 +23,8 @@ function codeTabs() {
 	var counter = 0;
 	var langImages = {
 		"scala": "img/scala-sm.png",
-		"python": "img/python-sm.png"
+		"python": "img/python-sm.png",
+		"java": "img/java-sm.png"
 	};
 	$("div.codetabs").each(function() {
 		$(this).addClass("tab-content");
