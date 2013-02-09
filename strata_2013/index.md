@@ -37,10 +37,9 @@ bad permissions: ignore key: ../ampcamp.pem
 Permission denied (publickey).
 </pre>
 
-__Answer:__ Run the next two commands, then try to log in again:
+__Answer:__ Run this command, then try to log in again:
 
     chmod 600 ../ampcamp.pem
-    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
 </div>
 <div class="tab-pane" id="login_windows" markdown="1">
 You can use [PuTTY](http://www.putty.org/) to log into the cluster from Windows.
