@@ -87,6 +87,15 @@ a:hover code {
   max-width: 914px;
 }
 
+.sidebar {
+  width: 200px;
+  float: right;
+  padding: 8px 8px 20px 8px;
+  margin: 10px;
+  background-color: #f7f7f9; 
+  border: 1px solid #e1e1e8;
+}
+
 /**
  * Make dropdown menus in nav bars show on hover instead of click
  * using solution at http://stackoverflow.com/questions/8878033/how-
