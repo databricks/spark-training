@@ -56,6 +56,8 @@ Log into your cluster via
 
     ssh -i <key_file> root@<master_node_hostname>
 
+where `key_file` here is the private keyfile that was given to you by the tutorial instructors (or your AWS EC2 keyfile if you spun up your own cluster).
+
 __Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
@@ -106,11 +108,9 @@ Your cluster contains 4 m2.xlarge Amazon EC2 nodes.
 One of these 4 nodes is the master node, responsible for scheduling tasks as well as maintaining the HDFS metadata (a.k.a. HDFS name node).
 The other 3 are the slave nodes on which tasks are actually executed.
 You will mainly interact with the master node.
-If you haven't already, let's ssh onto the master node:
+If you haven't already, let's ssh onto the master node (see instructions above).
 
-    ssh -i <key_file> root@<master_node_hostname>
-
-On the cluster, run the `ls` command and you will see a number of directories.
+Once you've used SSH to log into the master, run the `ls` command and you will see a number of directories.
 Some of the more important ones are listed below:
 
 - Templates for exercises:
@@ -368,7 +368,7 @@ Wait for the prompt to appear.
    </div>
    </div>
 
-   This should launch 177 Spark tasks on the Mesos cluster.
+   This should launch 177 Spark tasks on the Spark cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
    Because we are reading 20G of data from HDFS, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).
 ￼
