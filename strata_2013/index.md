@@ -1,12 +1,16 @@
 ---
 layout: global
-title: Strata 2013 Exercises
+title: Strata 2013 Big Data Crashcourse
 ---
-# Introduction to Strata 2013 Exercises
+# Introduction to Strata 2013 Big Data Crashcourse 
 
-The following series of exercises will walk you through the process of setting up a 4-machine cluster on EC2 running [Spark](http://spark-project.org), [Shark](http://shark.cs.berkeley.edu) and [Mesos](http://mesos-project.org),
-then loading and analyzing a real wikipedia dataset using your cluster.
-We will begin with simple interactive analysis techniques at the command-line using Spark and Shark, and progress to writing standalone programs using Spark and Spark Streaming, and then onto more advanced machine learning algorithms.
+Welcome to the hands-on tutorial in our Strata 2013 one-day Crashcourse on Big Data.
+In addition to the amazing O'Reilly Strata folks, this event has been organized by Professors and PhD students in the UC Berkeley AMPLab.
+
+This tutorial consists of a series of exercises that will have you working directly with components of our open-source software stack, called the Berkeley Data Analytics Stack (BDAS), that have been released and are ready to use.
+These components include [Spark](http://spark-project.org), Spark Streaming, and [Shark](http://shark.cs.berkeley.edu).
+We have already spun up a 4-node EC2 Cluster for you with the software preinstalled, which you will be using to load and analyze a real Wikipedia dataset.
+We will begin with simple interactive analysis techniques at the Spark and Shark shells, then progress to writing standalone programs with Spark Streaming, and finish by imlementing some more advanced machine learning algorithms to incorporate into your analysis.
 
 # Launching a Spark/Shark Cluster on EC2
 
@@ -178,7 +182,7 @@ However, reading through that whole tutorial and trying the examples at the cons
        cube: (a: Int)Int
    </div>
 
-1. Apply the function to `myNumbers` using the `map` function.
+1. Apply the function to `myNumbers` using the `map` function. Hint: read about the `map` function in <a href="http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.List" target="_blank">the Scala List API</a> and also in Table 1 about halfway through the <a href="http://www.artima.com/scalazine/articles/steps.html" target="_blank">First Steps to Scala</a> tutorial.
 
    <div class="solution" markdown="1">
        scala> myNumbers.map(x => cube(x))
@@ -196,8 +200,8 @@ However, reading through that whole tutorial and trying the examples at the cons
    </div>
 
 1. Define a `factorial` function that computes n! = 1 * 2 * ... * n given input n.
-   You can use either a loop or recursion (see steps 5-7 of <a href="http://www.artima.com/scalazine/articles/steps.html" target="_blank">First Steps to Scala</a>).
-   Then compute the sum of factorials in `myNumbers`.
+   You can use either a loop or recursion, in our solution we use recursion (see steps 5-7 of <a href="http://www.artima.com/scalazine/articles/steps.html" target="_blank">First Steps to Scala</a>).
+   Then compute the sum of factorials in `myNumbers`. Hint: check out the `sum` function in <a href="http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.List" target="_blank">the Scala List API</a>.
 
    <div class="solution" markdown="1">
        scala> def factorial(n:Int):Int = if (n==0) 1 else n * factorial(n-1) // Copied from http://bit.ly/b2sVKI
@@ -237,7 +241,7 @@ However, reading through that whole tutorial and trying the examples at the cons
 # Data Exploration Using Spark
 
 In this section, we will first use the Spark shell to interactively explore the Wikipedia data.
-Then, we will give a brief introduction to writing standalone Spark programs.
+Then, we will give a brief introduction to writing standalone Spark programs. Remember, Spark is an open source computation engine built on top of the popular Hadoop Distributed File System (HDFS).
 
 ## Interactive Analysis
 
@@ -344,9 +348,10 @@ Wait for the prompt to appear.
 ￼
    While it's running, you can open the Spark web console to see the progress.
    To do this, open your favorite browser, and type in the following URL.
-   Recall that during the Cluster Setup section, you copied `<master_node_hostname>` to a text file for easy access.
 
    `http://<master_node_hostname>:8080`
+
+   You should have been given `master_node_hostname` at the beginning of the tutorial, or you might have [launched your own cluster](launching-a-cluster.html) and made of note of it then. You should see the Spark Standalone mode web interface, similar to the following (yours will probably only show three slaves).
 
    ![Spark Standalone Web UI](img/standalone-webui640.png)
 
@@ -435,7 +440,7 @@ Wait for the prompt to appear.
    </div>
    </div>
 
-   The `collect` method at the end converts the result from an RDD to a Scala array.
+   The `collect` method at the end converts the result from an RDD to an array.
    Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res` is automatically created.
 
    We can combine the previous three commands into one:
@@ -507,10 +512,21 @@ Wait for the prompt to appear.
 
    To leave the Spark shell, type `exit` at the prompt.
 
+## Running Standalone Spark Programs
+
+Because of time constraints, in this tutorial we focus on ad-hoc style analytics using the Spark shell.
+However, for many tasks, it makes more sense to write a standalone Spark program. 
+We will return to this in the section on Spark Streaming below, where you will actually write a standalone Spark Streaming job.
+We aren't going to cover how to structure, build, and run standalone Spark jobs here, but before we move on, we list here a few resources about standalone Spark jobs for you to come back and explore later.
+
+First, on the AMI for this tutorial we have included "template" projects for Scala and Java standalone programs for both Spark and Spark streaming.
+The Spark ones can be found in the `/root/scala-app-template` and `/root/java-app-template` directories (we will discuss the Streaming ones later).
+Feel free to browse through the contents of those directories. You can also find instructions for doing so in <a href="http://www.spark-project.org/docs/0.6.0/quick-start.html#a-standalone-job-in-java">the Spark Quick Start Guide</a>. For even more details, see Matei Zaharia's <a href="http://ampcamp.berkeley.edu/wp-content/uploads/2012/06/matei-zaharia-part-2-amp-camp-2012-standalone-programs.pdf" target="_blank">slides</a> and <a href="http://www.youtube.com/watch?v=7k4yDKBYOcw&t=59m37s" target="_blank">talk video</a> about Standalone Spark jobs at the <a href="http://ampcamp.berkeley.edu/agenda-2012" target="blank">first AMP Camp</a>.
+ 
 
 # Data Exploration Using Shark
 
-Now that we've had fun with Scala, let's try some SQL in Shark.
+Now that we've had fun with Spark, let's try out Shark. Remember Shark is a large-scale data warehouse system that runs on top of Spark and provides an SQL like interface (that is fully compatible with Apache Hive).
 
 1. First, launch the Shark console:
 
@@ -626,10 +642,10 @@ To exit Shark, type the following at the Shark command line (and don't forget th
 
 # Processing Live Data Streams with Spark Streaming
 
-In this section, we will walk you through using Spark Streaming to process live data streams. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to Scala](#introduction-to-the-scala-shell) section to learn some basics.
+In this section, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a new component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to the Scala Shell](#introduction-to-the-scala-shell) section to learn some basics.
 
 ## Setup
-We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#introduction-to-running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
+We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
 
 <div class="sidebar">
 <p style="font-size:1.2em"><b>What is SBT?</b></p>
@@ -1087,7 +1103,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
 # Machine Learning
 
-To allow you to complete the machine learning exercises within the relatively short time available, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre- loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
+To allow you to complete the machine learning exercises within the relatively short time available, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
 
 
 ## Command Line Preprocessing and Featurization

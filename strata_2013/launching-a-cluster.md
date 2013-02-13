@@ -223,7 +223,12 @@ You can find the master hostname (`<master_node_hostname>` in the instructions b
 At this point, it would be helpful to open a text file and copy `<master_node_hostname>` there.
 In a later exercise, you will want to have `<master_node_hostname>` ready at hand without having to scroll through your terminal history.
 
-## Terminating the cluster (Not yet! Only after you do the exercises below.)
+## Go through the Tutorial
+Contratulations, you should now have a cluster running on EC2 with the all of the BDAS components you need to perform the Big Data Analytics tutorial.
+
+[Go start the tutorial](index.html)!
+
+## Terminating the cluster (Not yet, only after you do the exercises!)
 __After you are done with your exercises__, you can terminate the cluster by running
 
     ./spark-ec2 -i <key_file> -k <key_pair> destroy ampcamp
