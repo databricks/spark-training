@@ -1086,22 +1086,56 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    </pre>
 
 
-3. __Find the top 10 hashtags based on their counts (Scala only)__ :
+3. __Find the top 10 hashtags based on their counts__ :
    Finally, these counts have to be used to find the popular hashtags.
    A simple (but not the most efficient) way to do this is to sort the hashtags based on their counts and
    take the top 10 records. Since this requires sorting by the counts, the count (i.e., the second item in the
    (hashtag, count) tuple) needs to be made the key. Hence, we need to first use a `map` to flip the tuple and
-   then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows.
+   then sort the hashtags. Finally, we need to get the top 10 hashtags and print them. All this can be done as follows:
 
+   <div class="codetabs">
+   <div data-lang="scala" markdown="1">
    ~~~
        val sortedCounts = counts.map { case(tag, count) => (count, tag) }
                                 .transform(rdd => rdd.sortByKey(false))
        sortedCounts.foreach(rdd =>
          println("\nTop 10 hashtags:\n" + rdd.take(10).mkString("\n")))
    ~~~
+   </div>
+   <div data-lang="java" markdown="1">
+   ~~~
+      JavaPairDStream<Integer, String> swappedCounts = counts.map(
+        new PairFunction<Tuple2<String, Integer>, Integer, String>() {
+          public Tuple2<Integer, String> call(Tuple2<String, Integer> in) {
+            return in.swap();
+          }
+        }
+      );
+
+      JavaPairDStream<Integer, String> sortedCounts = swappedCounts.transform(
+        new Function<JavaPairRDD<Integer, String>, JavaPairRDD<Integer, String>>() {
+          public JavaPairRDD<Integer, String> call(JavaPairRDD<Integer, String> in) throws Exception {
+            return in.sortByKey(false);
+          }
+        });
+
+      sortedCounts.foreach(
+        new Function<JavaPairRDD<Integer, String>, Void> () {
+          public Void call(JavaPairRDD<Integer, String> rdd) {
+            String out = "\nTop 10 hashtags:\n";
+            for (Tuple2<Integer, String> t: rdd.take(10)) {
+              out = out + t.toString() + "\n";
+            }
+            System.out.println(out);
+            return null;
+          }
+        }
+      );
+   ~~~
+   </div>
+   </div>
 
    The `transform` operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream.
-   As the name suggests, `sortByKey` is an RDD operation that does a distributed sort on the data in the RDD (`false` to ensure descending order).
    The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags.
    The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case,
    `foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.
