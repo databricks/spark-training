@@ -1184,23 +1184,44 @@ Recall that each record in our dataset consists of a string with the format "`<d
    </div>
 
 
-   -  We'll start by entering Spark and loading the data. First, launch a Spark shell.
+   -  We'll start by entering the shell and loading the data.
 
+      <div class="codetabs">
+      <div data-lang="scala" markdown="1">
       ~~~
-      cd /root/
-      /root/spark/spark-shell
+        cd /root/
+        /root/spark/spark-shell
       ~~~
+      </div>
+      <div data-lang="python" markdown="1">
+      ~~~
+        cd /root/
+        /root/spark/pyspark
+      ~~~
+      </div>
+      </div>
 
       Next, load the data.
 
+      <div class="codetabs">
+      <div data-lang="scala" markdown="1">
       ~~~
-      val data = sc.textFile("/wikistats_20090505-07_restricted")
+        val data = sc.textFile("/wikistats_20090505-07_restricted")
       ~~~
+      </div>
+      <div data-lang="python" markdown="1">
+      ~~~
+        # Python goes here.
+      ~~~
+      </div>
+      </div>
 
     - Next, for every line of data, we collect a tuple with elements described next. The first element is what we will call the "full document title", a concatenation of the project code and page title. The second element is a key-value pair whose key is the hour from the `<date-time>` field and whose value is the number of views that occurred in this hour.
 
       There are a few new points to note about the code below. First, `data.map` takes each line of data in the RDD data and applies all of the code contained in the curly braces after the `=>` symbol. The last line of code is automatically output. The first line of code within the curly braces splits the line of data into the five data fields we discussed in the Spark exercises above. The second line of code within the braces extracts the hour information from the `<date-time>` string. The final line forms the output tuple.
 
+      <div class="codetabs">
+      <div data-lang="scala" markdown="1">
       ~~~
       val featureMap = data.map(line => {
         val Array(dateTime, projectCode, pageTitle, numViews, numBytes) = line.trim.split("\\s+")
@@ -1208,6 +1229,13 @@ Recall that each record in our dataset consists of a string with the format "`<d
         (projectCode+" "+pageTitle, hour -> numViews.toInt)
       })
       ~~~
+      </div>
+      <div data-lang="python" markdown="1">
+      ~~~
+        # Python goes here.
+      ~~~
+      </div>
+      </div>
 
       To double-check that your code did what you wanted it to do, you can print the first 10 output tuples:
 
