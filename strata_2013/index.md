@@ -13,7 +13,7 @@ We have already spun up a 4-node EC2 Cluster for you with the software preinstal
 We will begin with simple interactive analysis techniques at the Spark and Shark shells, then progress to writing standalone programs with Spark Streaming, and finish by imlementing some more advanced machine learning algorithms to incorporate into your analysis.
 
 ## Tutorial Developer Prerequisites
-This tutorial is meant to be hands-on introduction to Spark, Spark Streaming, and Shark. While shark supports a simpliefied version of SQL, Spark and Spark Streaming both support multiple languages. For the sections about Spark and Spark Streaming, the tutorial allows you to choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this tutorial supports for each of Spark, Spark Streaming, and Shark.
+This tutorial is meant to be hands-on introduction to Spark, Spark Streaming, and Shark. While Shark supports a simplified version of SQL, Spark and Spark Streaming both support multiple languages. For the sections about Spark and Spark Streaming, the tutorial allows you to choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this tutorial supports for each of Spark, Spark Streaming, and Shark.
 
 <center>
 <style type="text/css">
@@ -41,7 +41,7 @@ table td, table th {
 # Launching a Spark/Shark Cluster on EC2
 
 For the Strata tutorial, we have provided you with login credentials for an existing EC2 cluster.
-To launch your own cluster (after the event, for example), follow [these instructions](launching-a-cluster.html).
+If, for some reason, you want to to launch your own cluster using your own EC2 credentials (after the event, for example), follow [these instructions](launching-a-cluster.html).
 
 # Logging into the Cluster
 
@@ -1217,7 +1217,7 @@ Recall that each record in our dataset consists of a string with the format "`<d
 
       Now we want to find the average hourly views for each article (average for the same hour across different days).
 
-      In the code below, we first take our tuples in the RDD `featureMap` and, treating the first elements as keys and the second elements as values, group all the values for a single key (i.e. a single article) together using `groupByKey`.  We put the article name in article and the multiple tuples of hours and pageviews in `hoursViews`. The syntax `Array.fill[Int](24)(0)` initializes an integer array of 24 elements with a value of 0 at every element. The for loop then collects the number of days for which we have a particular hour of data in `counts[hour]` and the total pageviews at hour across all these days in `sums[hour]`. Finally, we use the syntax sums zip counts to make an array of tuples with parallel elements from the sums and counts arrays and use this to calculate the average pageviews at particular hours across days in the data set.
+      In the code below, we first take our tuples in the RDD `featureMap` and, treating the first elements (i.e., article name) as keys and the second elements (i.e., hoursViewed) as values, group all the values for a single key (i.e., a single article) together using `groupByKey`.  We put the article name in a variable called `article` and the multiple tuples of hours and pageviews associated with the current `article` in a variable called `hoursViews`. The syntax `Array.fill[Int](24)(0)` initializes an integer array of 24 elements with a value of 0 at every element. The <a href="http://www.scala-lang.org/node/111">for comprehension</a> (similar to a for loop) then collects the number of days for which we have a particular hour of data in `counts[hour]` and the total pageviews at hour across all these days in `sums[hour]`. Finally, we use the syntax sums zip counts to make an array of tuples with parallel elements from the sums and counts arrays and use this to calculate the average pageviews at particular hours across days in the data set.
 
       ~~~
       val featureGroup = featureMap.groupByKey.map(grouped => {
@@ -1225,8 +1225,8 @@ Recall that each record in our dataset consists of a string with the format "`<d
         val sums = Array.fill[Int](24)(0)
         val counts = Array.fill[Int](24)(0)
         for((hour, numViews) <- hoursViews) {
-          sums(hour) += numViews
           counts(hour) += 1
+          sums(hour) += numViews
         }
         val avgs: Array[Double] =
           for((sum, count) <- sums zip counts) yield
@@ -1310,7 +1310,7 @@ Recall that each record in our dataset consists of a string with the format "`<d
 
 Now, try to solve the following problem using Spark. We provide less guidance for this problem. If you run out of time, or get stuck or are just curious, again feel free to jump straight to our solutions.
 
-1. We now further explore the featurized dataset via K-means clustering. Implement K-means clustering (as a standalone Spark program) and generate 10 clusters from the featurized dataset created above. For each cluster, print its centroid vector and the " " strings of 10 articles assigned to that cluster.
+1. We now further explore the featurized dataset via K-means clustering. Implement K-means clustering (as a <a href="#running-standalone-spark-programs">standalone Spark program</a>) and generate 10 clusters from the featurized dataset created above. For each cluster, print its centroid vector and the titles of 10 articles assigned to that cluster.
 
 
    <div class="solution" markdown="1">
@@ -1391,7 +1391,7 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
          // print centroid
          println(centroid.elements.mkString("[",",","]"))
 
-         // print numArticles articles which are assigned to this centroid’s cluster
+         // print title of numArticles articles which are assigned to this centroid’s cluster
          data.filter(p => (closestPoint(p._2, centroids) == centroidI)).take(numArticles).foreach(
              x => println(x._1))
          println()
