@@ -1266,7 +1266,7 @@ Next, we use the SparkContext to read in our featurized dataset. Recall that we 
 </div>
 
 ## Running the program
-Before we implement the K-Means algorithm, here is quick reminder on how you can run the program at any point during this exercise. Save `WikipediaKMeans.scala` and hthen run the following command from the `/root/kmeans` directory.
+Before we implement the K-Means algorithm, here is quick reminder on how you can run the program at any point during this exercise. Save `WikipediaKMeans.scala` and then run the following command from the `/root/kmeans` directory.
 
 ~~~
 sbt/sbt package run
@@ -1365,7 +1365,7 @@ Exercise: Write the `average` function in `WikipediaKMeans.scala` to sum all the
 </div>
 </div>
 
-You can now save `WikipediaKMeans.scala`, and run is using `sbt/sbt package run` to make sure our program is working fine so far. If everything went right, you should see the output similar to the following. (NOTE: Your output may not exactly match this as we use a random set of initial centers).
+You can now save `WikipediaKMeans.scala`, and run it using `sbt/sbt package run` to make sure our program is working fine so far. If everything went right, you should see the output similar to the following. (NOTE: Your output may not exactly match this as we use a random set of initial centers).
 
 ~~~
 Finished iteration (delta = 0.025900765093161377)
@@ -1397,7 +1397,7 @@ Finished iteration (delta = 0.025900765093161377)
 </div>
 </div>
 
-- Exercise: At the end of the K-Means algorithm, print the titles of 10 articles assigned to that cluster. 
+- Exercise: At the `do while` loop completes, write code to print the titles of 10 articles assigned to each cluster. 
 
     <div class="solution" markdown="1">
       val numArticles = 10
@@ -1409,7 +1409,7 @@ Finished iteration (delta = 0.025900765093161377)
       }
     </div>
 
-- Your final output should have clusters similar to the following output. Recall that our feature vector consisted of the number of times a page was visited in every hour of the day. We can see that clustered together by language indicating that they are accessed during the same time periods.
+- You can save `WikipediaKMeans.scala` and run your program now. If everything goes well your algorithm will converge after some iterations and your final output should have clusters similar to the following output. Recall that our feature vector consisted of the number of times a page was visited in every hour of the day. We can see that pages are clustered together by language indicating that they are accessed during the same hours of the day.
 
 <pre class="nocode">
 ja %E6%AD%8C%E8%97%A4%E9%81%94%E5%A4%AB
