@@ -1163,8 +1163,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
 # Machine Learning
 
-To allow you to complete the machine learning exercises within the relatively short time available, using only the relatively small number of nodes available to you, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
-
+In this section, we will look at how you can use Spark to implement machine learning algorithms. To allow you to complete the machine learning exercises within the relatively short time available, using only the relatively small number of machines available, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
 
 ## Command Line Preprocessing and Featurization
 
@@ -1172,231 +1171,141 @@ To apply most machine learning algorithms, we first must preprocess and featuriz
 
 Recall that each record in our dataset consists of a string with the format "`<date_time> <project_code> <page_title> <num_hits> <page_size>`".  The format of the date-time field is YYYYMMDD-HHmmSS (where 'M' denotes month, and 'm' denotes minute).
 
-1. You can preprocess and featurize the data yourself by following along with the parts of this exercise. To skip ahead to exercise 2 where we start examining the data set we will input to K means, just copy and paste all of the code from our solution to preprocess the data.
-
-   <div class="solution" markdown="1">
-
-   Place the following code within a Scala `object` and call the `featurization` function from a `main` function:
-
-   ~~~
-   import scala.io.Source
-   import spark.SparkContext
-   import SparkContext._
-   lazy val hostname = Source.fromFile("/root/mesos-ec2/masters").mkString.trim
-   def featurization(sc: SparkContext) {
-    val featurizedRdd = sc.textFile("hdfs://"+hostname+":9000/wikistats_20090505-07_restricted").map{line => {
-      val Array(dateTime, projectCode, pageTitle, numViews, numBytes) = line.trim.split("\\s+")
-      val hour = dateTime.substring(dateTime.indexOf("-")+1, dateTime.indexOf("-")+3).toInt
-      (projectCode+" "+pageTitle, hour -> numViews.toInt)
-    }}.groupByKey.map{grouped => {
-      val (article, hoursViews) = grouped
-      val sums = Array.fill[Int](24)(0)
-      val counts = Array.fill[Int](24)(0)
-      for((hour, numViews) <- hoursViews) {
-        sums(hour) += numViews
-        counts(hour) += 1
-      }
-      val avgs: Array[Double] =
-        for((sum, count) <- sums zip counts) yield
-          if(count > 0) sum/count.toDouble else 0.0
-      article -> avgs
-    }}.filter{t => {
-      t._2.forall(_ > 0)
-    }}.map{t => {
-      val avgsTotal = t._2.sum
-      t._1 -> t._2.map(_ / avgsTotal)
-    }}
-    featurizedRdd.cache()
-    println("Number of records in featurized dataset: " + featurizedRdd.count)
-    println("Selected feature vectors:")
-    featurizedRdd.filter{t => {
-      t._1 == "en Computer_science" || t._1 == "en Machine_learning"
-    }}.collect.map{t => t._1 -> t._2.mkString("[",",","]")}.foreach(println)
-    featurizedRdd.map{t => t._1 -> t._2.mkString(",")}.saveAsSequenceFile("hdfs://"+hostname+":9000/wikistats_featurized")
-   }
-   ~~~
-   </div>
-
-
-   -  We'll start by entering the shell and loading the data.
-
-      <div class="codetabs">
-      <div data-lang="scala" markdown="1">
-      ~~~
-        cd /root/
-        /root/spark/spark-shell
-      ~~~
-      </div>
-      <div data-lang="python" markdown="1">
-      ~~~
-        cd /root/
-        /root/spark/pyspark
-      ~~~
-      </div>
-      </div>
-
-      Next, load the data.
-
-      <div class="codetabs">
-      <div data-lang="scala" markdown="1">
-      ~~~
-        val data = sc.textFile("/wikistats_20090505-07_restricted")
-      ~~~
-      </div>
-      <div data-lang="python" markdown="1">
-      ~~~
-        # Python goes here.
-      ~~~
-      </div>
-      </div>
-
-    - Next, for every line of data, we collect a tuple with elements described next. The first element is what we will call the "full document title", a concatenation of the project code and page title. The second element is a key-value pair whose key is the hour from the `<date-time>` field and whose value is the number of views that occurred in this hour.
-
-      There are a few new points to note about the code below. First, `data.map` takes each line of data in the RDD data and applies all of the code contained in the curly braces after the `=>` symbol. The last line of code is automatically output. The first line of code within the curly braces splits the line of data into the five data fields we discussed in the Spark exercises above. The second line of code within the braces extracts the hour information from the `<date-time>` string. The final line forms the output tuple.
-
-      <div class="codetabs">
-      <div data-lang="scala" markdown="1">
-      ~~~
-      val featureMap = data.map(line => {
-        val Array(dateTime, projectCode, pageTitle, numViews, numBytes) = line.trim.split("\\s+")
-        val hour = dateTime.substring(9, 11).toInt
-        (projectCode+" "+pageTitle, hour -> numViews.toInt)
-      })
-      ~~~
-      </div>
-      <div data-lang="python" markdown="1">
-      ~~~
-        # Python goes here.
-      ~~~
-      </div>
-      </div>
-
-      To double-check that your code did what you wanted it to do, you can print the first 10 output tuples:
-
-      ~~~
-      featureMap.take(10).foreach(println)
-      ~~~
-
-      Now we want to find the average hourly views for each article (average for the same hour across different days).
-
-      In the code below, we first take our tuples in the RDD `featureMap` and, treating the first elements (i.e., article name) as keys and the second elements (i.e., hoursViewed) as values, group all the values for a single key (i.e., a single article) together using `groupByKey`.  We put the article name in a variable called `article` and the multiple tuples of hours and pageviews associated with the current `article` in a variable called `hoursViews`. The syntax `Array.fill[Int](24)(0)` initializes an integer array of 24 elements with a value of 0 at every element. The <a href="http://www.scala-lang.org/node/111">for comprehension</a> (similar to a for loop) then collects the number of days for which we have a particular hour of data in `counts[hour]` and the total pageviews at hour across all these days in `sums[hour]`. Finally, we use the syntax sums zip counts to make an array of tuples with parallel elements from the sums and counts arrays and use this to calculate the average pageviews at particular hours across days in the data set.
-
-      ~~~
-      val featureGroup = featureMap.groupByKey.map(grouped => {
-        val (article, hoursViews) = grouped
-        val sums = Array.fill[Int](24)(0)
-        val counts = Array.fill[Int](24)(0)
-        for((hour, numViews) <- hoursViews) {
-          counts(hour) += 1
-          sums(hour) += numViews
-        }
-        val avgs: Array[Double] =
-          for((sum, count) <- sums zip counts) yield
-            if(count > 0) sum/count.toDouble else 0.0
-        article -> avgs
-      })
-      ~~~
-
-      Using `println` directly here as above doesn't let us see what’s inside the arrays. The `mkString` method prints an array by concatenating all of its elements with some specified delimiter.  Note that when we use `_1` to access the first part of a tuple, the indexing is 1 and 2 for the first and second parts, not 0 and 1.
-
-      ~~~
-      featureGroup.take(10).foreach(x => println(x._1, x._2.mkString(" ")))
-      ~~~
-
-    - Now suppose we’re only interested in those articles that were viewed at least once in each hour during the data collection time.
-
-      To do this, we filter to find those articles with an average number of views (the second tuple element in an article tuple) greater than zero in every hour.
-
-      ~~~
-      val featureGroupFiltered = featureGroup.filter(t => t._2.forall(_ > 0))
-      ~~~
-
-    - So far article popularity is still implicitly in our feature vector (the sum of the average views per hour is the average views per day if the number of days of data is constant across hours).  Since we are interested only in which times are more popular viewing times for each article, we next divide out by this sum.
-
-      If you were following along with the AMP Camp lectures, note that this normalization is different from standardizing each feature separately but accomplishes the goal that all features are on a comparable scale.
-
-      ~~~
-      val featurizedRDD = featureGroupFiltered.map(t => {
-        val avgsTotal = t._2.sum
-        t._1 -> t._2.map(_ /avgsTotal)
-      })
-      ~~~
-
-      We can use the same command as before to view the latest RDD.
-
-      ~~~
-      featurizedRDD.take(10).foreach(x => println(x._1, x._2.mkString(" ")))
-      ~~~
-
-    - Save the RDD within Spark and to a file for later use.
-      Locally, we just cache the RDD.
-
-      ~~~
-      featurizedRDD.cache
-      ~~~
-
-      To save to file, we first create a string of comma-separated values for each data point.
-
-      ~~~
-      featurizedRDD.map(t => t._1 -> t._2.mkString(",")).saveAsSequenceFile("/wikistats_featurized")
-      ~~~
-
-2. In this exercise, we examine the preprocessed data.
-
-    - Count the number of records in the preprocessed data.  Recall that we potentially threw away some data when we filtered out records with zero views in a given hour.
-
-      ~~~
-      featurizedRDD.count
-      ~~~
-
-      <div class="solution" markdown="1">
-      Number of records in the preprocessed data: 802450
-      </div>
-
-
-   - Print the feature vectors for the Wikipedia articles with project code “en” and the following titles: Computer_science, Machine_learning.  The second line below shows another option for printing arrays in a readable way at the command line.
-
-     ~~~
-     val featuresCSML = featurizedRDD.filter(t => t._1 == "en Computer_science" || t._1 == "en Machine_learning").collect
-     featuresCSML.foreach(x => println(x._1 + "," + x._2.mkString(" ")))
-     ~~~
-
-     <div class="solution">
-     <textarea rows="12" style="width: 100%" readonly>
-     (en Machine_learning, [0.03708182184602984,0.027811366384522376,0.031035872632003234,0.033454252317613876,0.033051189036678766,0.023780733575171308,0.03224506247480856,0.029826682789197912,0.04997984683595326,0.04433696090286176,0.04997984683595326,0.04474002418379687,0.04272470777912134,0.054816606207174545,0.054816606207174545,0.04474002418379687,0.054010479645304324,0.049173720274083045,0.049173720274083045,0.05038291011688836,0.04594921402660219,0.04957678355501815,0.03667875856509473,0.030632809351068126])
-     (en Computer_science, [0.03265137425087828,0.057656540607563554,0.03306468278569953,0.033374664186815464,0.03709444100020666,0.03947096507542881,0.03502789832610044,0.03637115106426948,0.036577805331680105,0.0421574705517669,0.04267410622029345,0.03885100227319695,0.03885100227319695,0.046083901632568716,0.04691051870221121,0.050320314114486474,0.05259351105600331,0.04649721016738996,0.04732382723703245,0.048357098574085565,0.04236412481917752,0.043190741888820015,0.03626782393056417,0.03626782393056417])
-     </textarea>
-     </div>
+In order to focus on machine learning algorithms within the time available, we have pre-processed the data and created the featurized dataset that we will use to implement K-means clustering. In case you are are interested in doing featurization on your own, you can follow [these instructions](featurization.html).
 
 ## Clustering
 
-Now, try to solve the following problem using Spark. We provide less guidance for this problem. If you run out of time, or get stuck or are just curious, again feel free to jump straight to our solutions.
+[K-Means clustering](http://en.wikipedia.org/wiki/K-means_clustering) is a popular clustering algorithm that can be used to partition your dataset into K clusters. We now look at how we can implement K-Means clustering using Spark to cluster the featurized Wikipedia dataset. 
 
-1. We now further explore the featurized dataset via K-means clustering. Implement K-means clustering (as a <a href="#running-standalone-spark-programs">standalone Spark program</a>) and generate 10 clusters from the featurized dataset created above. For each cluster, print its centroid vector and the titles of 10 articles assigned to that cluster.
+## Setup
+Similar to the Spark streaming exercises above, we will be using a standalone project template for this exercise. In your AMI, this has been setup in `/root/kmeans/`. You should find the following items in the directory.
 
+- `sbt:` Directory containing the SBT tool
+- `build.sbt:` SBT project file
+- `WikipediaKMeans.scala:` Main Scala program that you are going to edit, compile and run
 
-   <div class="solution" markdown="1">
+The main file you are going to edit, compile and run for the exercises is `WikipediaKMeans.scala`. It should look as follows:
 
-   Place the following code in a file and use `sbt/sbt run` to run it:
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+import spark.SparkContext
+import spark.SparkContext._
+import spark.util.Vector
 
-   ~~~
-   import spark.SparkContext
-   import spark.SparkContext._
-   import spark.util.Vector
+import scala.util.Random
+import scala.io.Source
 
-   import scala.util.Random
-   import scala.io.Source
+object WikipediaKMeans {
+  def parseVector(line: String): Vector = {
+      return new Vector(line.split(',').map(_.toDouble))
+  }
 
-   object WikipediaKMeans {
-     def parseVector(line: String): Vector = {
-         return new Vector(line.split(',').map(_.toDouble))
-     }
+  // Add any new functions you need here
 
+  def main(args: Array[String]) {
+    val sparkHome = "/root/spark"
+    val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
+    val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
+    val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
+
+    val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+
+    val K = 10
+    val convergeDist = 1e-6
+
+    val data = sc.sequenceFile[String, String](
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+            t => (t._1,  parseVector(t._2))).cache()
+
+    // Your code goes here
+
+    sc.stop()
+    System.exit(0)
+  }
+}
+~~~
+</div>
+</div>
+
+Let's first take a look at our template code. Locate the `WikipediaKMeans` class and open it with a text editor.
+
+<div class="codetabs">
+<div data-lang="scala">
+<pre>
+cd /root/kmeans
+vim WikipediaKMeans.scala
+</pre>
+</div>
+</div>
+
+The cluster machines have both vim and emacs installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim or emacs before running it.
+
+For any Spark computation, we will first need to create a Spark context object. We do that by providing the Spark cluster URL, the Spark home directory and the JAR file that will be generated when we compile our program. Finally, we also name our program "WikipediaKMeans" to identify it in Spark's web UI.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+    val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+~~~
+</div>
+</div>
+
+Next, we use the SparkContext to read in our featurized dataset. Recall that we created 24-dimensional feature vectors from our Wikipedia dataset, with each feature vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. Then, we count the number of records in our dataset by running `data.count` and print that using `println`.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+   val data = sc.sequenceFile[String, String](
+       "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+           t => (t._1,  parseVector(t._2))).cache()
+   val count = data.count()
+   println("Number of records " + count)
+~~~
+</div>
+</div>
+
+## Running the program
+Before we implement the K-Means algorithm, here is quick reminder on how you can run the program at any point during this exercise. Save `WikipediaKMeans.scala` and hthen run the following command from the `/root/kmeans` directory.
+
+~~~
+sbt/sbt package run
+~~~
+
+This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
+
+~~~
+Number of records 802450
+~~~
+
+## K-Means algorithm
+- The first step in the K-Means algorithm is to initialize our centers by randomly picking `K` points from our dataset. We use the `takeSample` function in Spark to do this. 
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+  var centroids = data.takeSample(false, K, 42).map(x => x._2).collect()
+~~~
+</div>
+</div>
+
+- Next, we need to compute the closest centroid for each point and we do this by using the `map` operation in Spark. For every point we will use a function `closestPoint` to compute the closest centroid. 
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+  var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
+~~~
+</div>
+</div>
+
+Exercise: Write the `closestPoint` function in `WikipediaKMeans.scala` to return the index of the closest centroid given a point and the set of all centroids. In case you get stuck, you can use our solution given below.
+
+  <div class="solution" markdown="1">
      def closestPoint(p: Vector, centers: Array[Vector]): Int = {
        var index = 0
        var bestIndex = 0
        var closest = Double.PositiveInfinity
-
        for (i <- 0 until centers.length) {
          val tempDist = p.squaredDist(centers(i))
          if (tempDist < closest) {
@@ -1404,91 +1313,233 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
            bestIndex = i
          }
        }
-
        return bestIndex
      }
+  </div>
 
-     def main(args: Array[String]) {
-       val sparkHome = "/root/spark"
-       val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
-       val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
-       val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
+The `map` operation creates a new RDD which contains a tuple for every point. The first element in the tuple is the index of the closest centroid for the point and second element is the `Vector` representing the point. 
 
-       val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+- Now that we have the closest centroid for each point, we can cluster our points by the centroid they belong to. To do this, we use a `groupByKey` operation as shown below. The `groupByKey` operator creates a new `RDD[(Int, Array[Vector])]` where the key is the index of the centroid and the values are all the points which belong to its cluster.
 
-       val K = 4
-       val convergeDist = 1e-6
-       var iter = 0
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+    var pointsGroup = closest.groupByKey()
+~~~
+</div>
+</div>
 
-       val data = sc.sequenceFile[String, String](
-           "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-               t => (t._1,  parseVector(t._2))).cache()
+- We can now calculate our new centroids by computing the mean of the points that belong to a cluster. We do this using `mapValues` which allows us to apply a function on all the values for a particular key. We also use a function `average` to compute the average of an array of vectors.
 
-       var centroids = data.sample(false, 0.005, 23789).map(x => x._2).collect().take(K)
-       println("Done selecting initial centroids")
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+    var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
+~~~
+</div>
+</div>
 
-       var tempDist = 1.0
-       while(tempDist > convergeDist) {
-         var closest = data.map(p => (closestPoint(p._2, centroids), (p._2, 1)))
+Exercise: Write the `average` function in `WikipediaKMeans.scala` to sum all the vectors and divide it by the number of vectors present in the input array. Your function should return a new Vector which is the average of the input vectors. You can look at our solution in case you get stuck.
 
-         var pointStats = closest.reduceByKey{case ((x1, y1), (x2, y2)) => (x1 + x2, y1 + y2)}
+  <div class="solution" markdown="1">
+    def average(ps: Seq[Vector]) : Vector = {
+      val numVectors = ps.size
+      var out = new Vector(ps(0).elements)
+      for (i <- 1 until numVectors) {
+        out += ps(i)
+      }
+      out / numVectors
+    }
+  </div>
 
-         var newCentroids = pointStats.map {pair => (pair._1, pair._2._1 / pair._2._2)}.collectAsMap()
+- Finally, lets calculate how different our new centroids are compared to our initial centroids. This will be used to determine if we have converged to the right set of centroids. To do this we create a variable named `tempDist` and use the `squaredDist` function to compute the distance between two vectors. We sum up the distance over `K` centroids and print this value. 
 
-         tempDist = 0.0
-         for (i <- 0 until K) {
-           tempDist += centroids(i).squaredDist(newCentroids(i))
-         }
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+    var tempDist = 0.0
+    for (i <- 0 until K) {
+      tempDist += centroids(i).squaredDist(newCentroids(i))
+    }
+    println("Finished iteration (delta = " + tempDist + ")")
+~~~
+</div>
+</div>
 
-         for (newP <- newCentroids) {
-           centroids(newP._1) = newP._2
-         }
-         iter += 1
-         println("Finished iteration " + iter + " (delta = " + tempDist + ")")
-       }
+You can now save `WikipediaKMeans.scala`, and run is using `sbt/sbt package run` to make sure our program is working fine so far. If everything went right, you should see the output similar to the following. (NOTE: Your output may not exactly match this as we use a random set of initial centers).
 
-       println("Centroids with some articles:")
-       val numArticles = 10
-       for((centroid, centroidI) <- centroids.zipWithIndex) {
-         // print centroid
-         println(centroid.elements.mkString("[",",","]"))
+~~~
+Finished iteration (delta = 0.025900765093161377)
+~~~
 
-         // print title of numArticles articles which are assigned to this centroid’s cluster
-         data.filter(p => (closestPoint(p._2, centroids) == centroidI)).take(numArticles).foreach(
-             x => println(x._1))
-         println()
-       }
+- The above steps represent one iteration of the K-Means algorithm. We will need to repeat these steps until the distance between newly computed centers and the ones from the previous iteration become lesser than some small constant. (`convergeDist` in our program). To do this we put our steps inside a `do while` loop and check if `tempDist` is lower than the convergence constant. Putting this together with the previous steps, our code will look like: 
+ 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+    do {
+      var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
+      var pointsGroup = closest.groupByKey()
+      var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
 
-       sc.stop()
-       System.exit(0)
-     }
-   }
-   ~~~
+      tempDist = 0.0
+      for (i <- 0 until K) {
+        tempDist += centroids(i).squaredDist(newCentroids(i))
+      }
 
-   </div>
+      // Assign newCentroids to centroids
+      for (newP <- newCentroids) {
+        centroids(newP._1) = newP._2
+      }
+      iter += 1
+      println("Finished iteration " + iter + " (delta = " + tempDist + ")")
+    } while (tempDist > convergeDist)
+~~~
+</div>
+</div>
 
-2. Run K-means again (so that the cluster centroids are initialized differently) and see how the clusters change.
+- Exercise: At the end of the K-Means algorithm, print the titles of 10 articles assigned to that cluster. 
 
-   <div class="solution" markdown="1">
+    <div class="solution" markdown="1">
+      val numArticles = 10
+      for((centroid, centroidI) <- centroids.zipWithIndex) {
+        // print numArticles articles which are assigned to this centroid’s cluster
+        data.filter(p => (closestPoint(p._2, centroids) == centroidI)).take(numArticles).foreach(
+            x => println(x._1))
+        println()
+      }
+    </div>
 
-   Centroids with some articles for K-means with K=10:
+- Your final output should have clusters similar to the following output. Recall that our feature vector consisted of the number of times a page was visited in every hour of the day. We can see that clustered together by language indicating that they are accessed during the same time periods.
 
-   <textarea rows="12" style="width: 100%" readonly>
-   {% include 10_clusters_solution.txt %}
-   </textarea>
+<pre class="nocode">
+ja %E6%AD%8C%E8%97%A4%E9%81%94%E5%A4%AB
+ja %E7%8B%90%E3%81%AE%E5%AB%81%E5%85%A5%E3%82%8A
+ja %E3%83%91%E3%82%B0
+ja %E7%B4%AB%E5%BC%8F%E9%83%A8
+ja %E3%81%8A%E5%A7%89%E7%B3%BB
+ja Reina
+ja %E8%B8%8A%E3%82%8A%E5%AD%97
+ja %E3%83%90%E3%82%BB%E3%83%83%E3%83%88%E3%83%8F%E3%82%A6%E3%83%B3%E3%83%89
+ja %E3%81%BF%E3%81%9A%E3%81%BB%E3%83%95%E3%82%A3%E3%83%8A%E3%83%B3%E3%82%B7%E3%83%A3%E3%83%AB%E3%82%B0%E3%83%AB%E3%83%BC%E3%83%97
+ja %E6%96%B0%E6%BD%9F%E7%9C%8C%E7%AB%8B%E6%96%B0%E6%BD%9F%E5%8D%97%E9%AB%98%E7%AD%89%E5%AD%A6%E6%A0%A1
 
-   </div>
+ru %D0%A6%D0%B8%D1%80%D0%BA%D0%BE%D0%BD%D0%B8%D0%B9
+de Kirchenstaat
+ru %D0%90%D0%B2%D1%80%D0%B0%D0%B0%D0%BC
+de Migr%C3%A4ne
+de Portal:Freie_Software
+de Datenflusskontrolle
+de Dornier_Do_335
+de.b LaTeX-Schnellkurs:_Griechisches_Alphabet
+de Mach-Zahl
+ru Total_Commander
 
-3. Repeat #2, now using 50 clusters.
+en 761st_Tank_Battalion_(United_States)
+en File:N34---Douglas-DC3-Cockpit.jpg
+en Desmond_Child
+en Philadelphia_Freeway
+en Zygon
+en File:Ruth1918.jpg
+en Sally_Rand
+en File:HLHimmler.jpg
+en Waiting_to_Exhale
+en File:Sonic1991b.jpg
+</pre>
 
-   <div class="solution" markdown="1">
+- In case you want to look at the complete solution, here is how `WikipediaKMeans.scala` will look after all the above steps have been completed.
 
-   Centroids with some articles for K-means with K=50:
+  <div class="solution" markdown="1">
+  ~~~
+    import spark.SparkContext
+    import spark.SparkContext._
+    import spark.util.Vector
+    
+    import org.apache.log4j.Logger
+    import org.apache.log4j.Level
+    
+    import scala.util.Random
+    import scala.io.Source
+    
+    object WikipediaKMeans {
+      def parseVector(line: String): Vector = {
+          return new Vector(line.split(',').map(_.toDouble))
+      }
+    
+      def closestPoint(p: Vector, centers: Array[Vector]): Int = {
+        var index = 0
+        var bestIndex = 0
+        var closest = Double.PositiveInfinity
+        for (i <- 0 until centers.length) {
+          val tempDist = p.squaredDist(centers(i))
+          if (tempDist < closest) {
+            closest = tempDist
+            bestIndex = i
+          }
+        }
+        return bestIndex
+      }
+    
+      def average(ps: Seq[Vector]) : Vector = {
+        val numVectors = ps.size
+        var out = new Vector(ps(0).elements)
+        for (i <- 1 until numVectors) {
+          out += ps(i)
+        }
+        out / numVectors
+      }
+    
+      // Add any new functions you need here
+    
+      def main(args: Array[String]) {
+        Logger.getLogger("spark").setLevel(Level.WARN)
+        val sparkHome = "/root/spark"
+        val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
+        val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
+        val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
+    
+        val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+    
+        val K = 10
+        val convergeDist = 1e-6
+    
+        val data = sc.sequenceFile[String, String](
+            "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+                t => (t._1,  parseVector(t._2))).cache()
+        val count = data.count()
+        println("Number of records " + count)
+    
+        // Your code goes here
+        var centroids = data.takeSample(false, K, 42).map(x => x._2)
+        var tempDist = 1.0
+        do {
+          var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
+          var pointsGroup = closest.groupByKey()
+          var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
+          tempDist = 0.0
+          for (i <- 0 until K) {
+            tempDist += centroids(i).squaredDist(newCentroids(i))
+          }
+          for (newP <- newCentroids) {
+            centroids(newP._1) = newP._2
+          }
+          println("Finished iteration (delta = " + tempDist + ")")
+        } while (tempDist > convergeDist)
+    
+        println("Clusters with some articles:")
+        val numArticles = 10
+        for((centroid, centroidI) <- centroids.zipWithIndex) {
+          // print numArticles articles which are assigned to this centroid’s cluster
+          data.filter(p => (closestPoint(p._2, centroids) == centroidI)).take(numArticles).foreach(
+              x => println(x._1))
+          println()
+        }
+    
+        sc.stop()
+        System.exit(0)
+      }
+    }
+  ~~~
+  </div>
 
-   <textarea rows="12" style="width: 100%" readonly>
-   {% include 50_clusters_solution.txt %}
-   </textarea>
-
-   </div>
-
-
+- Challenge: The K-Means implementation uses a `groupBy` and `mapValues` to compute the new centers. This can be optimized by using a running sum of the vectors that belong to a cluster and running counter of the number of vectors present in a cluster. How would you use the Spark API to implement this ?
