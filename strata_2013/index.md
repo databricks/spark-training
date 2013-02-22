@@ -1393,7 +1393,6 @@ Now, try to solve the following problem using Spark. We provide less guidance fo
      }
 
      def closestPoint(p: Vector, centers: Array[Vector]): Int = {
-       var index = 0
        var bestIndex = 0
        var closest = Double.PositiveInfinity
 
