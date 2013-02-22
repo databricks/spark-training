@@ -1303,7 +1303,6 @@ Exercise: Write the `closestPoint` function in `WikipediaKMeans.scala` to return
 
   <div class="solution" markdown="1">
      def closestPoint(p: Vector, centers: Array[Vector]): Int = {
-       var index = 0
        var bestIndex = 0
        var closest = Double.PositiveInfinity
        for (i <- 0 until centers.length) {
