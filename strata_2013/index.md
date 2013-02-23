@@ -1178,13 +1178,13 @@ In order to focus on machine learning algorithms within the time available, we h
 [K-Means clustering](http://en.wikipedia.org/wiki/K-means_clustering) is a popular clustering algorithm that can be used to partition your dataset into K clusters. We now look at how we can implement K-Means clustering using Spark to cluster the featurized Wikipedia dataset. 
 
 ## Setup
-Similar to the Spark streaming exercises above, we will be using a standalone project template for this exercise. In your AMI, this has been setup in `/root/kmeans/`. You should find the following items in the directory.
+Similar to the Spark streaming exercises above, we will be using a standalone project template for this exercise. In your AMI, this has been setup in `/root/kmeans/[scala|java]/`. You should find the following items in the directory.
 
 - `sbt:` Directory containing the SBT tool
 - `build.sbt:` SBT project file
-- `WikipediaKMeans.scala:` Main Scala program that you are going to edit, compile and run
+- `WikipediaKMeans.[scala|java]:` Main Scala program that you are going to edit, compile and run
 
-The main file you are going to edit, compile and run for the exercises is `WikipediaKMeans.scala`. It should look as follows:
+The main file you are going to edit, compile and run for the exercises is `WikipediaKMeans.[scala|java]`. It should look as follows:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1233,7 +1233,7 @@ Let's first take a look at our template code. Locate the `WikipediaKMeans` class
 <div class="codetabs">
 <div data-lang="scala">
 <pre>
-cd /root/kmeans
+cd /root/kmeans/scala
 vim WikipediaKMeans.scala
 </pre>
 </div>
@@ -1266,13 +1266,13 @@ Next, we use the SparkContext to read in our featurized dataset. The featurizati
 </div>
 
 ## Running the program
-Before we implement the K-Means algorithm, here is quick reminder on how you can run the program at any point during this exercise. Save `WikipediaKMeans.scala` and then run the following command from the `/root/kmeans` directory.
+Before we implement the K-Means algorithm, here is quick reminder on how you can run the program at any point during this exercise. Save `WikipediaKMeans.scala` and then run the following command from the `/root/kmeans/scala` directory.
 
 ~~~
 sbt/sbt package run
 ~~~
 
-This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
+This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/scala/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
 
 ~~~
 Number of records 802450
