@@ -1741,7 +1741,6 @@ en File:Sonic1991b.jpg
 <div class="codetabs">
   <div data-lang="scala" markdown="1">
   <div class="solution" markdown="1">
-  ~~~
     import spark.SparkContext
     import spark.SparkContext._
     import spark.util.Vector
@@ -1830,7 +1829,6 @@ en File:Sonic1991b.jpg
         System.exit(0)
       }
     }
-  ~~~
   </div>
   </div>
   <div data-lang="java" markdown="1">
