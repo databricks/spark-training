@@ -1251,7 +1251,7 @@ For any Spark computation, we will first need to create a Spark context object. 
 </div>
 </div>
 
-Next, we use the SparkContext to read in our featurized dataset. Recall that we created 24-dimensional feature vectors from our Wikipedia dataset, with each feature vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. Then, we count the number of records in our dataset by running `data.count` and print that using `println`.
+Next, we use the SparkContext to read in our featurized dataset. The featurization process creates a 24-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. Then, we count the number of records in our dataset by running `data.count` and print that using `println`.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1299,7 +1299,17 @@ Number of records 802450
 </div>
 </div>
 
-Exercise: Write the `closestPoint` function in `WikipediaKMeans.scala` to return the index of the closest centroid given a point and the set of all centroids. In case you get stuck, you can use our solution given below.
+Exercise: Write the `closestPoint` function in `WikipediaKMeans.scala` to return the index of the closest centroid given a point and the set of all centroids. To get you started, we provide the type signature of the function:
+
+  <div class="codetabs">
+  <div data-lang="scala" markdown="1">
+~~~
+  def closestPoint(p: Vector, centers: Array[Vector]): Int = {
+~~~
+  </div>
+  </div>
+
+In case you get stuck, you can use our solution given below.
 
   <div class="solution" markdown="1">
      def closestPoint(p: Vector, centers: Array[Vector]): Int = {
@@ -1409,7 +1419,7 @@ Finished iteration (delta = 0.025900765093161377)
       }
     </div>
 
-- You can save `WikipediaKMeans.scala` and run your program now. If everything goes well your algorithm will converge after some iterations and your final output should have clusters similar to the following output. Recall that our feature vector consisted of the number of times a page was visited in every hour of the day. We can see that pages are clustered together by language indicating that they are accessed during the same hours of the day.
+- You can save `WikipediaKMeans.scala` and run your program now. If everything goes well your algorithm will converge after some iterations and your final output should have clusters similar to the following output. Recall that our feature vector consisted of the number of times a page was visited in every hour of the day. We can see that pages are clustered together by _language_ indicating that they are accessed during the same hours of the day.
 
 <pre class="nocode">
 ja %E6%AD%8C%E8%97%A4%E9%81%94%E5%A4%AB
