@@ -1350,7 +1350,7 @@ For any Spark computation, we will first need to create a Spark context object. 
 </div>
 </div>
 
-Next, we use the SparkContext to read in our featurized dataset. The featurization process creates a 24-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. Then, we count the number of records in our dataset by running `data.count` and print that using `println`.
+Next, we use the SparkContext to read in our featurized dataset. The featurization process creates a 24-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. We can count the number of records in our dataset by running `data.count` and print that using `println`.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1364,7 +1364,7 @@ Next, we use the SparkContext to read in our featurized dataset. The featurizati
 </div>
 <div data-lang="java" markdown="1">
 ~~~
- JavaPairRDD<String, Vector> data = sc.sequenceFile(
+  JavaPairRDD<String, Vector> data = sc.sequenceFile(
       "hdfs://" + masterHostname + ":9000/wikistats_featurized",
       String.class, String.class).map(
         new PairFunction<Tuple2<String, String>, String, Vector>() {
@@ -1374,6 +1374,8 @@ Next, we use the SparkContext to read in our featurized dataset. The featurizati
           }
         }
       );
+    long count = data.count();
+    System.out.println("Number of records " + count);
 ~~~
 </div>
 </div>
@@ -1399,7 +1401,7 @@ cd /root/kmeans/java
 sbt/sbt package run
 ~~~
 
-This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/scala/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
+This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/java/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
 
 ~~~
 Number of records 802450
@@ -1662,7 +1664,8 @@ Finished iteration (delta = 0.025900765093161377)
 
 <div class="codetabs">
   <div data-lang="scala" markdown="1">
-    <div class="solution" markdown="1">
+  <div class="solution" markdown="1">
+~~~
       val numArticles = 10
       for((centroid, centroidI) <- centroids.zipWithIndex) {
         // print numArticles articles which are assigned to this centroid’s cluster
@@ -1670,9 +1673,11 @@ Finished iteration (delta = 0.025900765093161377)
             x => println(x._1))
         println()
       }
-    </div>
+~~~
+  </div>
   </div>
   <div data-lang="java" markdown="1">
+  <div class="solution" markdown="1">
 ~~~
  System.out.println("Cluster with some articles:");
     int numArticles = 10;
@@ -1690,6 +1695,7 @@ Finished iteration (delta = 0.025900765093161377)
       System.out.println();
     }
 ~~~
+  </div>
   </div>
 </div>
 
@@ -1922,6 +1928,9 @@ public class WikipediaKMeansJava {
         }
       }
      ).cache();
+    long count = data.count();
+    System.out.println("Number of records " + count);
+
     List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
     final List<Vector> centroids = Lists.newArrayList();
     for (Tuple2<String, Vector> t: centroidTuples) {
