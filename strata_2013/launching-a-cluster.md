@@ -72,7 +72,7 @@ The following are some errors that you may encounter, and other frequently asked
         I get an error when running this command: <code>UNPROTECTED KEY FILE...</code>
       </a>
       <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q2" data-parent="#q-accordion">
-        I get an error when running this command: <code>Your requested instance type (m2.xlarge) is not supported...</code>
+        I get an error when running this command: <code>Your requested instance type (m1.xlarge) is not supported...</code>
       </a>
       <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
         I get an error when running this command: <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
@@ -112,7 +112,7 @@ __Answer:__ Run the next two commands.
 __Question: I got the following permission error when I ran the above command. Help!__
 
 <pre class="nocode">
-"Your requested instance type (m2.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zone or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
+"Your requested instance type (m1.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zone or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
 </pre>
 
 __Answer:__ Add the `-z` flag to your command line arguments to use an availability zone other than `us-east-1b`.
@@ -171,8 +171,8 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
 
 __Question: Can I specify the instances types while creating the cluster?__
 
-__Answer:__ These exercises have been designed to work with at least 3 slave
-machines using instances of type __m2.xlarge__.
+__Answer:__ These exercises have been designed to work with at least 4 slave
+machines using instances of type __m1.xlarge__.
 You can also launch the cluster with different [instance types](http://aws.amazon.com/ec2/instance-types/).
 However, you should ensure two things:
 
@@ -210,7 +210,7 @@ In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
 </div>
 </div>
 
-If you launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 4 m2.xlarge Amazon EC2 nodes. 
+If you launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 5 m1.xlarge Amazon EC2 nodes.
 
 ![Running EC2 instances in AWS Management Console](img/aws-runninginstances.png)
 
