@@ -41,9 +41,9 @@ So make sure you create a key-pair in that region!
 
 Check out the launch scripts by cloning the github repository.
 
-    git clone git://github.com/amplab/ampcamp.git
+    git clone git://github.com/amplab/training-scripts.git
 
-You can also obtain them by downloading the zip file at `http://github.com/amplab/ampcamp/zipball/master`
+You can also obtain them by downloading the zip file at `https://github.com/amplab/training-scripts/archive/master.zip`
 
 ## Launching the cluster
 Launch the cluster by running the following command.
@@ -51,14 +51,14 @@ This script will launch a cluster, create a HDFS cluster and configure Mesos, Sp
 Finally, it will copy the datasets used in the exercises from S3 to the HDFS cluster.
 _This can take around 15-20 mins._
 
-    cd ampcamp
-    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy launch ampcamp
+    cd training-scripts
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy launch amplab-training
 
 Where `<name_of_key_pair>` is the name of your EC2 key pair (that you gave it when you created it), `<key_file>`is the private key file for your key pair.
 
 For example, if you created a key pair named `ampcamp-key` and the private key (`<key_file>`) is in your home directory and is called `ampcamp.pem`, then the command would be
 
-    ./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key --copy launch ampcamp
+    ./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key --copy launch amplab-training
 
 This command may take a 30-40 minutes or longer and should produce a bunch of output as it first spins up the nodes for your cluster, sets up <a href="http://amplab.cs.berkeley.edu/bdas">BDAS</a> on them, and performs a large distributed file copy of the wikipedia files we'll use in these training documents from S3 to your instance of HDFS.
 
@@ -100,7 +100,7 @@ Permission denied (publickey).
 __Answer:__ Run the next two commands.
 
     chmod 600 ../ampcamp.pem
-    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch ampcamp
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch amplab-training
 
 
 
@@ -119,7 +119,7 @@ __Answer:__ Add the `-z` flag to your command line arguments to use an availabil
 You can set the value of that flag to "none", as in the following example command, which tells the script to pick a random availability zone.
 It may randomly pick an availability zone that doesn't support this instance size (such as `us-east-1b`), so you may need to try this command a few times to get it to work.
 
-    ./spark-ec2 -i <key_file> -k <name_of_key_pair> -z none --copy launch ampcamp
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> -z none --copy launch amplab-training
 
 </div>
 </div>
@@ -131,7 +131,7 @@ __Question: I got the following error when I ran the above command. Help!__
 <pre class="nocode">
 12/08/21 16:50:45 INFO tools.DistCp: destPath=hdfs://ip-10-42-151-150.ec2.internal:9000/wiki/pagecounts
 java.lang.IllegalArgumentException: Invalid hostname in URI
-s3n://AKIAJIFGXUZ4MDJNYCGQ:COWo3AxVhjyu43Ug5kDvTnO/V3wQloBRIEOYEQgG@ak-ampcamp/wikistats_20090505-07
+s3n://AKIAJIFGXUZ4MDJNYCGQ:COWo3AxVhjyu43Ug5kDvTnO/V3wQloBRIEOYEQgG@ampcamp-data/wikistats_20090505-07
 </pre>
 
 __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the following steps:
@@ -139,7 +139,7 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
 1. Login to the master node by running
 
    ~~~
-   ./spark-ec2 -i <key_file> -k <key_pair> login ampcamp
+   ./spark-ec2 -i <key_file> -k <key_pair> login amplab-training
    ~~~
 
 2. Open the HDFS config file at `/root/ephemeral-hdfs/conf/core-site.xml` and
@@ -161,7 +161,7 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
 5. Logout and run the following command to retry copying data from S3
 
    ~~~
-   ./spark-ec2 -i <key_file> -k <key_pair> copy-data ampcamp
+   ./spark-ec2 -i <key_file> -k <key_pair> copy-data amplab-training
    ~~~
 
 </div>
@@ -184,7 +184,7 @@ However, you should ensure two things:
    For example, to launching a cluster with 8 `m1.large` slaves, use
 
    ~~~
-   ./spark-ec2 -i <key_file> -k <name_of_key_pair> -t m1.large -s 8 --copy launch ampcamp
+   ./spark-ec2 -i <key_file> -k <name_of_key_pair> -t m1.large -s 8 --copy launch amplab-training
    ~~~
 
 2. __Correct java heap setting for Spark:__ Make sure to change the `SPARK_MEM` variable in
@@ -218,7 +218,7 @@ If you launched the cluster with the default script above (no custom instance ty
 Your cluster should be ready to use.
 You can find the master hostname (`<master_node_hostname>` in the instructions below) by running
 
-    ./spark-ec2 -i -k get-master ampcamp
+    ./spark-ec2 -i -k get-master amplab-training
 
 At this point, it would be helpful to open a text file and copy `<master_node_hostname>` there.
 In a later exercise, you will want to have `<master_node_hostname>` ready at hand without having to scroll through your terminal history.
@@ -231,5 +231,5 @@ Contratulations, you should now have a cluster running on EC2 with the all of th
 ## Terminating the cluster (Not yet, only after you do the exercises!)
 __After you are done with your exercises__, you can terminate the cluster by running
 
-    ./spark-ec2 -i <key_file> -k <key_pair> destroy ampcamp
+    ./spark-ec2 -i <key_file> -k <key_pair> destroy amplab-training
 
