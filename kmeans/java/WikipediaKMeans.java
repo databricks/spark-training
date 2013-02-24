@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.*;
 import com.google.common.collect.Lists;
 
-public class WikipediaKMeansJava {
+public class WikipediaKMeans {
   /** Creates a vector object from a string */
   static Vector parseVector(String line) {
     String[] parts = line.split(",");
