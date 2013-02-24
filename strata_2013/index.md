@@ -33,7 +33,7 @@ table td, table th {
 </tr><tr>
   <td>ML (featurization)</td><td>yes</td><td>no</td><td>yes</td>
 </tr><tr>
-  <td>K-Means</td><td>yes</td><td>TODO</td><td>TODO</td>
+  <td>K-Means</td><td>yes</td><td>yes</td><td>yes</td>
 </tr>
 </table>
 </center>
@@ -1178,13 +1178,31 @@ In order to focus on machine learning algorithms within the time available, we h
 [K-Means clustering](http://en.wikipedia.org/wiki/K-means_clustering) is a popular clustering algorithm that can be used to partition your dataset into K clusters. We now look at how we can implement K-Means clustering using Spark to cluster the featurized Wikipedia dataset. 
 
 ## Setup
-Similar to the Spark streaming exercises above, we will be using a standalone project template for this exercise. In your AMI, this has been setup in `/root/kmeans/[scala|java]/`. You should find the following items in the directory.
+Similar to the Spark streaming exercises above, we will be using a standalone project template for this exercise. In your AMI, this has been setup in `/root/kmeans/[scala|java|python]/`. You should find the following items in the directory.
 
+<div class="codetabs">
+<div data-lang="scala">
+<pre>
 - `sbt:` Directory containing the SBT tool
 - `build.sbt:` SBT project file
-- `WikipediaKMeans.[scala|java]:` Main Scala program that you are going to edit, compile and run
+- `WikipediaKMeans.scala:` Main Scala program that you are going to edit, compile and run
+</pre>
+</div>
+<div data-lang="java">
+<pre>
+- `sbt:` Directory containing the SBT tool
+- `build.sbt:` SBT project file
+- `WikipediaKMeans.java:` Main Java program that you are going to edit, compile and run
+</pre>
+</div>
+<div data-lang="python">
+<pre>
+- `WikipediaKMeans.py:` Main Python program that you are going to edit and run
+</pre>
+</div>
+</div>
 
-The main file you are going to edit, compile and run for the exercises is `WikipediaKMeans.[scala|java]`. It should look as follows:
+The main file you are going to edit, compile and run for the exercises is `WikipediaKMeans.[scala|java|py]`. It should look as follows:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1368,7 +1386,7 @@ vim WikipediaKMeans.py
 
 The cluster machines have both vim and emacs installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim or emacs before running it.
 
-For any Spark computation, we will first need to create a Spark context object. We do that by providing the Spark cluster URL, the Spark home directory and the JAR file that will be generated when we compile our program. Finally, we also name our program "WikipediaKMeans" to identify it in Spark's web UI.
+For any Spark computation, we will first need to create a Spark context object. For Scala or Java programs, we do that by providing the Spark cluster URL, the Spark home directory and the JAR file that will be generated when we compile our program. For Python programs, we only need to provide the Spark cluster URL. Finally, we also name our program "WikipediaKMeans" to identify it in Spark's web UI.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1388,7 +1406,9 @@ For any Spark computation, we will first need to create a Spark context object. 
 </div>
 </div>
 
-Next, we use the SparkContext to read in our featurized dataset. The featurization process creates a 24-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. We can count the number of records in our dataset by running `data.count` and print that using `println`.
+Next, we use the SparkContext to read in our featurized dataset. The featurization process creates a 24-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. We then count the number of records in our dataset by running `data.count()` and print the value. 
+
+A quick note about the `Vector` class we will using in this exercise: For Scala and Java programs we will be using the [Vector](http://spark-project.org/docs/latest/api/core/index.html#spark.util.Vector) class provided by Spark. For Python, we will be using [NumPy arrays](http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html).
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1460,11 +1480,18 @@ Number of records 802450
 cd /root/kmeans/python
 /root/spark/pyspark ./WikipediaKMeans.py
 ~~~
+
+This command will run `WikipediaKMeans` on your Spark cluster. You should see output similar to the following on your screen:
+
+~~~
+Number of records 802450
+~~~
+
 </div>
 </div>
 
 ## K-Means algorithm
-- The first step in the K-Means algorithm is to initialize our centers by randomly picking `K` points from our dataset. We use the `takeSample` function in Spark to do this. 
+- The first step in the K-Means algorithm is to initialize our centers by randomly picking `K` points from our dataset. We use the `takeSample` function in Spark to do this.  
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1516,7 +1543,7 @@ cd /root/kmeans/python
 </div>
 </div>
 
-Exercise: Write the `closestPoint` function in `WikipediaKMeans.scala` to return the index of the closest centroid given a point and the set of all centroids. To get you started, we provide the type signature of the function:
+Exercise: Write the `closestPoint` function in `WikipediaKMeans` to return the index of the closest centroid given a point and the set of all centroids. To get you started, we provide the type signature of the function:
 
   <div class="codetabs">
   <div data-lang="scala" markdown="1">
@@ -1638,7 +1665,7 @@ The `map` operation creates a new RDD which contains a tuple for every point. Th
 </div>
 </div>
 
-Exercise: Write the `average` function in `WikipediaKMeans.scala` to sum all the vectors and divide it by the number of vectors present in the input array. Your function should return a new Vector which is the average of the input vectors. You can look at our solution in case you get stuck.
+Exercise: Write the `average` function in `WikipediaKMeans` to sum all the vectors and divide it by the number of vectors present in the input array. Your function should return a new Vector which is the average of the input vectors. You can look at our solution in case you get stuck.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1684,7 +1711,7 @@ Exercise: Write the `average` function in `WikipediaKMeans.scala` to sum all the
 
 </div>
 
-- Finally, lets calculate how different our new centroids are compared to our initial centroids. This will be used to determine if we have converged to the right set of centroids. To do this we create a variable named `tempDist` and use the `squaredDist` function to compute the distance between two vectors. We sum up the distance over `K` centroids and print this value. 
+- Finally, lets calculate how different our new centroids are compared to our initial centroids. This will be used to determine if we have converged to the right set of centroids. To do this we create a variable named `tempDist` that represents the distance between the old centroids and new centroids. In Scala and Java, we use the `squaredDist` function to compute the distance between two vectors. For Python we can use `np.sum`. We sum up the distance over `K` centroids and print this value. 
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1717,7 +1744,7 @@ Exercise: Write the `average` function in `WikipediaKMeans.scala` to sum all the
 </div>
 </div>
 
-You can now save `WikipediaKMeans.scala`, and run it using `sbt/sbt package run` to make sure our program is working fine so far. If everything went right, you should see the output similar to the following. (NOTE: Your output may not exactly match this as we use a random set of initial centers).
+You can now save `WikipediaKMeans`, and [run it](#running-the-program) to make sure our program is working fine so far. If everything went right, you should see the output similar to the following. (NOTE: Your output may not exactly match this as we use a random set of initial centers).
 
 ~~~
 Finished iteration (delta = 0.025900765093161377)
@@ -1793,7 +1820,7 @@ Finished iteration (delta = 0.025900765093161377)
 </div>
 </div>
 
-- Exercise: At the `do while` loop completes, write code to print the titles of 10 articles assigned to each cluster. 
+- Exercise: After the `do while` loop completes, write code to print the titles of 10 articles assigned to each cluster. 
 
 <div class="codetabs">
   <div data-lang="scala" markdown="1">
@@ -1846,7 +1873,7 @@ Finished iteration (delta = 0.025900765093161377)
   </div>
 </div>
 
-- You can save `WikipediaKMeans.scala` and run your program now. If everything goes well your algorithm will converge after some iterations and your final output should have clusters similar to the following output. Recall that our feature vector consisted of the number of times a page was visited in every hour of the day. We can see that pages are clustered together by _language_ indicating that they are accessed during the same hours of the day.
+- You can save `WikipediaKMeans` and [run your program](#running-the-program) now. If everything goes well your algorithm will converge after some iterations and your final output should have clusters similar to the following output. Recall that our feature vector consisted of the number of times a page was visited in every hour of the day. We can see that pages are clustered together by _language_ indicating that they are accessed during the same hours of the day.
 
 <pre class="nocode">
 ja %E6%AD%8C%E8%97%A4%E9%81%94%E5%A4%AB
@@ -1883,7 +1910,7 @@ en Waiting_to_Exhale
 en File:Sonic1991b.jpg
 </pre>
 
-- In case you want to look at the complete solution, here is how `WikipediaKMeans.scala` will look after all the above steps have been completed.
+- In case you want to look at the complete solution, here is how `WikipediaKMeans` will look after all the above steps have been completed.
 
 <div class="codetabs">
   <div data-lang="scala" markdown="1">
