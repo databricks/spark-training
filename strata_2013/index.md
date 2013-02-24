@@ -1314,6 +1314,33 @@ public class WikipediaKMeans {
 }
 ~~~
 </div>
+<div data-lang="python" markdown="1">
+~~~
+import sys
+import numpy as np
+
+from pyspark import SparkContext
+
+def parseVector(line):
+    return np.array([float(x) for x in line.split(',')])
+
+# Add any new functions you need here
+
+if __name__ == "__main__":
+    master = open("/root/spark-ec2/cluster-url").read().strip()
+    masterHostname = open("/root/spark-ec2/masters").read().strip()
+    sc = SparkContext(master, "PythonKMeans")
+    K = 4
+    convergeDist = 1e-5
+
+    lines = sc.textFile(
+	"hdfs://" + masterHostname + ":9000/wikistats_featurized")
+    data = lines.map(
+	lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
+
+    # Your code goes here
+~~~
+</div>
 </div>
 
 Let's first take a look at our template code. Locate the `WikipediaKMeans` class and open it with a text editor.
@@ -1329,6 +1356,12 @@ vim WikipediaKMeans.scala
 <pre>
 cd /root/kmeans/java
 vim WikipediaKMeans.java
+</pre>
+</div>
+<div data-lang="python">
+<pre>
+cd /root/kmeans/python
+vim WikipediaKMeans.py
 </pre>
 </div>
 </div>
@@ -1448,6 +1481,12 @@ cd /root/kmeans/python
     }
 ~~~
 </div>
+<div data-lang="python" markdown="1">
+~~~
+    # NOTE: PySpark does not support takeSample() yet. Use first K points instead.
+    centroids = map(lambda (x, y): y, data.take(K))
+~~~
+</div>
 </div>
 
 - Next, we need to compute the closest centroid for each point and we do this by using the `map` operation in Spark. For every point we will use a function `closestPoint` to compute the closest centroid. 
@@ -1469,6 +1508,12 @@ cd /root/kmeans/python
         );
 ~~~
 </div>
+<div data-lang="python" markdown="1">
+~~~
+    closest = data.map(
+        lambda (x, y) : (closestPoint(y, centroids), y))
+~~~
+</div>
 </div>
 
 Exercise: Write the `closestPoint` function in `WikipediaKMeans.scala` to return the index of the closest centroid given a point and the set of all centroids. To get you started, we provide the type signature of the function:
@@ -1482,6 +1527,11 @@ Exercise: Write the `closestPoint` function in `WikipediaKMeans.scala` to return
   <div data-lang="java" markdown="1">
 ~~~
   static int closestPoint(Vector p, List<Vector> centers) {
+~~~
+  </div>
+  <div data-lang="python" markdown="1">
+~~~
+  def closestPoint(p, centers):
 ~~~
   </div>
   </div>
@@ -1523,6 +1573,21 @@ In case you get stuck, you can use our solution given below.
 ~~~
   </div>
 </div>
+<div data-lang="python" markdown="1">
+  <div class="solution" markdown="1">
+~~~
+  def closestPoint(p, centers):
+      bestIndex = 0
+      closest = float("+inf")
+      for i in range(len(centers)):
+          dist = np.sum((p - centers[i]) ** 2)
+          if dist < closest:
+              closest = dist
+              bestIndex = i
+      return bestIndex
+~~~
+  </div>
+</div>
 </div>
 
 The `map` operation creates a new RDD which contains a tuple for every point. The first element in the tuple is the index of the closest centroid for the point and second element is the `Vector` representing the point. 
@@ -1538,6 +1603,11 @@ The `map` operation creates a new RDD which contains a tuple for every point. Th
 <div data-lang="java" markdown="1">
 ~~~
     JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
+    pointsGroup = closest.groupByKey()
 ~~~
 </div>
 </div>
@@ -1558,6 +1628,12 @@ The `map` operation creates a new RDD which contains a tuple for every point. Th
           return average(ps);
         }
       }).collectAsMap();
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
+    newCentroids = pointsGroup.mapValues(
+        lambda x : average(x)).collectAsMap()
 ~~~
 </div>
 </div>
@@ -1591,6 +1667,21 @@ Exercise: Write the `average` function in `WikipediaKMeans.scala` to sum all the
 ~~~
   </div>
 </div>
+
+<div data-lang="python" markdown="1">
+  <div class="solution" markdown="1">
+~~~
+  def average(points):
+      numVectors = len(points)
+      out = np.array(points[0])
+      for i in range(2, numVectors):
+          out += points[i]
+      out = out / numVectors
+      return out
+~~~
+  </div>
+</div>
+
 </div>
 
 - Finally, lets calculate how different our new centroids are compared to our initial centroids. This will be used to determine if we have converged to the right set of centroids. To do this we create a variable named `tempDist` and use the `squaredDist` function to compute the distance between two vectors. We sum up the distance over `K` centroids and print this value. 
@@ -1616,6 +1707,12 @@ Exercise: Write the `average` function in `WikipediaKMeans.scala` to sum all the
       centroids.set(t.getKey(), t.getValue());
     }
     System.out.println("Finished iteration (delta = " + tempDist + ")");
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
+    tempDist = sum(np.sum((centroids[x] - y) ** 2) for (x, y) in newCentroids.iteritems())
+    print "Finished iteration (delta = " + str(tempDist) + ")"
 ~~~
 </div>
 </div>
@@ -1679,6 +1776,21 @@ Finished iteration (delta = 0.025900765093161377)
     } while (tempDist < convergeDist);
 ~~~
 </div>
+<div data-lang="python" markdown="1">
+~~~
+    while tempDist > convergeDist:
+        closest = data.map(
+            lambda (x, y) : (closestPoint(y, centroids), y))
+        pointsGroup = closest.groupByKey()
+        newCentroids = pointsGroup.mapValues(
+            lambda x : average(x)).collectAsMap()
+
+        tempDist = sum(np.sum((centroids[x] - y) ** 2) for (x, y) in newCentroids.iteritems())
+        for (x, y) in newCentroids.iteritems():
+            centroids[x] = y
+        print "Finished iteration (delta = " + str(tempDist) + ")"
+~~~
+</div>
 </div>
 
 - Exercise: At the `do while` loop completes, write code to print the titles of 10 articles assigned to each cluster. 
@@ -1715,6 +1827,20 @@ Finished iteration (delta = 0.025900765093161377)
       }
       System.out.println();
     }
+~~~
+  </div>
+  </div>
+  <div data-lang="python" markdown="1">
+  <div class="solution" markdown="1">
+~~~
+    print "Clusters with some articles"
+    numArticles = 10
+    for i in range(0, len(centroids)):
+      samples = data.filter(lambda (x,y) : closestPoint(y, centroids) == i).take(numArticles)
+      for (name, features) in samples:
+        print name
+
+      print " "
 ~~~
   </div>
   </div>
