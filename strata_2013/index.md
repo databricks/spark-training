@@ -1360,25 +1360,25 @@ Next, we use the SparkContext to read in our featurized dataset. The featurizati
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-   val data = sc.sequenceFile[String, String](
+   val data = sc.textFile(
        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-           t => (t._1,  parseVector(t._2))).cache()
+           t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
    val count = data.count()
    println("Number of records " + count)
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-  JavaPairRDD<String, Vector> data = sc.sequenceFile(
-      "hdfs://" + masterHostname + ":9000/wikistats_featurized",
-      String.class, String.class).map(
-        new PairFunction<Tuple2<String, String>, String, Vector>() {
-          public Tuple2<String, Vector> call(Tuple2<String, String> in)
+    JavaPairRDD<String, Vector> data = sc.textFile(
+      "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+        new PairFunction<String, String, Vector>() {
+          public Tuple2<String, Vector> call(String in)
           throws Exception {
-            return new Tuple2<String, Vector>(in._1(), parseVector(in._2()));
+            String[] parts = in.split("#");
+            return new Tuple2<String, Vector>(parts[0], parseVector(parts[1]));
           }
         }
-      );
+      ).cache();
     long count = data.count();
     System.out.println("Number of records " + count);
 ~~~
@@ -1814,9 +1814,10 @@ en File:Sonic1991b.jpg
         val K = 10
         val convergeDist = 1e-6
     
-        val data = sc.sequenceFile[String, String](
+        val data = sc.textFile(
             "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-                t => (t._1,  parseVector(t._2))).cache()
+                t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
+
         val count = data.count()
         println("Number of records " + count)
     
@@ -1938,12 +1939,13 @@ public class WikipediaKMeansJava {
     int K = 4;
     double convergeDist = .000001;
 
-    JavaPairRDD<String, Vector> data = sc.sequenceFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized", String.class, String.class).map(
-      new PairFunction<Tuple2<String, String>, String, Vector>() {
-        @Override
-        public Tuple2<String, Vector> call(Tuple2<String, String> in) throws Exception {
-          return new Tuple2<String, Vector>(in._1(), parseVector(in._2()));
+    JavaPairRDD<String, Vector> data = sc.textFile(
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+      new PairFunction<String, String, Vector>() {
+        public Tuple2<String, Vector> call(String in)
+        throws Exception {
+          String[] parts = in.split("#");
+          return new Tuple2<String, Vector>(parts[0], parseVector(parts[1]));
         }
       }
      ).cache();
@@ -1966,6 +1968,7 @@ public class WikipediaKMeansJava {
           }
          }
         );
+
       JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
       Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
         new Function<List<Vector>, Vector>() {
@@ -2045,7 +2048,8 @@ if __name__ == "__main__":
     convergeDist = 1e-4
 
     lines = sc.textFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized_hash_text")
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized")
+
     data = lines.map(
         lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
     count = data.count()
