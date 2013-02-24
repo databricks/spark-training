@@ -42,7 +42,7 @@ In this section, we will walk you through the steps to preprocess and featurize 
 
    -  Next, for every line of data, we collect a tuple with elements described next. The first element is what we will call the "full document title", a concatenation of the project code and page title. The second element is a key-value pair whose key is the hour from the `<date-time>` field and whose value is the number of views that occurred in this hour.
 
-      There are a few new points to note about the code below. First, `data.map` takes each line of data in the RDD data and applies all of the code contained in the curly braces after the `=>` symbol. The last line of code is automatically output. The first line of code within the curly braces splits the line of data into the five data fields we discussed in the Spark exercises above. The second line of code within the braces extracts the hour information from the `<date-time>` string. The final line forms the output tuple.
+      There are a few new points to note about the code below. First, `data.map` takes each line of data in the RDD data and applies the function passed to it. The first step splits the line of data into the five data fields we discussed in the Spark exercises above. The second step extracts the hour information from the `<date-time>` string and we then form the output tuple.
 
       <div class="codetabs">
       <div data-lang="scala" markdown="1">
@@ -63,7 +63,7 @@ In this section, we will walk you through the steps to preprocess and featurize 
 
       Now we want to find the average hourly views for each article (average for the same hour across different days).
 
-      In the code below, we first take our tuples in the RDD `featureMap` and, treating the first elements (i.e., article name) as keys and the second elements (i.e., hoursViewed) as values, group all the values for a single key (i.e., a single article) together using `groupByKey`.  We put the article name in a variable called `article` and the multiple tuples of hours and pageviews associated with the current `article` in a variable called `hoursViews`. The syntax `Array.fill[Int](24)(0)` initializes an integer array of 24 elements with a value of 0 at every element. The <a href="http://www.scala-lang.org/node/111">for comprehension</a> (similar to a for loop) then collects the number of days for which we have a particular hour of data in `counts[hour]` and the total pageviews at hour across all these days in `sums[hour]`. Finally, we use the syntax sums zip counts to make an array of tuples with parallel elements from the sums and counts arrays and use this to calculate the average pageviews at particular hours across days in the data set.
+      In the code below, we first take our tuples in the RDD `featureMap` and, treating the first elements (i.e., article name) as keys and the second elements (i.e., hoursViewed) as values, group all the values for a single key (i.e., a single article) together using `groupByKey`.  We put the article name in a variable called `article` and the multiple tuples of hours and pageviews associated with the current `article` in a variable called `hoursViews`. The for loop then collects the number of days for which we have a particular hour of data in `counts[hour]` and the total pageviews at hour across all these days in `sums[hour]`. Finally, we use the syntax `sums zip counts` to make an array of tuples with parallel elements from the sums and counts arrays and use this to calculate the average pageviews at particular hours across days in the data set.
 
       <div class="codetabs">
       <div data-lang="scala" markdown="1">
@@ -135,7 +135,7 @@ In this section, we will walk you through the steps to preprocess and featurize 
       </div>
       </div>
 
-   -  Cache and save the RDD to a file for later use. To save our features to a file, we first create a string of comma-separated values for each data point.
+   -  Now we can cache and save the RDD to a file for later use. To save our features to a file, we first create a string of comma-separated values for each data point and then save it in HDFS as file named `wikistats_featurized`.
 
       <div class="codetabs">
       <div data-lang="scala" markdown="1">
@@ -155,16 +155,25 @@ In this section, we will walk you through the steps to preprocess and featurize 
 
     - Count the number of records in the preprocessed data.  Recall that we potentially threw away some data when we filtered out records with zero views in a given hour.
 
+      <div class="codetabs">
+      <div data-lang="scala" markdown="1">
       ~~~
       featurizedRDD.count()
       ~~~
+      </div>
+      <div data-lang="python" markdown="1">
+      ~~~
+      featurizedRDD.count()
+      ~~~
+      </div>
+      </div>
 
       <div class="solution" markdown="1">
       Number of records in the preprocessed data: 802450
       </div>
 
 
-   - Print the feature vectors for the Wikipedia articles with project code “en” and the following titles: Computer_science, Machine_learning.  The second line below shows another option for printing arrays in a readable way at the command line.
+   - Print the feature vectors for the Wikipedia articles with project code “en” and the following titles: Computer_science, Machine_learning.
 
      <div class="codetabs">
      <div data-lang="scala" markdown="1">
