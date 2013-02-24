@@ -66,16 +66,16 @@ public class WikipediaKMeans {
     int K = 4;
     double convergeDist = .000001;
 
-    JavaPairRDD<String, Vector> data = sc.sequenceFile(
-      "hdfs://" + masterHostname + ":9000/wikistats_featurized", 
-      String.class, String.class).map(
-        new PairFunction<Tuple2<String, String>, String, Vector>() {
-          public Tuple2<String, Vector> call(Tuple2<String, String> in) 
-          throws Exception {
-            return new Tuple2<String, Vector>(in._1(), parseVector(in._2()));
-          }
+    JavaPairRDD<String, Vector> data = sc.textFile(
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+      new PairFunction<String, String, Vector>() {
+        public Tuple2<String, Vector> call(String in)
+        throws Exception {
+          String[] parts = in.split("#");
+          return new Tuple2<String, Vector>(parts[0], parseVector(parts[1]));
         }
-      ).cache();
+      }
+     ).cache();
 
     // Your code goes here
 

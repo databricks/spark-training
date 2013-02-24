@@ -23,9 +23,10 @@ object WikipediaKMeans {
     val K = 10
     val convergeDist = 1e-6
 
-    val data = sc.sequenceFile[String, String](
+    val data = sc.textFile(
         "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-            t => (t._1,  parseVector(t._2))).cache()
+            t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
+
 
     // Your code goes here
 
