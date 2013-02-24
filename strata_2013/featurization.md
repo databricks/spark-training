@@ -95,7 +95,7 @@ In this section, we will walk you through the steps to preprocess and featurize 
         avgs = np.array(map(lambda (x,y): float(x)/float(y) if y != 0 else 0, zip(sums, counts)))
         return (articles, avgs)
 
-      featureGroup = featureMap.groupByKey().map(lambda (x,y): groupFeatures(x,y))
+      featureGroup = featureMap.groupByKey(16).map(lambda (x,y): groupFeatures(x,y))
       ~~~
       </div>
       </div>
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     data = sc.textFile(sys.argv[2])
     featureMap = data.map(lambda x: x.strip().split(" ")).map(
         lambda x: (x[1]+" "+x[2], (int(x[0][9:11]), int(x[3]))))
-    featureGroup = featureMap.groupByKey().map(
+    featureGroup = featureMap.groupByKey(16).map(
         lambda (x,y): groupFeatures(x,y))
 
     featureGroupFiltered = featureGroup.filter(

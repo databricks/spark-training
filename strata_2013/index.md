@@ -1348,6 +1348,11 @@ For any Spark computation, we will first need to create a Spark context object. 
     JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans", sparkHome, jarFile);
 ~~~
 </div>
+<div data-lang="python" markdown="1">
+~~~
+    sc = SparkContext(master, "PythonKMeans")
+~~~
+</div>
 </div>
 
 Next, we use the SparkContext to read in our featurized dataset. The featurization process creates a 24-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. We can count the number of records in our dataset by running `data.count` and print that using `println`.
@@ -1378,6 +1383,16 @@ Next, we use the SparkContext to read in our featurized dataset. The featurizati
     System.out.println("Number of records " + count);
 ~~~
 </div>
+<div data-lang="python" markdown="1">
+~~~
+    lines = sc.textFile(
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized_hash_text")
+    data = lines.map(
+        lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
+    count = data.count()
+    print "Number of records " + str(count)
+~~~
+</div>
 </div>
 
 ## Running the program
@@ -1405,6 +1420,12 @@ This command will compile the `WikipediaKMeans` class and create a JAR file in `
 
 ~~~
 Number of records 802450
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
+cd /root/kmeans/python
+/root/spark/pyspark ./WikipediaKMeans.py
 ~~~
 </div>
 </div>
@@ -1983,6 +2004,80 @@ public class WikipediaKMeansJava {
     System.exit(0);
   }
 }
+~~~
+  </div>
+  </div>
+  <div data-lang="python" markdown="1">
+  <div class="solution" markdown="1">
+~~~
+import sys
+import logging
+
+import numpy as np
+from pyspark import SparkContext
+
+def parseVector(line):
+    return np.array([float(x) for x in line.split(',')])
+
+def closestPoint(p, centers):
+    bestIndex = 0
+    closest = float("+inf")
+    for i in range(len(centers)):
+        dist = np.sum((p - centers[i]) ** 2)
+        if dist < closest:
+            closest = dist
+            bestIndex = i
+    return bestIndex
+
+def average(points):
+    numVectors = len(points)
+    out = np.array(points[0])
+    for i in range(2, numVectors):
+        out += points[i]
+    out = out / numVectors
+    return out
+
+if __name__ == "__main__":
+    master = open("/root/spark-ec2/cluster-url").read().strip()
+    masterHostname = open("/root/spark-ec2/masters").read().strip()
+    sc = SparkContext(master, "PythonKMeans")
+    K = 10
+    convergeDist = 1e-4
+
+    lines = sc.textFile(
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized_hash_text")
+    data = lines.map(
+        lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
+    count = data.count()
+    print "Number of records " + str(count)
+
+    # TODO: PySpark does not support takeSample(). Use first K points instead.
+    centroids = map(lambda (x, y): y, data.take(K))
+    tempDist = 1.0
+
+    while tempDist > convergeDist:
+        closest = data.map(
+            lambda (x, y) : (closestPoint(y, centroids), y))
+        pointsGroup = closest.groupByKey()
+        newCentroids = pointsGroup.mapValues(
+            lambda x : average(x)).collectAsMap()
+
+        tempDist = sum(np.sum((centroids[x] - y) ** 2) for (x, y) in newCentroids.iteritems())
+        for (x, y) in newCentroids.iteritems():
+            centroids[x] = y
+        print "Finished iteration (delta = " + str(tempDist) + ")"
+        sys.stdout.flush()
+
+
+    print "Clusters with some articles"
+    numArticles = 10
+    for i in range(0, len(centroids)):
+      samples = data.filter(lambda (x,y) : closestPoint(y, centroids) == i).take(numArticles)
+      for (name, features) in samples:
+        print name
+
+      print " "
+
 ~~~
   </div>
   </div>
