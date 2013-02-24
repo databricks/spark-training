@@ -1,4 +1,6 @@
-name := "Tutorial"
+name := "wikipedia-kmeans"
+
+version := "0.0"
 
 scalaVersion := "2.9.2"
 
