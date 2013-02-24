@@ -140,12 +140,12 @@ In this section, we will walk you through the steps to preprocess and featurize 
       <div class="codetabs">
       <div data-lang="scala" markdown="1">
       ~~~
-      featurizedRDD.cache.map(t => t._1 -> t._2.mkString(",")).saveAsSequenceFile("/wikistats_featurized")
+      featurizedRDD.cache.map(t => t._1 + "#" + t._2.mkString(",")).saveAsTextFile("/wikistats_featurized")
       ~~~
       </div>
       <div data-lang="python" markdown="1">
       ~~~
-      featurizedRDD.cache().map(lambda (x,y): (x, ','.join(map(str, y)))).saveAsTextFile("/wikistats_featurized")
+      featurizedRDD.cache().map(lambda (x,y): (x + '#' + ','.join(map(str, y)))).saveAsTextFile("/wikistats_featurized")
       ~~~
       </div>
       </div>
@@ -241,7 +241,7 @@ Finally, if you wish to create a standalone Spark program to perform featurizati
       featurizedRdd.filter{ t => {
         t._1 == "en Computer_science" || t._1 == "en Machine_learning"
       }}.collect.map{t => t._1 -> t._2.mkString("[",",","]")}.foreach(println)
-      featurizedRdd.map{t => t._1 -> t._2.mkString(",")}.saveAsSequenceFile(
+      featurizedRDD.cache.map(t => t._1 + "#" + t._2.mkString(",")).saveAsTextFile(
           "hdfs://"+hostname+":9000/wikistats_featurized")
     }
 
@@ -284,9 +284,9 @@ if __name__ == "__main__":
         lambda (x,y): np.count_nonzero(y) == len(y))
     featurizedRDD = featureGroupFiltered.map(
         lambda (x,y): (x, y/y.sum()))
-    
+
     featurizedRDD.cache().map(
-        lambda (x,y): (x, ','.join(map(str, y)))).saveAsTextFile("/wikistats_featurized")
+        lambda (x,y): (x + '#' + ','.join(map(str, y)))).saveAsTextFile("/wikistats_featurized")
 ~~~
    </div>
   </div>
