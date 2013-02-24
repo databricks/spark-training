@@ -31,7 +31,7 @@ table td, table th {
 </tr><tr>
   <td>Spark Streaming</td><td>yes</td><td>yes</td><td>no</td>
 </tr><tr>
-  <td>ML (featurization)</td><td>yes</td><td>no</td><td>TODO</td>
+  <td>ML (featurization)</td><td>yes</td><td>no</td><td>yes</td>
 </tr><tr>
   <td>K-Means</td><td>yes</td><td>TODO</td><td>TODO</td>
 </tr>

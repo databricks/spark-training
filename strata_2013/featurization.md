@@ -20,6 +20,7 @@ In this section, we will walk you through the steps to preprocess and featurize 
       ~~~
         cd /root/
         /root/spark/pyspark
+        import numpy as np
       ~~~
       </div>
       </div>
@@ -34,7 +35,7 @@ In this section, we will walk you through the steps to preprocess and featurize 
       </div>
       <div data-lang="python" markdown="1">
       ~~~
-        # Python goes here.
+        data = sc.textFile("/wikistats_20090505-07_restricted")
       ~~~
       </div>
       </div>
@@ -55,21 +56,17 @@ In this section, we will walk you through the steps to preprocess and featurize 
       </div>
       <div data-lang="python" markdown="1">
       ~~~
-        # Python goes here.
+      featureMap = data.map(lambda x: x.strip().split(" ")).map(lambda x: (x[1]+" "+x[2], (int(x[0][9:11]), int(x[3]))))
       ~~~
       </div>
       </div>
-
-      To double-check that your code did what you wanted it to do, you can print the first 10 output tuples:
-
-      ~~~
-      featureMap.take(10).foreach(println)
-      ~~~
 
       Now we want to find the average hourly views for each article (average for the same hour across different days).
 
       In the code below, we first take our tuples in the RDD `featureMap` and, treating the first elements (i.e., article name) as keys and the second elements (i.e., hoursViewed) as values, group all the values for a single key (i.e., a single article) together using `groupByKey`.  We put the article name in a variable called `article` and the multiple tuples of hours and pageviews associated with the current `article` in a variable called `hoursViews`. The syntax `Array.fill[Int](24)(0)` initializes an integer array of 24 elements with a value of 0 at every element. The <a href="http://www.scala-lang.org/node/111">for comprehension</a> (similar to a for loop) then collects the number of days for which we have a particular hour of data in `counts[hour]` and the total pageviews at hour across all these days in `sums[hour]`. Finally, we use the syntax sums zip counts to make an array of tuples with parallel elements from the sums and counts arrays and use this to calculate the average pageviews at particular hours across days in the data set.
 
+      <div class="codetabs">
+      <div data-lang="scala" markdown="1">
       ~~~
       val featureGroup = featureMap.groupByKey.map(grouped => {
         val (article, hoursViews) = grouped
@@ -85,50 +82,73 @@ In this section, we will walk you through the steps to preprocess and featurize 
         article -> avgs
       })
       ~~~
-
-      Using `println` directly here as above doesn't let us see what’s inside the arrays. The `mkString` method prints an array by concatenating all of its elements with some specified delimiter.  Note that when we use `_1` to access the first part of a tuple, the indexing is 1 and 2 for the first and second parts, not 0 and 1.
-
+      </div>
+      <div data-lang="python" markdown="1">
       ~~~
-      featureGroup.take(10).foreach(x => println(x._1, x._2.mkString(" ")))
+      def groupFeatures(articles, hoursView):
+        sums = np.zeros(24)
+        counts = np.zeros(24)
+        for (hour, numViews) in hoursView:
+          counts[hour] += 1
+          sums[hour] += numViews
+        avgs = np.zeros(24)
+        avgs = np.array(map(lambda (x,y): float(x)/float(y) if y != 0 else 0, zip(sums, counts)))
+        return (articles, avgs)
+
+      featureGroup = featureMap.groupByKey().map(lambda (x,y): groupFeatures(x,y))
       ~~~
+      </div>
+      </div>
 
    -  Now suppose we’re only interested in those articles that were viewed at least once in each hour during the data collection time.
 
       To do this, we filter to find those articles with an average number of views (the second tuple element in an article tuple) greater than zero in every hour.
 
+      <div class="codetabs">
+      <div data-lang="scala" markdown="1">
       ~~~
       val featureGroupFiltered = featureGroup.filter(t => t._2.forall(_ > 0))
       ~~~
+      </div>
+      <div data-lang="python" markdown="1">
+      ~~~
+      featureGroupFiltered = featureGroup.filter(lambda (x,y): np.count_nonzero(y) == len(y))
+      ~~~
+      </div>
+      </div>
 
    -  So far article popularity is still implicitly in our feature vector (the sum of the average views per hour is the average views per day if the number of days of data is constant across hours).  Since we are interested only in which times are more popular viewing times for each article, we next divide out by this sum.
 
-      If you were following along with the AMP Camp lectures, note that this normalization is different from standardizing each feature separately but accomplishes the goal that all features are on a comparable scale.
-
+      <div class="codetabs">
+      <div data-lang="scala" markdown="1">
       ~~~
       val featurizedRDD = featureGroupFiltered.map(t => {
         val avgsTotal = t._2.sum
         t._1 -> t._2.map(_ /avgsTotal)
       })
       ~~~
-
-      We can use the same command as before to view the latest RDD.
-
+      </div>
+      <div data-lang="python" markdown="1">
       ~~~
-      featurizedRDD.take(10).foreach(x => println(x._1, x._2.mkString(" ")))
+      featurizedRDD = featureGroupFiltered.map(lambda (x,y): (x, y/y.sum()))
       ~~~
+      </div>
+      </div>
 
-   -  Save the RDD within Spark and to a file for later use.
-      Locally, we just cache the RDD.
+   -  Cache and save the RDD to a file for later use. To save our features to a file, we first create a string of comma-separated values for each data point.
 
+      <div class="codetabs">
+      <div data-lang="scala" markdown="1">
       ~~~
-      featurizedRDD.cache
+      featurizedRDD.cache.map(t => t._1 -> t._2.mkString(",")).saveAsSequenceFile("/wikistats_featurized")
       ~~~
-
-      To save to file, we first create a string of comma-separated values for each data point.
-
+      </div>
+      <div data-lang="python" markdown="1">
       ~~~
-      featurizedRDD.map(t => t._1 -> t._2.mkString(",")).saveAsSequenceFile("/wikistats_featurized")
+      featurizedRDD.cache().map(lambda (x,y): (x, ','.join(map(str, y)))).saveAsTextFile("/wikistats_featurized")
       ~~~
+      </div>
+      </div>
 
 ## Exercises
 2. In this exercise, we examine the preprocessed data.
@@ -136,7 +156,7 @@ In this section, we will walk you through the steps to preprocess and featurize 
     - Count the number of records in the preprocessed data.  Recall that we potentially threw away some data when we filtered out records with zero views in a given hour.
 
       ~~~
-      featurizedRDD.count
+      featurizedRDD.count()
       ~~~
 
       <div class="solution" markdown="1">
@@ -146,10 +166,21 @@ In this section, we will walk you through the steps to preprocess and featurize 
 
    - Print the feature vectors for the Wikipedia articles with project code “en” and the following titles: Computer_science, Machine_learning.  The second line below shows another option for printing arrays in a readable way at the command line.
 
+     <div class="codetabs">
+     <div data-lang="scala" markdown="1">
      ~~~
      val featuresCSML = featurizedRDD.filter(t => t._1 == "en Computer_science" || t._1 == "en Machine_learning").collect
      featuresCSML.foreach(x => println(x._1 + "," + x._2.mkString(" ")))
      ~~~
+     </div>
+     <div data-lang="python" markdown="1">
+     ~~~
+     featuresCSML = featurizedRDD.filter(lambda (x,y): x == "en Computer_science" || x == "en Machine_learning").collect() 
+     for (name, features) in featuresCSML:
+       print name + "," + ','.join(map(str, features))
+     ~~~
+     </div>
+     </div>
 
      <div class="solution">
      <textarea rows="12" style="width: 100%" readonly>
@@ -162,6 +193,8 @@ In this section, we will walk you through the steps to preprocess and featurize 
 Finally, if you wish to create a standalone Spark program to perform featurization, you can just copy and paste all of the code from our solution below.
 
 
+<div class="codetabs">
+  <div data-lang="scala" markdown="1">
    <div class="solution" markdown="1">
 
    Place the following code within a Scala `object` and call the `featurization` function from a `main` function:
@@ -204,3 +237,48 @@ Finally, if you wish to create a standalone Spark program to perform featurizati
     }
 
    </div>
+  </div>
+  <div data-lang="python" markdown="1">
+   <div class="solution" markdown="1">
+
+~~~
+import sys
+
+import numpy as np
+from pyspark import SparkContext
+
+def groupFeatures(articles, hoursView):
+  sums = np.zeros(24)
+  counts = np.zeros(24)
+  for (hour, numViews) in hoursView:
+    counts[hour] += 1
+    sums[hour] += numViews
+  avgs = np.zeros(24)
+  avgs = np.array(map(lambda (x,y): float(x)/float(y) if y != 0 else 0, zip(sums, counts)))
+  return (articles, avgs)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print >> sys.stderr, \
+            "Usage: FeaturizeWikipedia <master> <file>"
+        exit(-1)
+    sc = SparkContext(sys.argv[1], "FeaturizeWikipedia")
+
+    data = sc.textFile(sys.argv[2])
+    featureMap = data.map(lambda x: x.strip().split(" ")).map(
+        lambda x: (x[1]+" "+x[2], (int(x[0][9:11]), int(x[3]))))
+    featureGroup = featureMap.groupByKey().map(
+        lambda (x,y): groupFeatures(x,y))
+
+    featureGroupFiltered = featureGroup.filter(
+        lambda (x,y): np.count_nonzero(y) == len(y))
+    featurizedRDD = featureGroupFiltered.map(
+        lambda (x,y): (x, y/y.sum()))
+    
+    featurizedRDD.cache().map(
+        lambda (x,y): (x, ','.join(map(str, y)))).saveAsTextFile("/wikistats_featurized")
+~~~
+   </div>
+  </div>
+</div>
