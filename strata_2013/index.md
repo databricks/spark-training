@@ -1234,7 +1234,7 @@ object WikipediaKMeans {
 
     val data = sc.textFile(
         "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-            t => (t._1,  parseVector(t._2))).cache()
+            t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
 
     // Your code goes here
 
@@ -1315,10 +1315,11 @@ public class WikipediaKMeans {
 
     JavaPairRDD<String, Vector> data = sc.textFile(
       "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-        new PairFunction<Tuple2<String, String>, String, Vector>() {
-          public Tuple2<String, Vector> call(Tuple2<String, String> in)
+        new PairFunction<String, String, Vector>() {
+          public Tuple2<String, Vector> call(String in)
           throws Exception {
-            return new Tuple2<String, Vector>(in._1(), parseVector(in._2()));
+            String[] parts = in.split("#");
+            return new Tuple2<String, Vector>(parts[0], parseVector(parts[1]));
           }
         }
       ).cache();
