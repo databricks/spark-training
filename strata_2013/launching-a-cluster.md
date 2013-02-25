@@ -171,7 +171,7 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
 
 __Question: Can I specify the instances types while creating the cluster?__
 
-__Answer:__ These exercises have been designed to work with at least 4 slave
+__Answer:__ These exercises have been designed to work with at least 5 slave
 machines using instances of type __m1.xlarge__.
 You can also launch the cluster with different [instance types](http://aws.amazon.com/ec2/instance-types/).
 However, you should ensure two things:
@@ -210,7 +210,7 @@ In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
 </div>
 </div>
 
-If you launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 5 m1.xlarge Amazon EC2 nodes.
+If you launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 6 m1.xlarge Amazon EC2 nodes.
 
 ![Running EC2 instances in AWS Management Console](img/aws-runninginstances.png)
 

@@ -104,9 +104,9 @@ For Spark Streaming, we will walk you through writing stand alone Spark programs
 Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark.
 
 ## Cluster Details
-Your cluster contains 5 m1.xlarge Amazon EC2 nodes.
-One of these 5 nodes is the master node, responsible for scheduling tasks as well as maintaining the HDFS metadata (a.k.a. HDFS name node).
-The other 4 are the slave nodes on which tasks are actually executed.
+Your cluster contains 6 m1.xlarge Amazon EC2 nodes.
+One of these 6 nodes is the master node, responsible for scheduling tasks as well as maintaining the HDFS metadata (a.k.a. HDFS name node).
+The other 5 are the slave nodes on which tasks are actually executed.
 You will mainly interact with the master node.
 If you haven't already, let's ssh onto the master node (see instructions above).
 
@@ -132,7 +132,7 @@ Some of the more important ones are listed below:
    - `hive-0.9.0-bin`: Hive installation
    - `mesos`: Mesos installation
 
-You can find a list of your 4 slave nodes in mesos-ec2/slaves:
+You can find a list of your 5 slave nodes in mesos-ec2/slaves:
 
     cat mesos-ec2/slaves
 
@@ -377,7 +377,7 @@ Wait for the prompt to appear.
 
    `http://<master_node_hostname>:8080`
 
-   You should have been given `master_node_hostname` at the beginning of the tutorial, or you might have [launched your own cluster](launching-a-cluster.html) and made of note of it then. You should see the Spark Standalone mode web interface, similar to the following (yours will also probably show four slaves).
+   You should have been given `master_node_hostname` at the beginning of the tutorial, or you might have [launched your own cluster](launching-a-cluster.html) and made of note of it then. You should see the Spark Standalone mode web interface, similar to the following (yours will probably show five slaves).
 
    ![Spark Standalone Web UI](img/standalone-webui640.png)
 
@@ -403,7 +403,7 @@ Wait for the prompt to appear.
    </div>
 
    When you type this command into the Spark shell, Spark defines the RDD, but because of lazy evaluation, no computation is done yet.
-   Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 4 slaves in your cluster.
+   Next time any action is invoked on `enPages`, Spark will cache the data set in memory across the 5 slaves in your cluster.
 
 5. How many records are there for English pages?
 
