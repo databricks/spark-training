@@ -1197,6 +1197,7 @@ Similar to the Spark streaming exercises above, we will be using a standalone pr
 <li><code>sbt</code>: Directory containing the SBT tool</li>
 <li><code>build.sbt</code>: SBT project file</li>
 <li><code>WikipediaKMeans.java</code>: Main Java program that you are going to edit, compile and run</li>
+<li><code>JavaHelpers.java</code>: Some helper functions used by the template.</li>
 </ul>
 </div>
 </div>
@@ -1256,73 +1257,48 @@ object WikipediaKMeans {
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-import org.apache.hadoop.io.Text;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
+import java.io.*;
+import java.util.*;
+import com.google.common.collect.Lists;
 
 import scala.Tuple2;
 import spark.api.java.*;
 import spark.api.java.function.*;
 import spark.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import com.google.common.collect.Lists;
 
 public class WikipediaKMeans {
-  /** Creates a vector object from a string */
-  static Vector parseVector(String line) {
-    String[] parts = line.split(",");
-    double[] dParts = new double[parts.length];
-    for (int i = 0; i < parts.length; i++) {
-      dParts[i] = Double.parseDouble(parts[i]);
+  // Add any new funcitons you need here
+  static int closestPoint(Vector p, List<Vector> centers) {
+    int bestIndex = 0;
+    double closest = Double.POSITIVE_INFINITY;
+    for (int i = 0; i < centers.size(); i++) {
+      double tempDist = p.squaredDist(centers.get(i));
+      if (tempDist < closest) {
+        closest = tempDist;
+        bestIndex = i;
+      }
     }
-    return new Vector(dParts);
+    return bestIndex;
   }
 
-  /** Gets the URL of this spark cluster */
-  static String getSparkUrl() throws Exception {
-    File file = new File("/root/spark-ec2/cluster-url");
-    if (file.exists()) {
-      List<String> lines = readLines(file);
-      return lines.get(0);
-    } else {
-      throw new Exception("Could not find " + file);
+  static Vector average(List<Vector> ps) {
+    int numVectors = ps.size();
+    Vector out = new Vector(ps.get(0).elements());
+    for (int i = 0; i < numVectors; i++) {
+      out.addInPlace(ps.get(i));
     }
+    return out.divide(numVectors);
   }
-
-  /** Gets the hostname of the Spark master */
-  static String getMasterHostname() throws Exception {
-    File file = new File("/root/spark-ec2/masters");
-    if (file.exists()) {
-      List<String> lines = readLines(file);
-      return lines.get(0);
-    } else {
-      throw new Exception("Could not find " + file);
-    }
-  }
-
-  /** Reads the lines of a file into a List */
-  private static List<String> readLines(File file) throws IOException {
-    FileReader fileReader = new FileReader(file);
-    BufferedReader bufferedReader = new BufferedReader(fileReader);
-    List<String> lines = new ArrayList<String>();
-    String line = null;
-    while ((line = bufferedReader.readLine()) != null) {
-      lines.add(line);
-    }
-    bufferedReader.close();
-    return lines;
-  }
-
- // Implement your own functions here
 
   public static void main(String[] args) throws Exception {
     Logger.getLogger("spark").setLevel(Level.WARN);
     String sparkHome = "/root/spark";
     String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
-    String master = getSparkUrl();
-    String masterHostname = getMasterHostname();
+    String master = JavaHelpers.getSparkUrl();
+    String masterHostname = JavaHelpers.getMasterHostname();
     JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
       sparkHome, jarFile);
 
@@ -1330,15 +1306,16 @@ public class WikipediaKMeans {
     double convergeDist = .000001;
 
     JavaPairRDD<String, Vector> data = sc.textFile(
-      "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-        new PairFunction<String, String, Vector>() {
-          public Tuple2<String, Vector> call(String in)
-          throws Exception {
-            String[] parts = in.split("#");
-            return new Tuple2<String, Vector>(parts[0], parseVector(parts[1]));
-          }
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+      new PairFunction<String, String, Vector>() {
+        public Tuple2<String, Vector> call(String in)
+        throws Exception {
+          String[] parts = in.split("#");
+          return new Tuple2<String, Vector>(
+            parts[0], JavaHelpers.parseVector(parts[1]));
         }
-      ).cache();
+      }
+     ).cache();
 
     // Your code goes here
 
@@ -2063,159 +2040,99 @@ We are now set to start implementing the K-means algorithm, so remove or comment
     <div data-lang="java" markdown="1">
     <div class="solution" markdown="1">
 ~~~
-  import org.apache.hadoop.io.Text;
   import org.apache.log4j.Logger;
   import org.apache.log4j.Level;
-  
+  import java.io.*;
+  import java.util.*;
+  import com.google.common.collect.Lists;
+
   import scala.Tuple2;
   import spark.api.java.*;
   import spark.api.java.function.*;
   import spark.util.Vector;
-  
-  import java.io.*;
-  import java.util.*;
-  import com.google.common.collect.Lists;
-  
-  
-  public class WikipediaKMeansJava {
-    static Vector parseVector(String line) {
-      String[] parts = line.split(",");
-      double[] dParts = new double[parts.length];
-      for (int i = 0; i < parts.length; i++) {
-        dParts[i] = Double.parseDouble(parts[i]);
-      }
-      return new Vector(dParts);
-    }
-  
-    static int closestPoint(Vector p, List<Vector> centers) {
-      int bestIndex = 0;
-      double closest = Double.POSITIVE_INFINITY;
-      for (int i = 0; i < centers.size(); i++) {
-        double tempDist = p.squaredDist(centers.get(i));
-        if (tempDist < closest) {
-          closest = tempDist;
-          bestIndex = i;
-        }
-      }
-      return bestIndex;
-    }
-  
-    static Vector average(List<Vector> ps) {
-      int numVectors = ps.size();
-      Vector out = new Vector(ps.get(0).elements());
-      for (int i = 0; i < numVectors; i++) {
-        out.addInPlace(ps.get(i));
-      }
-      return out.divide(numVectors);
-    }
-  
-    static String getSparkUrl() throws Exception {
-      File file = new File("/root/spark-ec2/cluster-url");
-      if (file.exists()) {
-        List<String> lines = readLines(file);
-        return lines.get(0);
-      } else {
-        throw new Exception("Could not find " + file);
-      }
-    }
-  
-    static String getMasterHostname() throws Exception {
-      File file = new File("/root/spark-ec2/masters");
-      if (file.exists()) {
-        List<String> lines = readLines(file);
-        return lines.get(0);
-      } else {
-        throw new Exception("Could not find " + file);
-      }
-    }
-  
-    private static List<String> readLines(File file) throws IOException {
-      FileReader fileReader = new FileReader(file);
-      BufferedReader bufferedReader = new BufferedReader(fileReader);
-      List<String> lines = new ArrayList<String>();
-      String line = null;
-      while ((line = bufferedReader.readLine()) != null) {
-        lines.add(line);
-      }
-      bufferedReader.close();
-      return lines;
-    }
-  
+
+
+  public class WikipediaKMeans {
+
     public static void main(String[] args) throws Exception {
       Logger.getLogger("spark").setLevel(Level.WARN);
       String sparkHome = "/root/spark";
       String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
-      String master = getSparkUrl();
-      String masterHostname = getMasterHostname();
-      JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans", sparkHome, jarFile);
-  
+      String master = JavaHelpers.getSparkUrl();
+      String masterHostname = JavaHelpers.getMasterHostname();
+      JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
+	sparkHome, jarFile);
+
       int K = 4;
       double convergeDist = .000001;
-  
+
       JavaPairRDD<String, Vector> data = sc.textFile(
-          "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-        new PairFunction<String, String, Vector>() {
-          public Tuple2<String, Vector> call(String in)
-          throws Exception {
-            String[] parts = in.split("#");
-            return new Tuple2<String, Vector>(parts[0], parseVector(parts[1]));
-          }
-        }
+	  "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+	new PairFunction<String, String, Vector>() {
+	  public Tuple2<String, Vector> call(String in)
+	  throws Exception {
+	    String[] parts = in.split("#");
+	    return new Tuple2<String, Vector>(
+	      parts[0], JavaHelpers.parseVector(parts[1]));
+	  }
+	}
        ).cache();
+
+
       long count = data.count();
       System.out.println("Number of records " + count);
-  
+    
       List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
       final List<Vector> centroids = Lists.newArrayList();
       for (Tuple2<String, Vector> t: centroidTuples) {
-        centroids.add(t._2());
+	centroids.add(t._2());
       }
-  
+    
       System.out.println("Done selecting initial centroids");
       double tempDist;
       do {
-        JavaPairRDD<Integer, Vector> closest = data.map(
-          new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
-            public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
-              return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
-            }
-           }
-          );
-  
-        JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
-        Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
-          new Function<List<Vector>, Vector>() {
-            public Vector call(List<Vector> ps) throws Exception {
-              return average(ps);
-            }
-          }).collectAsMap();
-        tempDist = 0.0;
-        for (int i = 0; i < K; i++) {
-          tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
-        }
-        for (Map.Entry<Integer, Vector> t: newCentroids.entrySet()) {
-          centroids.set(t.getKey(), t.getValue());
-        }
-        System.out.println("Finished iteration (delta = " + tempDist + ")");
-  
+	JavaPairRDD<Integer, Vector> closest = data.map(
+	  new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
+	    public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
+	      return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
+	    }
+	   }
+	  );
+
+	JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
+	Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
+	  new Function<List<Vector>, Vector>() {
+	    public Vector call(List<Vector> ps) throws Exception {
+	      return average(ps);
+	    }
+	  }).collectAsMap();
+	tempDist = 0.0;
+	for (int i = 0; i < K; i++) {
+	  tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
+	}
+	for (Map.Entry<Integer, Vector> t: newCentroids.entrySet()) {
+	  centroids.set(t.getKey(), t.getValue());
+	}
+	System.out.println("Finished iteration (delta = " + tempDist + ")");
+
       } while (tempDist < convergeDist);
-  
+
       System.out.println("Cluster with some articles:");
       int numArticles = 10;
       for (int i = 0; i < centroids.size(); i++) {
-        final int index = i;
-        List<Tuple2<String, Vector>> samples =
-          data.filter(new Function<Tuple2<String, Vector>, Boolean>() {
-            public Boolean call(Tuple2<String, Vector> in) throws Exception {
-              return closestPoint(in._2(), centroids) == index;
-            }
-          }).take(numArticles);
-        for(Tuple2<String, Vector> sample: samples) {
-          System.out.println(sample._1());
-        }
-        System.out.println();
+      final int index = i;
+	List<Tuple2<String, Vector>> samples =
+	  data.filter(new Function<Tuple2<String, Vector>, Boolean>() {
+	    public Boolean call(Tuple2<String, Vector> in) throws Exception {
+	      return closestPoint(in._2(), centroids) == index;
+	    }
+	  }).take(numArticles);
+	for(Tuple2<String, Vector> sample: samples) {
+	  System.out.println(sample._1());
+	}
+	System.out.println();
       }
-  
+
       System.exit(0);
     }
   }
