@@ -2061,22 +2061,20 @@ We are now set to start implementing the K-means algorithm, so remove or comment
       String master = JavaHelpers.getSparkUrl();
       String masterHostname = JavaHelpers.getMasterHostname();
       JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
-	sparkHome, jarFile);
+        sparkHome, jarFile);
 
       int K = 4;
       double convergeDist = .000001;
 
       JavaPairRDD<String, Vector> data = sc.textFile(
-	  "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
 	new PairFunction<String, String, Vector>() {
-	  public Tuple2<String, Vector> call(String in)
-	  throws Exception {
-	    String[] parts = in.split("#");
-	    return new Tuple2<String, Vector>(
-	      parts[0], JavaHelpers.parseVector(parts[1]));
-	  }
-	}
-       ).cache();
+          public Tuple2<String, Vector> call(String in) throws Exception {
+            String[] parts = in.split("#");
+            return new Tuple2<String, Vector>(
+             parts[0], JavaHelpers.parseVector(parts[1]));
+          }
+        }).cache();
 
 
       long count = data.count();
@@ -2085,54 +2083,52 @@ We are now set to start implementing the K-means algorithm, so remove or comment
       List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
       final List<Vector> centroids = Lists.newArrayList();
       for (Tuple2<String, Vector> t: centroidTuples) {
-	centroids.add(t._2());
+        centroids.add(t._2());
       }
     
       System.out.println("Done selecting initial centroids");
       double tempDist;
-      do {
-	JavaPairRDD<Integer, Vector> closest = data.map(
-	  new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
-	    public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
-	      return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
-	    }
-	   }
-	  );
+      do { 
+        JavaPairRDD<Integer, Vector> closest = data.map(
+          new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
+            public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
+              return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
+            }
+          }
+        );
 
-	JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
-	Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
-	  new Function<List<Vector>, Vector>() {
-	    public Vector call(List<Vector> ps) throws Exception {
-	      return average(ps);
-	    }
-	  }).collectAsMap();
-	tempDist = 0.0;
-	for (int i = 0; i < K; i++) {
-	  tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
-	}
-	for (Map.Entry<Integer, Vector> t: newCentroids.entrySet()) {
-	  centroids.set(t.getKey(), t.getValue());
-	}
-	System.out.println("Finished iteration (delta = " + tempDist + ")");
+        JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
+        Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
+          new Function<List<Vector>, Vector>() {
+           public Vector call(List<Vector> ps) throws Exception {
+             return average(ps);
+          }
+        }).collectAsMap();
+        tempDist = 0.0;
+        for (int i = 0; i < K; i++) {
+          tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
+        }
+        for (Map.Entry<Integer, Vector> t: newCentroids.entrySet()) {
+          centroids.set(t.getKey(), t.getValue());
+        }
+        System.out.println("Finished iteration (delta = " + tempDist + ")");
 
       } while (tempDist < convergeDist);
 
       System.out.println("Cluster with some articles:");
       int numArticles = 10;
       for (int i = 0; i < centroids.size(); i++) {
-      final int index = i;
-	List<Tuple2<String, Vector>> samples =
-	  data.filter(new Function<Tuple2<String, Vector>, Boolean>() {
-	    public Boolean call(Tuple2<String, Vector> in) throws Exception {
-	      return closestPoint(in._2(), centroids) == index;
-	    }
-	  }).take(numArticles);
-	for(Tuple2<String, Vector> sample: samples) {
-	  System.out.println(sample._1());
-	}
-	System.out.println();
+        final int index = i;
+        List<Tuple2<String, Vector>> samples =
+        data.filter(new Function<Tuple2<String, Vector>, Boolean>() {
+          public Boolean call(Tuple2<String, Vector> in) throws Exception {
+          return closestPoint(in._2(), centroids) == index;
+        }}).take(numArticles);
+        for(Tuple2<String, Vector> sample: samples) {
+         System.out.println(sample._1());
+        }
+        System.out.println();
       }
-
       System.exit(0);
     }
   }
