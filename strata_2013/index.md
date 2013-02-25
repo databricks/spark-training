@@ -1218,6 +1218,9 @@ import spark.SparkContext
 import spark.SparkContext._
 import spark.util.Vector
 
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
+
 import scala.util.Random
 import scala.io.Source
 
@@ -1229,6 +1232,7 @@ object WikipediaKMeans {
   // Add any new functions you need here
 
   def main(args: Array[String]) {
+    Logger.getLogger("spark").setLevel(Level.WARN)
     val sparkHome = "/root/spark"
     val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
     val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
@@ -1245,7 +1249,6 @@ object WikipediaKMeans {
 
     // Your code goes here
 
-    sc.stop()
     System.exit(0)
   }
 }
@@ -1253,10 +1256,15 @@ object WikipediaKMeans {
 </div>
 <div data-lang="java" markdown="1">
 ~~~
+import org.apache.hadoop.io.Text;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
 import scala.Tuple2;
 import spark.api.java.*;
 import spark.api.java.function.*;
 import spark.util.Vector;
+
 import java.io.*;
 import java.util.*;
 import com.google.common.collect.Lists;
@@ -1310,6 +1318,7 @@ public class WikipediaKMeans {
  // Implement your own functions here
 
   public static void main(String[] args) throws Exception {
+    Logger.getLogger("spark").setLevel(Level.WARN);
     String sparkHome = "/root/spark";
     String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
     String master = getSparkUrl();
@@ -1333,7 +1342,6 @@ public class WikipediaKMeans {
 
     // Your code goes here
 
-    sc.stop();
     System.exit(0);
   }
 }
@@ -1341,10 +1349,19 @@ public class WikipediaKMeans {
 </div>
 <div data-lang="python" markdown="1">
 ~~~
+import os
 import sys
 import numpy as np
 
 from pyspark import SparkContext
+
+def setClassPath():
+    oldClassPath = ''
+    if 'SPARK_CLASSPATH' in os.environ:
+        oldClassPath = os.environ['SPARK_CLASSPATH']
+    cwd = os.path.dirname(os.path.realpath(__file__))
+    os.environ['SPARK_CLASSPATH'] = cwd + ":" + oldClassPath
+
 
 def parseVector(line):
     return np.array([float(x) for x in line.split(',')])
@@ -1352,6 +1369,7 @@ def parseVector(line):
 # Add any new functions you need here
 
 if __name__ == "__main__":
+    setClassPath()
     master = open("/root/spark-ec2/cluster-url").read().strip()
     masterHostname = open("/root/spark-ec2/masters").read().strip()
     sc = SparkContext(master, "PythonKMeans")
@@ -2038,7 +2056,6 @@ en File:Sonic1991b.jpg
           println()
         }
     
-        sc.stop()
         System.exit(0)
       }
     }
@@ -2048,13 +2065,19 @@ en File:Sonic1991b.jpg
   <div class="solution" markdown="1">
 
 ~~~
-import com.google.common.collect.Lists;
+import org.apache.hadoop.io.Text;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
 import scala.Tuple2;
 import spark.api.java.*;
 import spark.api.java.function.*;
 import spark.util.Vector;
+
 import java.io.*;
 import java.util.*;
+import com.google.common.collect.Lists;
+
 
 public class WikipediaKMeansJava {
   static Vector parseVector(String line) {
@@ -2121,6 +2144,7 @@ public class WikipediaKMeansJava {
   }
 
   public static void main(String[] args) throws Exception {
+    Logger.getLogger("spark").setLevel(Level.WARN);
     String sparkHome = "/root/spark";
     String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
     String master = getSparkUrl();
@@ -2194,7 +2218,6 @@ public class WikipediaKMeansJava {
       System.out.println();
     }
 
-    sc.stop();
     System.exit(0);
   }
 }
@@ -2204,11 +2227,18 @@ public class WikipediaKMeansJava {
   <div data-lang="python" markdown="1">
   <div class="solution" markdown="1">
 ~~~
+import os
 import sys
-import logging
 
 import numpy as np
 from pyspark import SparkContext
+
+def setClassPath():
+    oldClassPath = ''
+    if 'SPARK_CLASSPATH' in os.environ:
+        oldClassPath = os.environ['SPARK_CLASSPATH']
+    cwd = os.path.dirname(os.path.realpath(__file__))
+    os.environ['SPARK_CLASSPATH'] = cwd + ":" + oldClassPath
 
 def parseVector(line):
     return np.array([float(x) for x in line.split(',')])
@@ -2232,6 +2262,7 @@ def average(points):
     return out
 
 if __name__ == "__main__":
+    setClassPath()
     master = open("/root/spark-ec2/cluster-url").read().strip()
     masterHostname = open("/root/spark-ec2/masters").read().strip()
     sc = SparkContext(master, "PythonKMeans")

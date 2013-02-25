@@ -2,6 +2,9 @@ import spark.SparkContext
 import spark.SparkContext._
 import spark.util.Vector
 
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
+
 import scala.util.Random
 import scala.io.Source
 
@@ -13,6 +16,7 @@ object WikipediaKMeans {
   // Add any new functions you need here
   
   def main(args: Array[String]) {
+    Logger.getLogger("spark").setLevel(Level.WARN)
     val sparkHome = "/root/spark"
     val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
     val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
@@ -30,7 +34,6 @@ object WikipediaKMeans {
 
     // Your code goes here
 
-    sc.stop()
     System.exit(0)
   }
 }

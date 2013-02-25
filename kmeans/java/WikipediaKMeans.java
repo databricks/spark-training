@@ -1,8 +1,12 @@
 import org.apache.hadoop.io.Text;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
 import scala.Tuple2;
 import spark.api.java.*;
 import spark.api.java.function.*;
 import spark.util.Vector;
+
 import java.io.*;
 import java.util.*;
 import com.google.common.collect.Lists;
@@ -56,6 +60,7 @@ public class WikipediaKMeans {
   // Implement your own functions here
 
   public static void main(String[] args) throws Exception {
+    Logger.getLogger("spark").setLevel(Level.WARN);
     String sparkHome = "/root/spark";
     String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
     String master = getSparkUrl();
@@ -79,7 +84,6 @@ public class WikipediaKMeans {
 
     // Your code goes here
 
-    sc.stop();
     System.exit(0);
   }
 }
