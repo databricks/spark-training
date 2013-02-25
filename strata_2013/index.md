@@ -10,7 +10,7 @@ In addition to the amazing O'Reilly Strata folks, this event has been organized 
 This tutorial consists of a series of exercises that will have you working directly with components of our open-source software stack, called the Berkeley Data Analytics Stack (BDAS), that have been released and are ready to use.
 These components include [Spark](http://spark-project.org), Spark Streaming, and [Shark](http://shark.cs.berkeley.edu).
 We have already spun up a 4-node EC2 Cluster for you with the software preinstalled, which you will be using to load and analyze a real Wikipedia dataset.
-We will begin with simple interactive analysis techniques at the Spark and Shark shells, then progress to writing standalone programs with Spark Streaming, and finish by imlementing some more advanced machine learning algorithms to incorporate into your analysis.
+We will begin with simple interactive analysis techniques at the Spark and Shark shells, then progress to writing standalone programs with Spark Streaming, and finish by implementing some more advanced machine learning algorithms to incorporate into your analysis.
 
 ## Tutorial Developer Prerequisites
 This tutorial is meant to be hands-on introduction to Spark, Spark Streaming, and Shark. While Shark supports a simplified version of SQL, Spark and Spark Streaming both support multiple languages. For the sections about Spark and Spark Streaming, the tutorial allows you to choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this tutorial supports for each of Spark, Spark Streaming, and Shark.
@@ -236,7 +236,7 @@ However, reading through that whole tutorial and trying the examples at the cons
        res: Int = 5193
    </div>
 
-1. <i>**BONUS QUESTION.** This is a more challenging task and may require 10 minutes or more to complete, so you should consider skipping it depending on your timing so far.</i> Do a wordcount of a textfile. More specifically, create and populate a Map with words as keys and counts of the number of occurances of the word as values.
+1. <i>**BONUS QUESTION.** This is a more challenging task and may require 10 minutes or more to complete, so you should consider skipping it depending on your timing so far.</i> Do a wordcount of a textfile. More specifically, create and populate a Map with words as keys and counts of the number of occurrences of the word as values.
 
    You can load a text file as an array of lines as shown below:
 
@@ -245,7 +245,7 @@ However, reading through that whole tutorial and trying the examples at the cons
    val lines = Source.fromFile("/root/mesos/README").getLines.toArray
    ~~~
 
-   Then, instanciate a `collection.mutable.HashMap[String,Int]` and use functional methods to populate it with wordcounts. Hint, in our solution, which is inspired by <a href="http://bit.ly/6mhGvo" target="_blank">this solution online</a>, we use <a href="http://richard.dallaway.com/in-praise-of-flatmap" target="_blank">`flatMap`</a> and then `map`.
+   Then, instantiate a `collection.mutable.HashMap[String,Int]` and use functional methods to populate it with wordcounts. Hint, in our solution, which is inspired by <a href="http://bit.ly/6mhGvo" target="_blank">this solution online</a>, we use <a href="http://richard.dallaway.com/in-praise-of-flatmap" target="_blank">`flatMap`</a> and then `map`.
 
    <div class="solution" markdown="1">
        scala> import scala.io.Source
