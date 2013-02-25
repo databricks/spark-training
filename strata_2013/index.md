@@ -1313,9 +1313,8 @@ public class WikipediaKMeans {
     int K = 4;
     double convergeDist = .000001;
 
-    JavaPairRDD<String, Vector> data = sc.sequenceFile(
-      "hdfs://" + masterHostname + ":9000/wikistats_featurized",
-      String.class, String.class).map(
+    JavaPairRDD<String, Vector> data = sc.textFile(
+      "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
         new PairFunction<Tuple2<String, String>, String, Vector>() {
           public Tuple2<String, Vector> call(Tuple2<String, String> in)
           throws Exception {
