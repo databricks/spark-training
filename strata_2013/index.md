@@ -1270,28 +1270,7 @@ import spark.util.Vector;
 
 
 public class WikipediaKMeans {
-  // Add any new funcitons you need here
-  static int closestPoint(Vector p, List<Vector> centers) {
-    int bestIndex = 0;
-    double closest = Double.POSITIVE_INFINITY;
-    for (int i = 0; i < centers.size(); i++) {
-      double tempDist = p.squaredDist(centers.get(i));
-      if (tempDist < closest) {
-        closest = tempDist;
-        bestIndex = i;
-      }
-    }
-    return bestIndex;
-  }
-
-  static Vector average(List<Vector> ps) {
-    int numVectors = ps.size();
-    Vector out = new Vector(ps.get(0).elements());
-    for (int i = 0; i < numVectors; i++) {
-      out.addInPlace(ps.get(i));
-    }
-    return out.divide(numVectors);
-  }
+  // Add any new functions you need here
 
   public static void main(String[] args) throws Exception {
     Logger.getLogger("spark").setLevel(Level.WARN);
@@ -2053,6 +2032,27 @@ We are now set to start implementing the K-means algorithm, so remove or comment
 
 
   public class WikipediaKMeans {
+    static int closestPoint(Vector p, List<Vector> centers) {
+      int bestIndex = 0;
+      double closest = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < centers.size(); i++) {
+        double tempDist = p.squaredDist(centers.get(i));
+        if (tempDist < closest) {
+          closest = tempDist;
+          bestIndex = i;
+        }
+      }
+      return bestIndex;
+    }
+
+    static Vector average(List<Vector> ps) {
+      int numVectors = ps.size();
+      Vector out = new Vector(ps.get(0).elements());
+      for (int i = 0; i < numVectors; i++) {
+        out.addInPlace(ps.get(i));
+      }
+      return out.divide(numVectors);
+    }
 
     public static void main(String[] args) throws Exception {
       Logger.getLogger("spark").setLevel(Level.WARN);
