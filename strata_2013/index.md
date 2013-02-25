@@ -1809,7 +1809,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
           }
           System.out.println("Finished iteration (delta = " + tempDist + ")");
     
-        } while (tempDist < convergeDist);
+        } while (tempDist > convergeDist);
 ~~~
   </div>
   <div data-lang="python" markdown="1">
@@ -2113,7 +2113,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
         }
         System.out.println("Finished iteration (delta = " + tempDist + ")");
 
-      } while (tempDist < convergeDist);
+      } while (tempDist > convergeDist);
 
       System.out.println("Cluster with some articles:");
       int numArticles = 10;
