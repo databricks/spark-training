@@ -1163,42 +1163,49 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
 # Machine Learning
 
-In this section, we will look at how you can use Spark to implement machine learning algorithms. To allow you to complete the machine learning exercises within the relatively short time available, using only the relatively small number of machines available, we will now work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, we have restricted the dataset to only include a subset of the full set of articles. This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
+In this section, we will use Spark to implement machine learning algorithms. To complete the machine learning exercises within the time available using our relatively small EC2 clusters, in this section we will work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, this dataset only includes a subset of all Wikipedia articles. This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
 
 ## Command Line Preprocessing and Featurization
 
-To apply most machine learning algorithms, we first must preprocess and featurize the data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of a unique Wikipedia article identifier (i.e., a unique combination of Wikipedia project code and page title) and associated traffic statistics.  We will generate 24-dimensional feature vectors, with each feature vector entry summarizing the page view counts for the corresponding hour of the day.
+To apply most machine learning algorithms, we must first preprocess and featurize the data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of a unique Wikipedia article identifier (i.e., a unique combination of Wikipedia project code and page title) and associated traffic statistics.  We will generate 24-dimensional feature vectors, with each feature vector entry summarizing the page view counts for the corresponding hour of the day.
 
 Recall that each record in our dataset consists of a string with the format "`<date_time> <project_code> <page_title> <num_hits> <page_size>`".  The format of the date-time field is YYYYMMDD-HHmmSS (where 'M' denotes month, and 'm' denotes minute).
 
-In order to focus on machine learning algorithms within the time available, we have pre-processed the data and created the featurized dataset that we will use to implement K-means clustering. In case you are are interested in doing featurization on your own, you can follow [these instructions](featurization.html).
+Given our time constraints, in order to focus on the machine learning algorithms themselves, we have pre-processed the data to create the featurized dataset that we will use to implement K-means clustering. If you are interested in doing featurization on your own, you can follow [these instructions](featurization.html).
 
 ## Clustering
 
-[K-Means clustering](http://en.wikipedia.org/wiki/K-means_clustering) is a popular clustering algorithm that can be used to partition your dataset into K clusters. We now look at how we can implement K-Means clustering using Spark to cluster the featurized Wikipedia dataset. 
+[K-Means clustering](http://en.wikipedia.org/wiki/K-means_clustering) is a popular clustering algorithm that can be used to partition your dataset into K clusters. We now look at how we can implement K-Means clustering using Spark to cluster the featurized Wikipedia dataset.
 
 ## Setup
 Similar to the Spark streaming exercises above, we will be using a standalone project template for this exercise. In your AMI, this has been setup in `/root/kmeans/[scala|java|python]/`. You should find the following items in the directory.
 
 <div class="codetabs">
 <div data-lang="scala">
-<pre>
-- `sbt:` Directory containing the SBT tool
-- `build.sbt:` SBT project file
-- `WikipediaKMeans.scala:` Main Scala program that you are going to edit, compile and run
-</pre>
+
+<div class="prettyprint" style="margin-bottom:10px">
+<ul style="margin-bottom:0px">
+<li><code>sbt</code>: Directory containing the SBT tool</li>
+<li><code>build.sbt</code>: SBT project file</li>
+<li><code>WikipediaKMeans.scala</code>: Main Scala program that you are going to edit, compile and run</li>
+</ul>
+</div>
 </div>
 <div data-lang="java">
-<pre>
-- `sbt:` Directory containing the SBT tool
-- `build.sbt:` SBT project file
-- `WikipediaKMeans.java:` Main Java program that you are going to edit, compile and run
-</pre>
+<div class="prettyprint" style="margin-bottom:10px">
+<ul style="margin-bottom:0px">
+<li><code>sbt</code>: Directory containing the SBT tool</li>
+<li><code>build.sbt</code>: SBT project file</li>
+<li><code>WikipediaKMeans.java</code>: Main Java program that you are going to edit, compile and run</li>
+</ul>
+</div>
 </div>
 <div data-lang="python">
-<pre>
-- `WikipediaKMeans.py:` Main Python program that you are going to edit and run
-</pre>
+<div class="prettyprint" style="margin-bottom:10px">
+<ul style="margin-bottom:0px">
+<li><code>WikipediaKMeans.py</code>: Main Python program that you are going to edit and run</li>
+</ul>
+</div>
 </div>
 </div>
 

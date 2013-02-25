@@ -54,7 +54,7 @@ _This can take around 15-20 mins._
     cd training-scripts
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy launch amplab-training
 
-Where `<name_of_key_pair>` is the name of your EC2 key pair (that you gave it when you created it), `<key_file>`is the private key file for your key pair.
+Where `<name_of_key_pair>` is the name of your EC2 key pair (that you gave it when you created it), `<key_file>` is the private key file for your key pair.
 
 For example, if you created a key pair named `ampcamp-key` and the private key (`<key_file>`) is in your home directory and is called `ampcamp.pem`, then the command would be
 
@@ -226,7 +226,7 @@ In a later exercise, you will want to have `<master_node_hostname>` ready at han
 ## Go through the Tutorial
 Contratulations, you should now have a cluster running on EC2 with the all of the BDAS components you need to perform the Big Data Analytics tutorial.
 
-[Go start the tutorial](index.html)!
+[Go start the tutorial!](index.html)
 
 ## Terminating the cluster (Not yet, only after you do the exercises!)
 __After you are done with your exercises__, you can terminate the cluster by running
