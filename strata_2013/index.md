@@ -1673,180 +1673,114 @@ We are now set to start implementing the K-means algorithm, so remove or comment
     </div>
     </div>
 
-The `map` operation creates a new RDD which contains a tuple for every point. The first element in the tuple is the index of the closest centroid for the point and second element is the `Vector` representing the point. 
+    The `map` operation creates a new RDD which contains a tuple for every point. The first element in the tuple is the index of the closest centroid for the point and second element is the `Vector` representing the point. 
 
 - Now that we have the closest centroid for each point, we can cluster our points by the centroid they belong to. To do this, we use a `groupByKey` operation as shown below. The `groupByKey` operator creates a new `RDD[(Int, Array[Vector])]` where the key is the index of the centroid and the values are all the points which belong to its cluster.
 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
 ~~~
-    var pointsGroup = closest.groupByKey()
+      var pointsGroup = closest.groupByKey()
 ~~~
-</div>
-<div data-lang="java" markdown="1">
+    </div>
+    <div data-lang="java" markdown="1">
 ~~~
-    JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
+      JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
 ~~~
-</div>
-<div data-lang="python" markdown="1">
+    </div>
+    <div data-lang="python" markdown="1">
 ~~~
-    pointsGroup = closest.groupByKey()
+      pointsGroup = closest.groupByKey()
 ~~~
-</div>
-</div>
+    </div>
+    </div>
 
 - We can now calculate our new centroids by computing the mean of the points that belong to a cluster. We do this using `mapValues` which allows us to apply a function on all the values for a particular key. We also use a function `average` to compute the average of an array of vectors.
 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
 ~~~
-    var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
-~~~
-</div>
-<div data-lang="java" markdown="1">
-~~~
-    Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
-      new Function<List<Vector>, Vector>() {
-        public Vector call(List<Vector> ps) throws Exception {
-          return average(ps);
-        }
-      }).collectAsMap();
-~~~
-</div>
-<div data-lang="python" markdown="1">
-~~~
-    newCentroids = pointsGroup.mapValues(
-        lambda x : average(x)).collectAsMap()
-~~~
-</div>
-</div>
-
-**Exercise:** Write the `average` function in `WikipediaKMeans` to sum all the vectors and divide it by the number of vectors present in the input array. Your function should return a new Vector which is the average of the input vectors. You can look at our solution in case you get stuck.
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-  <div class="solution" markdown="1">
-    def average(ps: Seq[Vector]) : Vector = {
-      val numVectors = ps.size
-      var out = new Vector(ps(0).elements)
-      for (i <- 1 until numVectors) {
-        out += ps(i)
-      }
-      out / numVectors
-    }
-  </div>
-</div>
-<div data-lang="java" markdown="1">
-  <div class="solution" markdown="1">
-~~~
-  static Vector average(List<Vector> ps) {
-    int numVectors = ps.size();
-    Vector out = new Vector(ps.get(0).elements());
-    for (int i = 0; i < numVectors; i++) {
-      out.addInPlace(ps.get(i));
-    }
-    return out.divide(numVectors);
-  }
-~~~
-  </div>
-</div>
-
-<div data-lang="python" markdown="1">
-  <div class="solution" markdown="1">
-~~~
-  def average(points):
-      numVectors = len(points)
-      out = np.array(points[0])
-      for i in range(2, numVectors):
-          out += points[i]
-      out = out / numVectors
-      return out
-~~~
-  </div>
-</div>
-
-</div>
-
-- Finally, lets calculate how different our new centroids are compared to our initial centroids. This will be used to determine if we have converged to the right set of centroids. To do this we create a variable named `tempDist` that represents the distance between the old centroids and new centroids. In Scala and Java, we use the `squaredDist` function to compute the distance between two vectors. For Python we can use `np.sum`. We sum up the distance over `K` centroids and print this value. 
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-    var tempDist = 0.0
-    for (i <- 0 until K) {
-      tempDist += centroids(i).squaredDist(newCentroids(i))
-    }
-    println("Finished iteration (delta = " + tempDist + ")")
-~~~
-</div>
-
-<div data-lang="java" markdown="1">
-~~~
-    double tempDist = 0.0;
-    for (int i = 0; i < K; i++) {
-      tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
-    }
-    for (Map.Entry<Integer, Vector> t: newCentroids.entrySet()) {
-      centroids.set(t.getKey(), t.getValue());
-    }
-    System.out.println("Finished iteration (delta = " + tempDist + ")");
-~~~
-</div>
-<div data-lang="python" markdown="1">
-~~~
-    tempDist = sum(np.sum((centroids[x] - y) ** 2) for (x, y) in newCentroids.iteritems())
-    print "Finished iteration (delta = " + str(tempDist) + ")"
-~~~
-</div>
-</div>
-
-You can now save `WikipediaKMeans`, and [run it](#running-the-program) to make sure our program is working fine so far. If everything went right, you should see the output similar to the following. (NOTE: Your output may not exactly match this as we use a random set of initial centers).
-
-~~~
-Finished iteration (delta = 0.025900765093161377)
-~~~
-
-- The above steps represent one iteration of the K-Means algorithm. We will need to repeat these steps until the distance between newly computed centers and the ones from the previous iteration become lesser than some small constant. (`convergeDist` in our program). To do this we put our steps inside a `do while` loop and check if `tempDist` is lower than the convergence constant. Putting this together with the previous steps, our code will look like: 
- 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-    do {
-      var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
-      var pointsGroup = closest.groupByKey()
       var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
-
-      tempDist = 0.0
-      for (i <- 0 until K) {
-        tempDist += centroids(i).squaredDist(newCentroids(i))
-      }
-
-      // Assign newCentroids to centroids
-      for (newP <- newCentroids) {
-        centroids(newP._1) = newP._2
-      }
-      iter += 1
-      println("Finished iteration " + iter + " (delta = " + tempDist + ")")
-    } while (tempDist > convergeDist)
 ~~~
-</div>
-<div data-lang="java" markdown="1">
+    </div>
+    <div data-lang="java" markdown="1">
 ~~~
-  do {
-      JavaPairRDD<Integer, Vector> closest = data.map(
-        new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
-          public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
-            return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
-          }
-         }
-        );
-      JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
       Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
         new Function<List<Vector>, Vector>() {
           public Vector call(List<Vector> ps) throws Exception {
             return average(ps);
           }
         }).collectAsMap();
+~~~
+    </div>
+    <div data-lang="python" markdown="1">
+~~~
+      newCentroids = pointsGroup.mapValues(
+          lambda x : average(x)).collectAsMap()
+~~~
+    </div>
+    </div>
+
+  **Exercise:** Write the `average` function in `WikipediaKMeans` to sum all the vectors and divide it by the number of vectors present in the input array. Your function should return a new Vector which is the average of the input vectors. You can look at our solution in case you get stuck.
+
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
+    <div class="solution" markdown="1">
+~~~
+      def average(ps: Seq[Vector]) : Vector = {
+        val numVectors = ps.size
+        var out = new Vector(ps(0).elements)
+        for (i <- 1 until numVectors) {
+          out += ps(i)
+        }
+        out / numVectors
+      }
+~~~
+    </div>
+    </div>
+    <div data-lang="java" markdown="1">
+    <div class="solution" markdown="1">
+~~~
+      static Vector average(List<Vector> ps) {
+        int numVectors = ps.size();
+        Vector out = new Vector(ps.get(0).elements());
+        for (int i = 0; i < numVectors; i++) {
+          out.addInPlace(ps.get(i));
+        }
+        return out.divide(numVectors);
+      }
+~~~
+    </div>
+    </div>
+    <div data-lang="python" markdown="1">
+    <div class="solution" markdown="1">
+~~~
+      def average(points):
+          numVectors = len(points)
+          out = np.array(points[0])
+          for i in range(2, numVectors):
+              out += points[i]
+          out = out / numVectors
+          return out
+~~~
+    </div>
+    </div>
+    </div>
+
+- Finally, lets calculate how different our new centroids are compared to our initial centroids. This will be used to determine if we have converged to the right set of centroids. To do this we create a variable named `tempDist` that represents the distance between the old centroids and new centroids. In Scala and Java, we use the `squaredDist` function to compute the distance between two vectors. For Python we can use `np.sum`. We sum up the distance over `K` centroids and print this value. 
+
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
+~~~
+      var tempDist = 0.0
+      for (i <- 0 until K) {
+        tempDist += centroids(i).squaredDist(newCentroids(i))
+      }
+      println("Finished iteration (delta = " + tempDist + ")")
+~~~
+    </div>
+    <div data-lang="java" markdown="1">
+~~~
       double tempDist = 0.0;
       for (int i = 0; i < K; i++) {
         tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
@@ -1855,11 +1789,74 @@ Finished iteration (delta = 0.025900765093161377)
         centroids.set(t.getKey(), t.getValue());
       }
       System.out.println("Finished iteration (delta = " + tempDist + ")");
-
-    } while (tempDist < convergeDist);
 ~~~
-</div>
-<div data-lang="python" markdown="1">
+    </div>
+    <div data-lang="python" markdown="1">
+~~~
+      tempDist = sum(np.sum((centroids[x] - y) ** 2) for (x, y) in newCentroids.iteritems())
+      print "Finished iteration (delta = " + str(tempDist) + ")"
+~~~
+    </div>
+    </div>
+
+    You can now save `WikipediaKMeans`, and [run it](#running-the-program) to make sure our program is working fine so far. If everything went right, you should see the output similar to the following. (NOTE: Your output may not exactly match this as we use a random set of initial centers).
+
+    <pre>Finished iteration (delta = 0.025900765093161377)</pre>
+
+- The above steps represent one iteration of the K-Means algorithm. We will need to repeat these steps until the distance between newly computed centers and the ones from the previous iteration become lesser than some small constant. (`convergeDist` in our program). To do this we put our steps inside a `do while` loop and check if `tempDist` is lower than the convergence constant. Putting this together with the previous steps, our code will look like: 
+ 
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
+~~~
+      do {
+        var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
+        var pointsGroup = closest.groupByKey()
+        var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
+  
+        tempDist = 0.0
+        for (i <- 0 until K) {
+          tempDist += centroids(i).squaredDist(newCentroids(i))
+        }
+  
+        // Assign newCentroids to centroids
+        for (newP <- newCentroids) {
+          centroids(newP._1) = newP._2
+        }
+        iter += 1
+        println("Finished iteration " + iter + " (delta = " + tempDist + ")")
+      } while (tempDist > convergeDist)
+~~~
+    </div>
+    <div data-lang="java" markdown="1">
+~~~
+      do {
+          JavaPairRDD<Integer, Vector> closest = data.map(
+            new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
+              public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
+                return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
+              }
+             }
+            );
+          JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
+          Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
+            new Function<List<Vector>, Vector>() {
+              public Vector call(List<Vector> ps) throws Exception {
+                return average(ps);
+              }
+            }).collectAsMap();
+          double tempDist = 0.0;
+          for (int i = 0; i < K; i++) {
+            tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
+          }
+          for (Map.Entry<Integer, Vector> t: newCentroids.entrySet()) {
+            centroids.set(t.getKey(), t.getValue());
+          }
+          System.out.println("Finished iteration (delta = " + tempDist + ")");
+    
+        } while (tempDist < convergeDist);
+~~~
+  </div>
+  <div data-lang="python" markdown="1">
 ~~~
     while tempDist > convergeDist:
         closest = data.map(
@@ -1873,14 +1870,14 @@ Finished iteration (delta = 0.025900765093161377)
             centroids[x] = y
         print "Finished iteration (delta = " + str(tempDist) + ")"
 ~~~
-</div>
-</div>
+  </div>
+  </div>
 
 - **Exercise:** After the `do while` loop completes, write code to print the titles of 10 articles assigned to each cluster. 
 
-<div class="codetabs">
-  <div data-lang="scala" markdown="1">
-  <div class="solution" markdown="1">
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
+    <div class="solution" markdown="1">
 ~~~
       val numArticles = 10
       for((centroid, centroidI) <- centroids.zipWithIndex) {
@@ -1890,423 +1887,423 @@ Finished iteration (delta = 0.025900765093161377)
         println()
       }
 ~~~
-  </div>
-  </div>
-  <div data-lang="java" markdown="1">
-  <div class="solution" markdown="1">
+    </div>
+    </div>
+    <div data-lang="java" markdown="1">
+    <div class="solution" markdown="1">
 ~~~
- System.out.println("Cluster with some articles:");
-    int numArticles = 10;
-    for (int i = 0; i < centroids.size(); i++) {
-      final int index = i;
-      List<Tuple2<String, Vector>> samples =
-        data.filter(new Function<Tuple2<String, Vector>, Boolean>() {
-          public Boolean call(Tuple2<String, Vector> in) throws Exception {
-            return closestPoint(in._2(), centroids) == index;
-          }
-        }).take(numArticles);
-      for(Tuple2<String, Vector> sample: samples) {
-        System.out.println(sample._1());
+      System.out.println("Cluster with some articles:");
+      int numArticles = 10;
+      for (int i = 0; i < centroids.size(); i++) {
+        final int index = i;
+        List<Tuple2<String, Vector>> samples =
+          data.filter(new Function<Tuple2<String, Vector>, Boolean>() {
+            public Boolean call(Tuple2<String, Vector> in) throws Exception {
+              return closestPoint(in._2(), centroids) == index;
+            }
+          }).take(numArticles);
+        for(Tuple2<String, Vector> sample: samples) {
+          System.out.println(sample._1());
+        }
+        System.out.println();
       }
-      System.out.println();
-    }
 ~~~
-  </div>
-  </div>
-  <div data-lang="python" markdown="1">
-  <div class="solution" markdown="1">
+    </div>
+    </div>
+    <div data-lang="python" markdown="1">
+    <div class="solution" markdown="1">
 ~~~
-    print "Clusters with some articles"
-    numArticles = 10
-    for i in range(0, len(centroids)):
-      samples = data.filter(lambda (x,y) : closestPoint(y, centroids) == i).take(numArticles)
-      for (name, features) in samples:
-        print name
-
-      print " "
+      print "Clusters with some articles"
+      numArticles = 10
+      for i in range(0, len(centroids)):
+        samples = data.filter(lambda (x,y) : closestPoint(y, centroids) == i).take(numArticles)
+        for (name, features) in samples:
+          print name
+  
+        print " "
 ~~~
-  </div>
-  </div>
-</div>
+    </div>
+    </div>
+    </div>
 
 - You can save `WikipediaKMeans` and [run your program](#running-the-program) now. If everything goes well your algorithm will converge after some iterations and your final output should have clusters similar to the following output. Recall that our feature vector consisted of the number of times a page was visited in every hour of the day. We can see that pages are clustered together by _language_ indicating that they are accessed during the same hours of the day.
 
-<pre class="nocode">
-ja %E6%AD%8C%E8%97%A4%E9%81%94%E5%A4%AB
-ja %E7%8B%90%E3%81%AE%E5%AB%81%E5%85%A5%E3%82%8A
-ja %E3%83%91%E3%82%B0
-ja %E7%B4%AB%E5%BC%8F%E9%83%A8
-ja %E3%81%8A%E5%A7%89%E7%B3%BB
-ja Reina
-ja %E8%B8%8A%E3%82%8A%E5%AD%97
-ja %E3%83%90%E3%82%BB%E3%83%83%E3%83%88%E3%83%8F%E3%82%A6%E3%83%B3%E3%83%89
-ja %E3%81%BF%E3%81%9A%E3%81%BB%E3%83%95%E3%82%A3%E3%83%8A%E3%83%B3%E3%82%B7%E3%83%A3%E3%83%AB%E3%82%B0%E3%83%AB%E3%83%BC%E3%83%97
-ja %E6%96%B0%E6%BD%9F%E7%9C%8C%E7%AB%8B%E6%96%B0%E6%BD%9F%E5%8D%97%E9%AB%98%E7%AD%89%E5%AD%A6%E6%A0%A1
-
-ru %D0%A6%D0%B8%D1%80%D0%BA%D0%BE%D0%BD%D0%B8%D0%B9
-de Kirchenstaat
-ru %D0%90%D0%B2%D1%80%D0%B0%D0%B0%D0%BC
-de Migr%C3%A4ne
-de Portal:Freie_Software
-de Datenflusskontrolle
-de Dornier_Do_335
-de.b LaTeX-Schnellkurs:_Griechisches_Alphabet
-de Mach-Zahl
-ru Total_Commander
-
-en 761st_Tank_Battalion_(United_States)
-en File:N34---Douglas-DC3-Cockpit.jpg
-en Desmond_Child
-en Philadelphia_Freeway
-en Zygon
-en File:Ruth1918.jpg
-en Sally_Rand
-en File:HLHimmler.jpg
-en Waiting_to_Exhale
-en File:Sonic1991b.jpg
-</pre>
+    <pre class="nocode">
+    ja %E6%AD%8C%E8%97%A4%E9%81%94%E5%A4%AB
+    ja %E7%8B%90%E3%81%AE%E5%AB%81%E5%85%A5%E3%82%8A
+    ja %E3%83%91%E3%82%B0
+    ja %E7%B4%AB%E5%BC%8F%E9%83%A8
+    ja %E3%81%8A%E5%A7%89%E7%B3%BB
+    ja Reina
+    ja %E8%B8%8A%E3%82%8A%E5%AD%97
+    ja %E3%83%90%E3%82%BB%E3%83%83%E3%83%88%E3%83%8F%E3%82%A6%E3%83%B3%E3%83%89
+    ja %E3%81%BF%E3%81%9A%E3%81%BB%E3%83%95%E3%82%A3%E3%83%8A%E3%83%B3%E3%82%B7%E3%83%A3%E3%83%AB%E3%82%B0%E3%83%AB%E3%83%BC%E3%83%97
+    ja %E6%96%B0%E6%BD%9F%E7%9C%8C%E7%AB%8B%E6%96%B0%E6%BD%9F%E5%8D%97%E9%AB%98%E7%AD%89%E5%AD%A6%E6%A0%A1
+    
+    ru %D0%A6%D0%B8%D1%80%D0%BA%D0%BE%D0%BD%D0%B8%D0%B9
+    de Kirchenstaat
+    ru %D0%90%D0%B2%D1%80%D0%B0%D0%B0%D0%BC
+    de Migr%C3%A4ne
+    de Portal:Freie_Software
+    de Datenflusskontrolle
+    de Dornier_Do_335
+    de.b LaTeX-Schnellkurs:_Griechisches_Alphabet
+    de Mach-Zahl
+    ru Total_Commander
+    
+    en 761st_Tank_Battalion_(United_States)
+    en File:N34---Douglas-DC3-Cockpit.jpg
+    en Desmond_Child
+    en Philadelphia_Freeway
+    en Zygon
+    en File:Ruth1918.jpg
+    en Sally_Rand
+    en File:HLHimmler.jpg
+    en Waiting_to_Exhale
+    en File:Sonic1991b.jpg
+    </pre>
 
 - In case you want to look at the complete solution, here is how `WikipediaKMeans` will look after all the above steps have been completed.
 
-<div class="codetabs">
-  <div data-lang="scala" markdown="1">
-  <div class="solution" markdown="1">
-    import spark.SparkContext
-    import spark.SparkContext._
-    import spark.util.Vector
-    
-    import org.apache.log4j.Logger
-    import org.apache.log4j.Level
-    
-    import scala.util.Random
-    import scala.io.Source
-    
-    object WikipediaKMeans {
-      def parseVector(line: String): Vector = {
-          return new Vector(line.split(',').map(_.toDouble))
-      }
-    
-      def closestPoint(p: Vector, centers: Array[Vector]): Int = {
-        var index = 0
-        var bestIndex = 0
-        var closest = Double.PositiveInfinity
-        for (i <- 0 until centers.length) {
-          val tempDist = p.squaredDist(centers(i))
-          if (tempDist < closest) {
-            closest = tempDist
-            bestIndex = i
-          }
-        }
-        return bestIndex
-      }
-    
-      def average(ps: Seq[Vector]) : Vector = {
-        val numVectors = ps.size
-        var out = new Vector(ps(0).elements)
-        for (i <- 1 until numVectors) {
-          out += ps(i)
-        }
-        out / numVectors
-      }
-    
-      // Add any new functions you need here
-    
-      def main(args: Array[String]) {
-        Logger.getLogger("spark").setLevel(Level.WARN)
-        val sparkHome = "/root/spark"
-        val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
-        val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
-        val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
-    
-        val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
-    
-        val K = 10
-        val convergeDist = 1e-6
-    
-        val data = sc.textFile(
-            "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-                t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
-
-        val count = data.count()
-        println("Number of records " + count)
-    
-        // Your code goes here
-        var centroids = data.takeSample(false, K, 42).map(x => x._2)
-        var tempDist = 1.0
-        do {
-          var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
-          var pointsGroup = closest.groupByKey()
-          var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
-          tempDist = 0.0
-          for (i <- 0 until K) {
-            tempDist += centroids(i).squaredDist(newCentroids(i))
-          }
-          for (newP <- newCentroids) {
-            centroids(newP._1) = newP._2
-          }
-          println("Finished iteration (delta = " + tempDist + ")")
-        } while (tempDist > convergeDist)
-    
-        println("Clusters with some articles:")
-        val numArticles = 10
-        for((centroid, centroidI) <- centroids.zipWithIndex) {
-          // print numArticles articles which are assigned to this centroid’s cluster
-          data.filter(p => (closestPoint(p._2, centroids) == centroidI)).take(numArticles).foreach(
-              x => println(x._1))
-          println()
-        }
-    
-        System.exit(0)
-      }
-    }
-  </div>
-  </div>
-  <div data-lang="java" markdown="1">
-  <div class="solution" markdown="1">
-
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
+    <div class="solution" markdown="1">
 ~~~
-import org.apache.hadoop.io.Text;
-import org.apache.log4j.Logger;
-import org.apache.log4j.Level;
-
-import scala.Tuple2;
-import spark.api.java.*;
-import spark.api.java.function.*;
-import spark.util.Vector;
-
-import java.io.*;
-import java.util.*;
-import com.google.common.collect.Lists;
-
-
-public class WikipediaKMeansJava {
-  static Vector parseVector(String line) {
-    String[] parts = line.split(",");
-    double[] dParts = new double[parts.length];
-    for (int i = 0; i < parts.length; i++) {
-      dParts[i] = Double.parseDouble(parts[i]);
+  import spark.SparkContext
+  import spark.SparkContext._
+  import spark.util.Vector
+  
+  import org.apache.log4j.Logger
+  import org.apache.log4j.Level
+  
+  import scala.util.Random
+  import scala.io.Source
+  
+  object WikipediaKMeans {
+    def parseVector(line: String): Vector = {
+        return new Vector(line.split(',').map(_.toDouble))
     }
-    return new Vector(dParts);
-  }
-
-  static int closestPoint(Vector p, List<Vector> centers) {
-    int bestIndex = 0;
-    double closest = Double.POSITIVE_INFINITY;
-    for (int i = 0; i < centers.size(); i++) {
-      double tempDist = p.squaredDist(centers.get(i));
-      if (tempDist < closest) {
-        closest = tempDist;
-        bestIndex = i;
-      }
-    }
-    return bestIndex;
-  }
-
-  static Vector average(List<Vector> ps) {
-    int numVectors = ps.size();
-    Vector out = new Vector(ps.get(0).elements());
-    for (int i = 0; i < numVectors; i++) {
-      out.addInPlace(ps.get(i));
-    }
-    return out.divide(numVectors);
-  }
-
-  static String getSparkUrl() throws Exception {
-    File file = new File("/root/spark-ec2/cluster-url");
-    if (file.exists()) {
-      List<String> lines = readLines(file);
-      return lines.get(0);
-    } else {
-      throw new Exception("Could not find " + file);
-    }
-  }
-
-  static String getMasterHostname() throws Exception {
-    File file = new File("/root/spark-ec2/masters");
-    if (file.exists()) {
-      List<String> lines = readLines(file);
-      return lines.get(0);
-    } else {
-      throw new Exception("Could not find " + file);
-    }
-  }
-
-  private static List<String> readLines(File file) throws IOException {
-    FileReader fileReader = new FileReader(file);
-    BufferedReader bufferedReader = new BufferedReader(fileReader);
-    List<String> lines = new ArrayList<String>();
-    String line = null;
-    while ((line = bufferedReader.readLine()) != null) {
-      lines.add(line);
-    }
-    bufferedReader.close();
-    return lines;
-  }
-
-  public static void main(String[] args) throws Exception {
-    Logger.getLogger("spark").setLevel(Level.WARN);
-    String sparkHome = "/root/spark";
-    String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
-    String master = getSparkUrl();
-    String masterHostname = getMasterHostname();
-    JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans", sparkHome, jarFile);
-
-    int K = 4;
-    double convergeDist = .000001;
-
-    JavaPairRDD<String, Vector> data = sc.textFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-      new PairFunction<String, String, Vector>() {
-        public Tuple2<String, Vector> call(String in)
-        throws Exception {
-          String[] parts = in.split("#");
-          return new Tuple2<String, Vector>(parts[0], parseVector(parts[1]));
+  
+    def closestPoint(p: Vector, centers: Array[Vector]): Int = {
+      var index = 0
+      var bestIndex = 0
+      var closest = Double.PositiveInfinity
+      for (i <- 0 until centers.length) {
+        val tempDist = p.squaredDist(centers(i))
+        if (tempDist < closest) {
+          closest = tempDist
+          bestIndex = i
         }
       }
-     ).cache();
-    long count = data.count();
-    System.out.println("Number of records " + count);
-
-    List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
-    final List<Vector> centroids = Lists.newArrayList();
-    for (Tuple2<String, Vector> t: centroidTuples) {
-      centroids.add(t._2());
+      return bestIndex
     }
-
-    System.out.println("Done selecting initial centroids");
-    double tempDist;
-    do {
-      JavaPairRDD<Integer, Vector> closest = data.map(
-        new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
-          public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
-            return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
-          }
-         }
-        );
-
-      JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
-      Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
-        new Function<List<Vector>, Vector>() {
-          public Vector call(List<Vector> ps) throws Exception {
-            return average(ps);
-          }
-        }).collectAsMap();
-      tempDist = 0.0;
-      for (int i = 0; i < K; i++) {
-        tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
+  
+    def average(ps: Seq[Vector]) : Vector = {
+      val numVectors = ps.size
+      var out = new Vector(ps(0).elements)
+      for (i <- 1 until numVectors) {
+        out += ps(i)
       }
-      for (Map.Entry<Integer, Vector> t: newCentroids.entrySet()) {
-        centroids.set(t.getKey(), t.getValue());
-      }
-      System.out.println("Finished iteration (delta = " + tempDist + ")");
-
-    } while (tempDist < convergeDist);
-
-    System.out.println("Cluster with some articles:");
-    int numArticles = 10;
-    for (int i = 0; i < centroids.size(); i++) {
-      final int index = i;
-      List<Tuple2<String, Vector>> samples =
-        data.filter(new Function<Tuple2<String, Vector>, Boolean>() {
-          public Boolean call(Tuple2<String, Vector> in) throws Exception {
-            return closestPoint(in._2(), centroids) == index;
-          }
-        }).take(numArticles);
-      for(Tuple2<String, Vector> sample: samples) {
-        System.out.println(sample._1());
-      }
-      System.out.println();
+      out / numVectors
     }
-
-    System.exit(0);
+  
+    // Add any new functions you need here
+  
+    def main(args: Array[String]) {
+      Logger.getLogger("spark").setLevel(Level.WARN)
+      val sparkHome = "/root/spark"
+      val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
+      val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
+      val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
+  
+      val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
+  
+      val K = 10
+      val convergeDist = 1e-6
+  
+      val data = sc.textFile(
+          "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+              t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
+  
+      val count = data.count()
+      println("Number of records " + count)
+  
+      // Your code goes here
+      var centroids = data.takeSample(false, K, 42).map(x => x._2)
+      var tempDist = 1.0
+      do {
+        var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
+        var pointsGroup = closest.groupByKey()
+        var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
+        tempDist = 0.0
+        for (i <- 0 until K) {
+          tempDist += centroids(i).squaredDist(newCentroids(i))
+        }
+        for (newP <- newCentroids) {
+          centroids(newP._1) = newP._2
+        }
+        println("Finished iteration (delta = " + tempDist + ")")
+      } while (tempDist > convergeDist)
+  
+      println("Clusters with some articles:")
+      val numArticles = 10
+      for((centroid, centroidI) <- centroids.zipWithIndex) {
+        // print numArticles articles which are assigned to this centroid’s cluster
+        data.filter(p => (closestPoint(p._2, centroids) == centroidI)).take(numArticles).foreach(
+            x => println(x._1))
+        println()
+      }
+  
+      System.exit(0)
+    }
   }
-}
 ~~~
-  </div>
-  </div>
-  <div data-lang="python" markdown="1">
-  <div class="solution" markdown="1">
+    </div>
+    </div>
+    <div data-lang="java" markdown="1">
+    <div class="solution" markdown="1">
 ~~~
-import os
-import sys
-
-import numpy as np
-from pyspark import SparkContext
-
-def setClassPath():
-    oldClassPath = ''
-    if 'SPARK_CLASSPATH' in os.environ:
-        oldClassPath = os.environ['SPARK_CLASSPATH']
-    cwd = os.path.dirname(os.path.realpath(__file__))
-    os.environ['SPARK_CLASSPATH'] = cwd + ":" + oldClassPath
-
-def parseVector(line):
-    return np.array([float(x) for x in line.split(',')])
-
-def closestPoint(p, centers):
-    bestIndex = 0
-    closest = float("+inf")
-    for i in range(len(centers)):
-        dist = np.sum((p - centers[i]) ** 2)
-        if dist < closest:
-            closest = dist
-            bestIndex = i
-    return bestIndex
-
-def average(points):
-    numVectors = len(points)
-    out = np.array(points[0])
-    for i in range(2, numVectors):
-        out += points[i]
-    out = out / numVectors
-    return out
-
-if __name__ == "__main__":
-    setClassPath()
-    master = open("/root/spark-ec2/cluster-url").read().strip()
-    masterHostname = open("/root/spark-ec2/masters").read().strip()
-    sc = SparkContext(master, "PythonKMeans")
-    K = 10
-    convergeDist = 1e-4
-
-    lines = sc.textFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized")
-
-    data = lines.map(
-        lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
-    count = data.count()
-    print "Number of records " + str(count)
-
-    # TODO: PySpark does not support takeSample(). Use first K points instead.
-    centroids = map(lambda (x, y): y, data.take(K))
-    tempDist = 1.0
-
-    while tempDist > convergeDist:
-        closest = data.map(
-            lambda (x, y) : (closestPoint(y, centroids), y))
-        pointsGroup = closest.groupByKey()
-        newCentroids = pointsGroup.mapValues(
-            lambda x : average(x)).collectAsMap()
-
-        tempDist = sum(np.sum((centroids[x] - y) ** 2) for (x, y) in newCentroids.iteritems())
-        for (x, y) in newCentroids.iteritems():
-            centroids[x] = y
-        print "Finished iteration (delta = " + str(tempDist) + ")"
-        sys.stdout.flush()
-
-
-    print "Clusters with some articles"
-    numArticles = 10
-    for i in range(0, len(centroids)):
-      samples = data.filter(lambda (x,y) : closestPoint(y, centroids) == i).take(numArticles)
-      for (name, features) in samples:
-        print name
-
-      print " "
-
+  import org.apache.hadoop.io.Text;
+  import org.apache.log4j.Logger;
+  import org.apache.log4j.Level;
+  
+  import scala.Tuple2;
+  import spark.api.java.*;
+  import spark.api.java.function.*;
+  import spark.util.Vector;
+  
+  import java.io.*;
+  import java.util.*;
+  import com.google.common.collect.Lists;
+  
+  
+  public class WikipediaKMeansJava {
+    static Vector parseVector(String line) {
+      String[] parts = line.split(",");
+      double[] dParts = new double[parts.length];
+      for (int i = 0; i < parts.length; i++) {
+        dParts[i] = Double.parseDouble(parts[i]);
+      }
+      return new Vector(dParts);
+    }
+  
+    static int closestPoint(Vector p, List<Vector> centers) {
+      int bestIndex = 0;
+      double closest = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < centers.size(); i++) {
+        double tempDist = p.squaredDist(centers.get(i));
+        if (tempDist < closest) {
+          closest = tempDist;
+          bestIndex = i;
+        }
+      }
+      return bestIndex;
+    }
+  
+    static Vector average(List<Vector> ps) {
+      int numVectors = ps.size();
+      Vector out = new Vector(ps.get(0).elements());
+      for (int i = 0; i < numVectors; i++) {
+        out.addInPlace(ps.get(i));
+      }
+      return out.divide(numVectors);
+    }
+  
+    static String getSparkUrl() throws Exception {
+      File file = new File("/root/spark-ec2/cluster-url");
+      if (file.exists()) {
+        List<String> lines = readLines(file);
+        return lines.get(0);
+      } else {
+        throw new Exception("Could not find " + file);
+      }
+    }
+  
+    static String getMasterHostname() throws Exception {
+      File file = new File("/root/spark-ec2/masters");
+      if (file.exists()) {
+        List<String> lines = readLines(file);
+        return lines.get(0);
+      } else {
+        throw new Exception("Could not find " + file);
+      }
+    }
+  
+    private static List<String> readLines(File file) throws IOException {
+      FileReader fileReader = new FileReader(file);
+      BufferedReader bufferedReader = new BufferedReader(fileReader);
+      List<String> lines = new ArrayList<String>();
+      String line = null;
+      while ((line = bufferedReader.readLine()) != null) {
+        lines.add(line);
+      }
+      bufferedReader.close();
+      return lines;
+    }
+  
+    public static void main(String[] args) throws Exception {
+      Logger.getLogger("spark").setLevel(Level.WARN);
+      String sparkHome = "/root/spark";
+      String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
+      String master = getSparkUrl();
+      String masterHostname = getMasterHostname();
+      JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans", sparkHome, jarFile);
+  
+      int K = 4;
+      double convergeDist = .000001;
+  
+      JavaPairRDD<String, Vector> data = sc.textFile(
+          "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
+        new PairFunction<String, String, Vector>() {
+          public Tuple2<String, Vector> call(String in)
+          throws Exception {
+            String[] parts = in.split("#");
+            return new Tuple2<String, Vector>(parts[0], parseVector(parts[1]));
+          }
+        }
+       ).cache();
+      long count = data.count();
+      System.out.println("Number of records " + count);
+  
+      List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
+      final List<Vector> centroids = Lists.newArrayList();
+      for (Tuple2<String, Vector> t: centroidTuples) {
+        centroids.add(t._2());
+      }
+  
+      System.out.println("Done selecting initial centroids");
+      double tempDist;
+      do {
+        JavaPairRDD<Integer, Vector> closest = data.map(
+          new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
+            public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
+              return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
+            }
+           }
+          );
+  
+        JavaPairRDD<Integer, List<Vector>> pointsGroup = closest.groupByKey();
+        Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
+          new Function<List<Vector>, Vector>() {
+            public Vector call(List<Vector> ps) throws Exception {
+              return average(ps);
+            }
+          }).collectAsMap();
+        tempDist = 0.0;
+        for (int i = 0; i < K; i++) {
+          tempDist += centroids.get(i).squaredDist(newCentroids.get(i));
+        }
+        for (Map.Entry<Integer, Vector> t: newCentroids.entrySet()) {
+          centroids.set(t.getKey(), t.getValue());
+        }
+        System.out.println("Finished iteration (delta = " + tempDist + ")");
+  
+      } while (tempDist < convergeDist);
+  
+      System.out.println("Cluster with some articles:");
+      int numArticles = 10;
+      for (int i = 0; i < centroids.size(); i++) {
+        final int index = i;
+        List<Tuple2<String, Vector>> samples =
+          data.filter(new Function<Tuple2<String, Vector>, Boolean>() {
+            public Boolean call(Tuple2<String, Vector> in) throws Exception {
+              return closestPoint(in._2(), centroids) == index;
+            }
+          }).take(numArticles);
+        for(Tuple2<String, Vector> sample: samples) {
+          System.out.println(sample._1());
+        }
+        System.out.println();
+      }
+  
+      System.exit(0);
+    }
+  }
 ~~~
-  </div>
-  </div>
-</div>
+    </div>
+    </div>
+    <div data-lang="python" markdown="1">
+    <div class="solution" markdown="1">
+~~~
+  import os
+  import sys
+  
+  import numpy as np
+  from pyspark import SparkContext
+  
+  def setClassPath():
+      oldClassPath = ''
+      if 'SPARK_CLASSPATH' in os.environ:
+          oldClassPath = os.environ['SPARK_CLASSPATH']
+      cwd = os.path.dirname(os.path.realpath(__file__))
+      os.environ['SPARK_CLASSPATH'] = cwd + ":" + oldClassPath
+  
+  def parseVector(line):
+      return np.array([float(x) for x in line.split(',')])
+  
+  def closestPoint(p, centers):
+      bestIndex = 0
+      closest = float("+inf")
+      for i in range(len(centers)):
+          dist = np.sum((p - centers[i]) ** 2)
+          if dist < closest:
+              closest = dist
+              bestIndex = i
+      return bestIndex
+  
+  def average(points):
+      numVectors = len(points)
+      out = np.array(points[0])
+      for i in range(2, numVectors):
+          out += points[i]
+      out = out / numVectors
+      return out
+  
+  if __name__ == "__main__":
+      setClassPath()
+      master = open("/root/spark-ec2/cluster-url").read().strip()
+      masterHostname = open("/root/spark-ec2/masters").read().strip()
+      sc = SparkContext(master, "PythonKMeans")
+      K = 10
+      convergeDist = 1e-4
+  
+      lines = sc.textFile(
+          "hdfs://" + masterHostname + ":9000/wikistats_featurized")
+  
+      data = lines.map(
+          lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
+      count = data.count()
+      print "Number of records " + str(count)
+  
+      # TODO: PySpark does not support takeSample(). Use first K points instead.
+      centroids = map(lambda (x, y): y, data.take(K))
+      tempDist = 1.0
+  
+      while tempDist > convergeDist:
+          closest = data.map(
+              lambda (x, y) : (closestPoint(y, centroids), y))
+          pointsGroup = closest.groupByKey()
+          newCentroids = pointsGroup.mapValues(
+              lambda x : average(x)).collectAsMap()
+  
+          tempDist = sum(np.sum((centroids[x] - y) ** 2) for (x, y) in newCentroids.iteritems())
+          for (x, y) in newCentroids.iteritems():
+              centroids[x] = y
+          print "Finished iteration (delta = " + str(tempDist) + ")"
+          sys.stdout.flush()
+  
+  
+      print "Clusters with some articles"
+      numArticles = 10
+      for i in range(0, len(centroids)):
+        samples = data.filter(lambda (x,y) : closestPoint(y, centroids) == i).take(numArticles)
+        for (name, features) in samples:
+          print name
+  
+        print " "
+~~~
+    </div>
+    </div>
+    </div>
 
-- Challenge: The K-Means implementation uses a `groupBy` and `mapValues` to compute the new centers. This can be optimized by using a running sum of the vectors that belong to a cluster and running counter of the number of vectors present in a cluster. How would you use the Spark API to implement this ?
+- **Challenge:** The K-Means implementation uses a `groupBy` and `mapValues` to compute the new centers. This can be optimized by using a running sum of the vectors that belong to a cluster and running counter of the number of vectors present in a cluster. How would you use the Spark API to implement this ?
