@@ -218,7 +218,7 @@ If you launched the cluster with the default script above (no custom instance ty
 Your cluster should be ready to use.
 You can find the master hostname (`<master_node_hostname>` in the instructions below) by running
 
-    ./spark-ec2 -i -k get-master amplab-training
+    ./spark-ec2 -i <key_file> -k <key_pair> get-master amplab-training
 
 At this point, it would be helpful to open a text file and copy `<master_node_hostname>` there.
 In a later exercise, you will want to have `<master_node_hostname>` ready at hand without having to scroll through your terminal history.
