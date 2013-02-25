@@ -38,7 +38,7 @@ public class WikipediaKMeans {
      ).cache();
 
     // Your code goes here
-
+    sc.stop();
     System.exit(0);
   }
 }

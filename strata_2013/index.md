@@ -1250,6 +1250,7 @@ object WikipediaKMeans {
 
     // Your code goes here
 
+    sc.stop();
     System.exit(0)
   }
 }
@@ -1298,6 +1299,7 @@ public class WikipediaKMeans {
 
     // Your code goes here
 
+    sc.stop();
     System.exit(0);
   }
 }
@@ -2010,6 +2012,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
         println()
       }
   
+      sc.stop();
       System.exit(0)
     }
   }
@@ -2129,6 +2132,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
         }
         System.out.println();
       }
+      sc.stop();
       System.exit(0);
     }
   }

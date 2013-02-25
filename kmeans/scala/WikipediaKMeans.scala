@@ -33,7 +33,7 @@ object WikipediaKMeans {
 
 
     // Your code goes here
-
+    sc.stop();
     System.exit(0)
   }
 }
