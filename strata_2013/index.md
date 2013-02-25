@@ -624,7 +624,7 @@ default number of reducers, which we have been using so far in this section, is 
 
    ~~~
    shark> set mapred.reduce.tasks=50;
-   shark> select page_name, sum(page_views) from wikistats_cached group by page_name order by views desc limit 50;
+   shark> select page_name, sum(page_views) as views from wikistats_cached group by page_name order by views desc limit 50;
    ......
    Lost_(TV_series)	121689
    World_War_II	121262
