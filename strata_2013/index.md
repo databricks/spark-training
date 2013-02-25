@@ -132,13 +132,13 @@ Some of the more important ones are listed below:
    - `hive-0.9.0-bin`: Hive installation
    - `mesos`: Mesos installation
 
-You can find a list of your 5 slave nodes in mesos-ec2/slaves:
+You can find a list of your 5 slave nodes in spark-ec2/slaves:
 
-    cat mesos-ec2/slaves
+    cat spark-ec2/slaves
 
-For stand-alone Spark programs, you will have to know the Spark cluster URL. You can find that in mesos-ec2/cluster-url:
+For stand-alone Spark programs, you will have to know the Spark cluster URL. You can find that in spark-ec2/cluster-url:
 
-    cat mesos-ec2/cluster-url
+    cat spark-ec2/cluster-url
 
 ## Dataset For Exploration
 Your HDFS cluster should come preloaded with 20GB of Wikipedia traffic statistics data obtained from http://aws.amazon.com/datasets/4182 .
@@ -761,7 +761,7 @@ public class Tutorial {
 
 For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
 
-- `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/mesos-ec2/cluster-url`.
+- `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/spark-ec2/cluster-url`.
 - `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`.
 
 Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
@@ -1368,32 +1368,34 @@ if __name__ == "__main__":
 </div>
 </div>
 
-Let's first take a look at our template code. Locate the `WikipediaKMeans` class and open it with a text editor.
+Let's first take a closer look at our template code in a text editor on the cluster itself, then we'll start adding code to the template. Locate the `WikipediaKMeans` class and open it with a text editor.
 
 <div class="codetabs">
 <div data-lang="scala">
 <pre>
 cd /root/kmeans/scala
-vim WikipediaKMeans.scala
+vim WikipediaKMeans.scala  # If you don't know vim, you can use emacs or nano
 </pre>
 </div>
 <div data-lang="java">
 <pre>
 cd /root/kmeans/java
-vim WikipediaKMeans.java
+vim WikipediaKMeans.java  # If you don't know vim, you can use emacs or nano
 </pre>
 </div>
 <div data-lang="python">
 <pre>
 cd /root/kmeans/python
-vim WikipediaKMeans.py
+vim WikipediaKMeans.py  # If you don't know Vim, you can use emacs or nano
 </pre>
 </div>
 </div>
 
-The cluster machines have both vim and emacs installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim or emacs before running it.
+The cluster machines have vim, emacs, and nano installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim, emacs, or nano before running it.
 
-For any Spark computation, we will first need to create a Spark context object. For Scala or Java programs, we do that by providing the Spark cluster URL, the Spark home directory and the JAR file that will be generated when we compile our program. For Python programs, we only need to provide the Spark cluster URL. Finally, we also name our program "WikipediaKMeans" to identify it in Spark's web UI.
+For any Spark computation, we first create a Spark context object. For Scala or Java programs, we do that by providing the Spark cluster URL, the Spark home directory, and the JAR file that will be generated when we compile our program. For Python programs, we only need to provide the Spark cluster URL. Finally, we also name our program "WikipediaKMeans" to identify it in Spark's web UI.
+
+This is what it looks like in our template code:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1413,7 +1415,9 @@ For any Spark computation, we will first need to create a Spark context object. 
 </div>
 </div>
 
-Next, we use the SparkContext to read in our featurized dataset. The featurization process creates a 24-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas. We first read the file in from HDFS and parse each line to create a RDD which contains pairs of `(String, Vector)`. We then count the number of records in our dataset by running `data.count()` and print the value. 
+Next, the code uses the SparkContext to read in our featurized dataset. The [featurization process](#command-line-preprocessing-and-featurization) created a 24-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the page view counts for the corresponding hour of the day. Each line in the file consists of the page identifier and the features separated by commas.
+
+Next, the code reads the file in from HDFS and parses each line to create a RDD which contains pairs of `(String, Vector)`.
 
 A quick note about the `Vector` class we will using in this exercise: For Scala and Java programs we will be using the [Vector](http://spark-project.org/docs/latest/api/core/index.html#spark.util.Vector) class provided by Spark. For Python, we will be using [NumPy arrays](http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html).
 
@@ -1449,6 +1453,29 @@ A quick note about the `Vector` class we will using in this exercise: For Scala 
         "hdfs://" + masterHostname + ":9000/wikistats_featurized_hash_text")
     data = lines.map(
         lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
+    count = data.count()
+    print "Number of records " + str(count)
+~~~
+</div>
+</div>
+
+Now, let's make our first edit to the file and add code to count the number of records in our dataset by running `data.count()` and print the value. Find the comment that says "Your code goes here" and replace it with:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+    val count = data.count()
+    println("Number of records " + count)
+~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+    long count = data.count();
+    System.out.println("Number of records " + count);
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
     count = data.count()
     print "Number of records " + str(count)
 ~~~
@@ -1498,131 +1525,135 @@ Number of records 802450
 </div>
 
 ## K-Means algorithm
+We are now set to start implementing the K-means algorithm, so remove or comment out the lines we just added to print the record count and let's get started.
+
 - The first step in the K-Means algorithm is to initialize our centers by randomly picking `K` points from our dataset. We use the `takeSample` function in Spark to do this.  
 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
 ~~~
-  var centroids = data.takeSample(false, K, 42).map(x => x._2).collect()
+      var centroids = data.takeSample(false, K, 42).map(x => x._2)
 ~~~
-</div>
-<div data-lang="java" markdown="1">
+    </div>
+    <div data-lang="java" markdown="1">
 ~~~
-    List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
-    final List<Vector> centroids = Lists.newArrayList();
-    for (Tuple2<String, Vector> t: centroidTuples) {
-      centroids.add(t._2());
-    }
+      List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
+      final List<Vector> centroids = Lists.newArrayList();
+      for (Tuple2<String, Vector> t: centroidTuples) {
+        centroids.add(t._2());
+      }
 ~~~
-</div>
-<div data-lang="python" markdown="1">
+    </div>
+    <div data-lang="python" markdown="1">
 ~~~
-    # NOTE: PySpark does not support takeSample() yet. Use first K points instead.
-    centroids = map(lambda (x, y): y, data.take(K))
+      # NOTE: PySpark does not support takeSample() yet. Use first K points instead.
+      centroids = map(lambda (x, y): y, data.take(K))
 ~~~
-</div>
-</div>
+    </div>
+    </div>
 
 - Next, we need to compute the closest centroid for each point and we do this by using the `map` operation in Spark. For every point we will use a function `closestPoint` to compute the closest centroid. 
 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
 ~~~
-  var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
+      var closest = data.map(p => (closestPoint(p._2, centroids), p._2)) // Won't work until you write closestPoint()
 ~~~
-</div>
-<div data-lang="java" markdown="1">
+    </div>
+    <div data-lang="java" markdown="1">
 ~~~
       JavaPairRDD<Integer, Vector> closest = data.map(
         new PairFunction<Tuple2<String, Vector>, Integer, Vector>() {
           public Tuple2<Integer, Vector> call(Tuple2<String, Vector> in) throws Exception {
             return new Tuple2<Integer, Vector>(closestPoint(in._2(), centroids), in._2());
           }
-         }
-        );
+        }
+      );
 ~~~
-</div>
-<div data-lang="python" markdown="1">
+    </div>
+    <div data-lang="python" markdown="1">
 ~~~
-    closest = data.map(
-        lambda (x, y) : (closestPoint(y, centroids), y))
+      closest = data.map(
+          lambda (x, y) : (closestPoint(y, centroids), y))
 ~~~
-</div>
-</div>
+    </div>
+    </div>
 
-Exercise: Write the `closestPoint` function in `WikipediaKMeans` to return the index of the closest centroid given a point and the set of all centroids. To get you started, we provide the type signature of the function:
+    **Exercise:** Write the `closestPoint` function in `WikipediaKMeans` to return the index of the closest centroid given a point and the set of all centroids. To get you started, we provide the type signature of the function:
 
-  <div class="codetabs">
-  <div data-lang="scala" markdown="1">
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
 ~~~
-  def closestPoint(p: Vector, centers: Array[Vector]): Int = {
+      def closestPoint(p: Vector, centers: Array[Vector]): Int = {
 ~~~
-  </div>
-  <div data-lang="java" markdown="1">
+    </div>
+    <div data-lang="java" markdown="1">
 ~~~
-  static int closestPoint(Vector p, List<Vector> centers) {
+      static int closestPoint(Vector p, List<Vector> centers) {
 ~~~
-  </div>
-  <div data-lang="python" markdown="1">
+    </div>
+    <div data-lang="python" markdown="1">
 ~~~
-  def closestPoint(p, centers):
+      def closestPoint(p, centers):
 ~~~
-  </div>
-  </div>
+    </div>
+    </div>
 
-In case you get stuck, you can use our solution given below.
+    In case you get stuck, you can use our solution given below.
 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-  <div class="solution" markdown="1">
-     def closestPoint(p: Vector, centers: Array[Vector]): Int = {
-       var bestIndex = 0
-       var closest = Double.PositiveInfinity
-       for (i <- 0 until centers.length) {
-         val tempDist = p.squaredDist(centers(i))
-         if (tempDist < closest) {
-           closest = tempDist
-           bestIndex = i
-         }
-       }
-       return bestIndex
-     }
-  </div>
-</div>
-<div data-lang="java" markdown="1">
-  <div class="solution" markdown="1">
+    <div class="codetabs">
+    <div data-lang="scala" markdown="1">
+    <div class="solution" markdown="1">
 ~~~
-  static int closestPoint(Vector p, List<Vector> centers) {
-    int bestIndex = 0;
-    double closest = Double.POSITIVE_INFINITY;
-    for (int i = 0; i < centers.size(); i++) {
-      double tempDist = p.squaredDist(centers.get(i));
-      if (tempDist < closest) {
-        closest = tempDist;
-        bestIndex = i;
+    def closestPoint(p: Vector, centers: Array[Vector]): Int = {
+      var bestIndex = 0
+      var closest = Double.PositiveInfinity
+      for (i <- 0 until centers.length) {
+        val tempDist = p.squaredDist(centers(i))
+        if (tempDist < closest) {
+          closest = tempDist
+          bestIndex = i
+        }
       }
+      return bestIndex
     }
-    return bestIndex;
-  }
 ~~~
-  </div>
-</div>
-<div data-lang="python" markdown="1">
+    </div>
+    </div>
+    <div data-lang="java" markdown="1">
   <div class="solution" markdown="1">
 ~~~
-  def closestPoint(p, centers):
-      bestIndex = 0
-      closest = float("+inf")
-      for i in range(len(centers)):
-          dist = np.sum((p - centers[i]) ** 2)
-          if dist < closest:
-              closest = dist
-              bestIndex = i
-      return bestIndex
+    static int closestPoint(Vector p, List<Vector> centers) {
+      int bestIndex = 0;
+      double closest = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < centers.size(); i++) {
+        double tempDist = p.squaredDist(centers.get(i));
+        if (tempDist < closest) {
+          closest = tempDist;
+          bestIndex = i;
+        }
+      }
+      return bestIndex;
+    }
 ~~~
   </div>
-</div>
-</div>
+    </div>
+    <div data-lang="python" markdown="1">
+  <div class="solution" markdown="1">
+~~~
+    def closestPoint(p, centers):
+        bestIndex = 0
+        closest = float("+inf")
+        for i in range(len(centers)):
+            dist = np.sum((p - centers[i]) ** 2)
+            if dist < closest:
+                closest = dist
+                bestIndex = i
+        return bestIndex
+~~~
+  </div>
+    </div>
+    </div>
 
 The `map` operation creates a new RDD which contains a tuple for every point. The first element in the tuple is the index of the closest centroid for the point and second element is the `Vector` representing the point. 
 
@@ -1672,7 +1703,7 @@ The `map` operation creates a new RDD which contains a tuple for every point. Th
 </div>
 </div>
 
-Exercise: Write the `average` function in `WikipediaKMeans` to sum all the vectors and divide it by the number of vectors present in the input array. Your function should return a new Vector which is the average of the input vectors. You can look at our solution in case you get stuck.
+**Exercise:** Write the `average` function in `WikipediaKMeans` to sum all the vectors and divide it by the number of vectors present in the input array. Your function should return a new Vector which is the average of the input vectors. You can look at our solution in case you get stuck.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -1827,7 +1858,7 @@ Finished iteration (delta = 0.025900765093161377)
 </div>
 </div>
 
-- Exercise: After the `do while` loop completes, write code to print the titles of 10 articles assigned to each cluster. 
+- **Exercise:** After the `do while` loop completes, write code to print the titles of 10 articles assigned to each cluster. 
 
 <div class="codetabs">
   <div data-lang="scala" markdown="1">
