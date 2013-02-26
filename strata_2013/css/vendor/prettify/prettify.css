@@ -1,12 +1,10 @@
-/* From bootstrap documentation site */
-.com { color: #93a1a1; }
-.lit { color: #195f91; }
+.com { color: #637171; } .lit { color: #195f91; }
 .pun, .opn, .clo { color: #93a1a1; }
 .fun { color: #dc322f; }
 .str, .atv { color: #D14; }
-.kwd, .prettyprint .tag { color: #1e347b; }
-.typ, .atn, .dec, .var { color: teal; }
-.pln { color: #48484c; }
+.kwd, .prettyprint .tag { color: rgb(44,44,240); }
+.typ, .atn, .dec, .var { color: rgb(0,143,34); }
+.pln { color: #000; }
 
 .prettyprint {
   padding: 8px;
