@@ -1271,7 +1271,7 @@ object WikipediaKMeans {
     val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
 
     val K = 10
-    val convergeDist = 1e-5
+    val convergeDist = 1e-6
 
     val data = sc.textFile(
         "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
