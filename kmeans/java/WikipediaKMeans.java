@@ -23,7 +23,7 @@ public class WikipediaKMeans {
       sparkHome, jarFile);
 
     int K = 10;
-    double convergeDist = .00001;
+    double convergeDist = .000001;
 
     JavaPairRDD<String, Vector> data = sc.textFile(
         "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
