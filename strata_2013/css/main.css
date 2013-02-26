@@ -213,3 +213,14 @@ div#toc ul li ul li ul {
 }
 div#toc ul li ul li ul a {
 }
+
+td.yes {
+  color: #4D974D;
+  text-align: center;
+}
+
+td.no {
+  color: #D14040;
+  text-align: center;
+}
+
