@@ -848,10 +848,7 @@ This object serves as the main entry point for all Spark Streaming functionality
 </div>
 </div>
 
-Here, a SparkContext object is first created by providing the Spark cluster URL, the Spark home directory and the list of JAR files that are necessary to run the program.
-"Tutorial" is a unique name given to this application to identify it the Spark's web UI.
-Using this SparkContext object, a StreamingContext object is created. `Seconds(1)` tells the context to receive and process data in batches of 1 second.
-Next, we use this context and the login information to create a stream of tweets.
+Here, we create a StreamingContext object by providing the Spark cluster URL, the batch duration we'd like to use for streams, the Spark home directory, and the list of JAR files that are necessary to run the program. "Tutorial" is a unique name given to this application to identify it the Spark's web UI. We elect for a batch duration of 1 second. Next, we use this context and the login information to create a stream of tweets:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
