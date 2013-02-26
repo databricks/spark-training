@@ -322,7 +322,7 @@ First, launch the Spark shell:
 </div>
 </div>
 
-Wait for the prompt to appear.
+The prompt should appear within a few seconds. __Note:__ You may need to hit `[Enter]` once to clear the log output.
 
 1. Warm up by creating an RDD (Resilient Distributed Dataset) named `pagecounts` from the input files.
    In the Spark shell, the SparkContext is already created for you as variable `sc`.
@@ -790,7 +790,11 @@ For your convenience, we have added a couple of helper function to get the param
 - `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/spark-ec2/cluster-url`.
 - `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`.
 
-Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
+
+<div class="alert alert-info">
+<i class="icon-info-sign"> 	</i>
+Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few accounts we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
+</div>
 
 <pre class="nocode">
 my.fancy.username
@@ -980,12 +984,11 @@ Relevant discussions can be found on the Internet at:
 TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
 </pre>
 
-Please verify whether the Twitter username and password has been set correctly in the file `login.txt` as instructed earlier. Make sure you do not have unnecessary trailing spaces.
-
+__Answer:__ Please verify whether the Twitter username and password has been set correctly in the file `login.txt` as instructed earlier. Make sure you do not have unnecessary trailing spaces.
 
 
 ## Further exercises
-Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 30 seconds. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
+Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 5 minutes. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
 
 1. __Get the stream of hashtags from the stream of tweets__:
    To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
@@ -1038,8 +1041,8 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    #Annaba
    </pre>
 
-2. __Count the hashtags over a window 30 seconds__: Next, these hashtags need to be counted over a 30 second moving window.
-   A simple way to do this would be to gather together last 30 seconds of data and process them using the usual map-reduce way - map each tag to a (tag, 1) key-value pair and
+2. __Count the hashtags over a 5 minute window__: Next, we'd like to count these hashtags over a 5 minute moving window.
+   A simple way to do this would be to gather together last 5 minutes of data and process them using the usual map-reduce way - map each tag to a (tag, 1) key-value pair and
    then reduce by adding the counts. However, in this case, counting over a sliding window can be done more intelligently. As the window moves, the counts of the new data can
    be added to the previous window's counts, and the counts of the old data that falls out of the window can be 'subtracted' from the previous window's counts. This can be
    done using DStreams as follows.
@@ -1049,10 +1052,10 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 
    ~~~
        val counts = hashtags.map(tag => (tag, 1))
-                            .reduceByKeyAndWindow(_ + _, _ - _, Seconds(30), Seconds(1))
+                            .reduceByKeyAndWindow(_ + _, _ - _, Seconds(60 * 5), Seconds(1))
    ~~~
 
-   The `_ + _` and `_ - _` are Scala short-hands for specifying functions to add and subtract two numbers. `Seconds(30)` specifies
+   The `_ + _` and `_ - _` are Scala short-hands for specifying functions to add and subtract two numbers. `Seconds(60 * 5)` specifies
    the window size and `Seconds(1)` specifies the movement of the window.
 
    </div>
@@ -1074,12 +1077,12 @@ Next, let's try something more interesting, say, try printing the 10 most popula
          new Function2<Integer, Integer, Integer>() {
            public Integer call(Integer i1, Integer i2) { return i1 - i2; }
          },
-         new Duration(30 * 1000),
+         new Duration(60 * 5 * 1000),
          new Duration(1 * 1000)
        );
    ~~~
 
-   There are two functions that are being defined for adding and subtracting the counts. `new Duration(30 * 1000)`
+   There are two functions that are being defined for adding and subtracting the counts. `new Duration(60 * 5 * 1000)`
    specifies the window size and `new Duration(1 * 1000)` specifies the movement of the window.
 
    </div>
@@ -1177,9 +1180,9 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    </pre>
 
    Note that there are more efficient ways to get the top 10 hashtags. For example, instead of sorting the entire of
-   30-second-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition,
+   5-minute-counts (thereby, incurring the cost of a data shuffle), one can get the top 10 hashtags in each partition,
    collect them together at the driver and then find the top 10 hashtags among them.
-   We leave this as an exercise for the reader to try out.
+   We leave this as an exercise for the reader to try.
 
 
 # Machine Learning
@@ -1309,7 +1312,7 @@ public class WikipediaKMeans {
       sparkHome, jarFile);
 
     int K = 10;
-    double convergeDist = .00001;
+    double convergeDist = .000001;
 
     JavaPairRDD<String, Vector> data = sc.textFile(
         "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
@@ -2086,7 +2089,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
           sparkHome, jarFile);
 
         int K = 10;
-        double convergeDist = .00001;
+        double convergeDist = .000001;
 
         JavaPairRDD<String, Vector> data = sc.textFile(
           "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
