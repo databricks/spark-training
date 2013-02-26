@@ -568,6 +568,8 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 
    To leave the Spark shell, type `exit` at the prompt.
 
+8. You can explore the full RDD API by browsing the [Java/Scala](http://www.cs.berkeley.edu/~pwendell/strataconf/api/core/index.html#spark.RDD) or [Python](http://www.cs.berkeley.edu/~pwendell/strataconf/api/pyspark/index.html) API docs.
+
 ## Running Standalone Spark Programs
 
 Because of time constraints, in this tutorial we focus on ad-hoc style analytics using the Spark shell.
@@ -1195,6 +1197,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    collect them together at the driver and then find the top 10 hashtags among them.
    We leave this as an exercise for the reader to try.
 
+4. __API Reference__: You can explore the full streaming API by referencing the [Java/Scala](http://www.cs.berkeley.edu/~pwendell/strataconf/api/streaming/index.html#spark.streaming.package) API docs.
 
 # Machine Learning
 
@@ -2258,6 +2261,9 @@ We are now set to start implementing the K-means algorithm, so remove or comment
 
 # Where to Go From Here - More Resources and Further Reading
 
+- [Spark API reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/core/index.html#spark.package) (Java/Scala)
+- [Spark API reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/pyspark/index.html) (Python)
+- [Spark Streaming API Reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/streaming/index.html#spark.streaming.package) (Java/Scala)
 - The [official Spark website](http:spark-project.org) - Find examples, documentation, downloads, research papers, news, and more!
 - The [official Shark website](http:shark.cs.berkeley.edu)
 - [Spark on github](http://github.com/mesos/spark) - The official repository.
