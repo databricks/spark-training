@@ -1984,40 +1984,12 @@ We are now set to start implementing the K-means algorithm, so remove or comment
         }
         return bestIndex
       }
-      out / numVectors
-    }
 
-    // Add any new functions you need here
-
-    def main(args: Array[String]) {
-      Logger.getLogger("spark").setLevel(Level.WARN)
-      val sparkHome = "/root/spark"
-      val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
-      val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
-      val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
-
-      val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
-
-      val K = 10
-      val convergeDist = 1e-5
-
-      val data = sc.textFile(
-          "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
-              t => (t.split("#")(0), parseVector(t.split("#")(1)))).cache()
-
-      val count = data.count()
-      println("Number of records " + count)
-
-      // Your code goes here
-      var centroids = data.takeSample(false, K, 42).map(x => x._2)
-      var tempDist = 1.0
-      do {
-        var closest = data.map(p => (closestPoint(p._2, centroids), p._2))
-        var pointsGroup = closest.groupByKey()
-        var newCentroids = pointsGroup.mapValues(ps => average(ps)).collectAsMap()
-        tempDist = 0.0
-        for (i <- 0 until K) {
-          tempDist += centroids(i).squaredDist(newCentroids(i))
+      def average(ps: Seq[Vector]) : Vector = {
+        val numVectors = ps.size
+        var out = new Vector(ps(0).elements)
+        for (i <- 1 until numVectors) {
+          out += ps(i)
         }
         out / numVectors
       }
@@ -2069,11 +2041,9 @@ We are now set to start implementing the K-means algorithm, so remove or comment
           println()
         }
 
+        sc.stop()
         System.exit(0)
       }
-
-      sc.stop();
-      System.exit(0)
     }
 ~~~
     </div>
@@ -2191,10 +2161,9 @@ We are now set to start implementing the K-means algorithm, so remove or comment
           }
           System.out.println();
         }
+        sc.stop();
         System.exit(0);
       }
-      sc.stop();
-      System.exit(0);
     }
 ~~~
     </div>
