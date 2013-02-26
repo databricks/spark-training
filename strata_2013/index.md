@@ -615,7 +615,8 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <pre class="prettyprint lang-sql">
    shark> create table wikistats_cached as select * from wikistats where project_code="en";
-   <span class="nocode">...
+   <span class="nocode">
+   ...
    Time taken: 127.5 seconds
    13/02/05 21:57:34 INFO CliDriver: Time taken: 127.5 seconds</span></pre>
 
@@ -623,7 +624,8 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <pre class="prettyprint lang-sql">
    shark> select count(1) from wikistats_cached;
-   <span class="nocode">...
+   <span class="nocode">
+   ...
    122352588
    Time taken: 7.632 seconds
    12/08/18 21:23:13 INFO CliDriver: Time taken: 7.632 seconds</span></pre>
@@ -632,35 +634,43 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <pre class="prettyprint lang-sql">
    shark> select dt, sum(page_views) from wikistats_cached group by dt;
-   <span class="nocode">...
+   <span class="nocode">
+   ...
    20090507-070000	6292754
    20090505-120000	7304485
    20090506-110000	6609124
    Time taken: 12.614 seconds
    13/02/05 22:05:18 INFO CliDriver: Time taken: 12.614 seconds</span></pre>
 
-1. In the Spark section, we ran a very expensive query to compute the top 50 pages. It is fairly simple to do the same thing in SQL.
+1. In the Spark section, we ran a very expensive query to compute pages that were viewed more than 200,000 times. It is fairly simple to do the same thing in SQL.
 
-   There are two steps we can take to make the query run faster. (1) In the first command below, we turn off map-side aggregation (a.k.a. combiners). Map-side aggregation doesn't improve run-time since each page appears only once in each partition, so we are building a giant hash table on each partition for nothing.
-(2) In the second command below, we increase the number of reducers used in this query to 50. Note that the
-default number of reducers, which we have been using so far in this section, is 1.
-
-   Also note that the "50" in the second command refers to the number of reducers while the "50" in the third command refers to the number of Wikipedia pages to return.
+   To make the query run faster, we increase the number of reducers used in this query to 50 in the first command. Note that the default number of reducers, which we have been using so far in this section, is 1.
 
    <pre class="prettyprint lang-sql">
    shark> set mapred.reduce.tasks=50;
-   shark> select page_name, sum(page_views) as views from wikistats_cached group by page_name order by views desc limit 50;
-   <span class="nocode">...
-   Lost_(TV_series)	121689
-   World_War_II	121262
-   Sabretooth_(comics)	118382
-   USS_Freedom_(LCS-1)	115561
-   external.png	115239
-   Tin_Man_%28Stargate_SG-1%29	115134
-   Necrotizing_fasciitis	114939
-   List_of_Scrubs_episodes	114932
-   Time taken: 129.217 seconds
-   13/02/05 22:11:56 INFO CliDriver: Time taken: 129.217 seconds</span></pre>
+   shark> select page_name, sum(page_views) as views from wikistats_cached group by page_name having views > 200000;
+   <span class="nocode">
+   ...
+   index.html      310642
+   Swine_influenza 534253
+   404_error/      43822489
+   YouTube 203378
+   X-Men_Origins:_Wolverine        204604
+   Dom_DeLuise     396776
+   Special:Watchlist       311465
+   The_Beatles     317708
+   Special:Search  17657352
+   Special:Random  5816953
+   Special:Export  248624
+   Scrubs_(TV_series)      234855
+   Cinco_de_Mayo   695817
+   2009_swine_flu_outbreak 237677
+   Deadpool_(comics)       382510
+   Wiki    464935
+   Special:Randompage      3521336
+   Main_Page       18730347
+   Time taken: 68.693 seconds
+   13/02/26 08:12:42 INFO CliDriver: Time taken: 68.693 seconds</span></pre>
 
 
 1. With all the warm up, now it is your turn to write queries. Write Hive QL queries to answer the following questions:
