@@ -322,7 +322,7 @@ First, launch the Spark shell:
 </div>
 </div>
 
-Wait for the prompt to appear.
+The prompt should appear within a few seconds. __Note:__ You may need to hit `[Enter]` once to clear the log output.
 
 1. Warm up by creating an RDD (Resilient Distributed Dataset) named `pagecounts` from the input files.
    In the Spark shell, the SparkContext is already created for you as variable `sc`.
