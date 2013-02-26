@@ -45,12 +45,12 @@ table td, table th {
   <td class="yes">yes</td>
   <td class="no">no</td>
 </tr><tr>
-  <td>ML (featurization)</td>
-  <td class="yes">yes</td>
-  <td class="no">no</td>
-  <td class="yes">yes</td>
+  <td class="dimmed"><b>Optional:</b> Machine Learning :: featurization</td>
+  <td class="dimmed yes">yes</td>
+  <td class="dimmed no">no</td>
+  <td class="dimmed yes">yes</td>
 </tr><tr>
-  <td>K-Means</td>
+  <td>Machine Learning :: K-Means</td>
   <td class="yes">yes</td>
   <td class="yes">yes</td>
   <td class="yes">yes</td>
