@@ -594,7 +594,8 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <pre class="prettyprint lang-sql">
    shark> create external table wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';
-   <span class="nocode">...
+   <span class="nocode">
+   ...
    Time taken: 0.232 seconds
    13/02/05 21:31:25 INFO CliDriver: Time taken: 0.232 seconds</span></pre>
 
