@@ -828,7 +828,7 @@ Next, we use this context and the login information to create a stream of tweets
 <div data-lang="java" markdown="1">
 ~~~
     JavaDStream<Status> tweets =
-      ScalaHelper.twitterStream(twitterUsername, twitterPassword, ssc);
+      ssc.twitterStream(twitterUsername, twitterPassword);
 ~~~
 </div>
 </div>
