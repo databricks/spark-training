@@ -1197,7 +1197,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    collect them together at the driver and then find the top 10 hashtags among them.
    We leave this as an exercise for the reader to try.
 
-4. __API Reference__: You can explore the full streaming API by referencing the [Java/Scala](http://www.cs.berkeley.edu/~pwendell/strataconf/api/streaming/index.html#spark.streaming.package) API docs.
+4. __API Reference__: You can explore the full streaming API by referencing the [Java/Scala](http://www.cs.berkeley.edu/~pwendell/strataconf/api/streaming/index.html#spark.streaming.DStream) API docs.
 
 # Machine Learning
 
