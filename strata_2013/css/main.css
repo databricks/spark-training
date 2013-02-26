@@ -224,3 +224,7 @@ td.no {
   text-align: center;
 }
 
+td.dimmed, td.dimmed.yes, td.dimmed.no {
+  color: #888;
+  background-color: #EEE;
+}
