@@ -416,11 +416,13 @@ Wait for the prompt to appear.
 
    `http://<master_node_hostname>:8080`
 
-   You should have been given `master_node_hostname` at the beginning of the tutorial, or you might have [launched your own cluster](launching-a-cluster.html) and made of note of it then. You should see the Spark Standalone mode web interface, similar to the following (yours will probably show five slaves).
+   You should have been given `master_node_hostname` at the beginning of the tutorial, or you might have [launched your own cluster](launching-a-cluster.html) and made a note of it then. You should see the Spark Standalone mode web interface, similar to the following (yours will probably show five slaves).
 
    ![Spark Standalone Web UI](img/standalone-webui640.png)
 
-   When your count does finish running, it should return the following result: `res: Long = 329641466`
+   When your count does finish running, it should return the following result:
+
+       res: Long = 329641466
 
 4. Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
    For example, the project code "en" indicates an English page.
@@ -467,7 +469,7 @@ Wait for the prompt to appear.
        13/02/05 20:29:01 INFO storage.BlockManagerMasterActor$BlockManagerInfo: Added rdd_2_172 in memory on ip-10-188-18-127.ec2.internal:42068 (size: 271.8 MB, free: 5.5 GB)
 
 6. Let's try something fancier.
-   Generate a histogram of total page views on Wikipedia English pages for May to May 7, 2009.
+   Generate a histogram of total page views on Wikipedia English pages for the date range represented in our dataset (May 5 to May 7, 2009).
    The high level idea of what we'll be doing is as follows.
    First, we generate a key value pair for each line; the key is the date (the first eight characters of the first field), and the value is the number of pageviews for that date (the fourth field).
 
@@ -506,7 +508,7 @@ Wait for the prompt to appear.
    </div>
 
    The `collect` method at the end converts the result from an RDD to an array.
-   Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res` is automatically created.
+   Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res`<i>N</i> is automatically created.
 
    We can combine the previous three commands into one:
 
@@ -523,52 +525,41 @@ Wait for the prompt to appear.
    </div>
    </div>
 
-7. Suppose we want to find the top 50 most-viewed pages during these three days.
-   Conceptually, this task is very similar to the previous query.
+7. Suppose we want to find pages that were viewed more than 200,000 times during the three days covered by our dataset.
+   Conceptually, this task is similar to the previous query.
    But, given the large number of pages (23 million distinct page names), the new task is very expensive.
-   We are doing a super expensive group-by with a lot of network shuffling of data.
+   We are doing an expensive group-by with a lot of network shuffling of data.
 
-   Also, we would like to use the distributed sorting in Spark rather than loading all 23 million results to the master node to take the top K.
-   Spark provides a `sortByKey` method for an RDD, but the value needs to come before the key in a tuple when running this method.
-   So make sure you swap the key and value in each tuple that results from `reduceByKey` before running `sortByKey`.
-
-   To recap, first we find the fields in each line of data (`map(l => l.split(" "))`).
-   Next, we extract the fields for page name and number of page views (`map(l => (l(2), l(3).toInt))`).
-   We reduce by key again, this time with 40 reducers (`reduceByKey(_+_, 40)`).
-   Finally, we swap the key and values (`map(x => (x._2, x._1))`), sort by key in descending order (the `false` argument specifies descending order and `true` would specify ascending), and return the top 50 results (`take`). The full command is:
+   To recap, first we split each line of data into its respective fields.
+   Next, we extract the fields for page name and number of page views.
+   We reduce by key again, this time with 40 reducers.
+   Then we filter out pages with less than 200,000 total views over our time window represented by our dataset.
 
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
-       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).map(x => (x._2, x._1)).sortByKey(false).take(50).foreach(println)
-       ...
-       (43822489,404_error/)
-       (18730347,Main_Page)
+       scala> enPages.map(l => l.split(" ")).map(l => (l(2), l(3).toInt)).reduceByKey(_+_, 40).filter(x => x._2 > 200000).map(x => (x._2, x._1)).collect.foreach(println)
+       (203378,YouTube)
        (17657352,Special:Search)
-       (5816953,Special:Random)
-       (3521336,Special:Randompage)
-       (695817,Cinco_de_Mayo)
-       (534253,Swine_influenza)
-       (464935,Wiki)
-       (396776,Dom_DeLuise)
-       (382510,Deadpool_(comics))
-       (317708,The_Beatles)
        (311465,Special:Watchlist)
-       (310642,index.html)
        (248624,Special:Export)
        (237677,2009_swine_flu_outbreak)
-       (234855,Scrubs_(TV_series))
+       (396776,Dom_DeLuise)
+       (5816953,Special:Random)
+       (18730347,Main_Page)
+       (534253,Swine_influenza)
+       (310642,index.html)
+       (464935,Wiki)
+       (382510,Deadpool_(comics))
+       (3521336,Special:Randompage)
        (204604,X-Men_Origins:_Wolverine)
-       (203378,YouTube)
-       (193648,Mother%27s_Day)
-       (192157,Kwan_Yin)
-       (176646,Search)
-       (176173,Star_Trek_(film))
-       ...
+       (695817,Cinco_de_Mayo)
+       (317708,The_Beatles)
+       (234855,Scrubs_(TV_series))
+       (43822489,404_error/)
    </div>
    <div data-lang="python" markdown="1">
-       >>> # TODO: sortByKey() isn't implemented in PySpark yet.
-       >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[2], int(x[3]))).reduceByKey(lambda x, y: x + y, 40).map(lambda x: (x[1], x[0])).sortByKey(false).take(50)
-       TODO
+       >>> enPages.map(lambda x: x.split(" ")).map(lambda x: (x[2], int(x[3]))).reduceByKey(lambda x, y: x + y, 40).filter(lambda x: x[1] > 200000).map(lambda x: (x[1], x[0])).collect()
+       [(5816953, u'Special:Random'), (18730347, u'Main_Page'), (534253, u'Swine_influenza'), (382510, u'Deadpool_(comics)'), (204604, u'X-Men_Origins:_Wolverine'), (203378, u'YouTube'), (43822489, u'404_error/'), (234855, u'Scrubs_(TV_series)'), (248624, u'Special:Export'), (695817, u'Cinco_de_Mayo'), (311465, u'Special:Watchlist'), (396776, u'Dom_DeLuise'), (310642, u'index.html'), (317708, u'The_Beatles'), (237677, u'2009_swine_flu_outbreak'), (3521336, u'Special:Randompage'), (464935, u'Wiki'), (17657352, u'Special:Search')]
    </div>
    </div>
 
@@ -961,7 +952,9 @@ Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
 ...
 </pre>
 
-To stop the application, use `Ctrl + c` . __FAQ__: If you see the following message, it means that the authentication with Twitter failed.
+To stop the application, use `Ctrl + c` .
+
+__FAQ__: If you see the following message, it means that the authentication with Twitter failed.
 
 <pre class="nocode">
 13/02/04 23:41:57 INFO streaming.NetworkInputTracker: De-registered receiver for network stream 0 with message 401:Authentication credentials (https://dev.twitter.com/pages/auth) were missing or incorrect. Ensure that you have set valid consumer key/secret, access token/secret, and the system clock is in sync.
@@ -2248,3 +2241,27 @@ We are now set to start implementing the K-means algorithm, so remove or comment
     </div>
 
 1. **Challenge Exercise:** The K-Means implementation uses a `groupBy` and `mapValues` to compute the new centers. This can be optimized by using a running sum of the vectors that belong to a cluster and running counter of the number of vectors present in a cluster. How would you use the Spark API to implement this?
+
+# Where to Go From Here - More Resources and Further Reading
+
+- The [official Spark website](http:spark-project.org) - Find examples, documentation, downloads, research papers, news, and more!
+- The [official Shark website](http:shark.cs.berkeley.edu)
+- [Spark on github](http://github.com/mesos/spark) - The official repository.
+- Check out talks (videos and slides) from the [first AMP Camp Big Data Bootcamp](http://ampcamp.berkeley.edu)
+- The Spark mailing lists:
+    - [spark-users](http://groups.google.com/group/spark-users) is for usage questions, help, and announcements
+    - [spark-developers](http://groups.google.com/group/spark-developers) is for people who want to contribute code to Spark
+- The [Spark issue tracker](https://spark-project.atlassian.net/browse/SPARK)
+- Various [Spark related articles on Quora](http://www.quora.com/Spark-Cluster-Computing)
+- Some blog posts about Spark:
+    - [Top 5 Open Source Projects in Big Data](http://siliconangle.com/blog/2013/02/04/top-5-open-source-projects-in-big-data-breaking-analysis/). By Molly Sassmann, February 4, 2013
+    - [Big Data Up to 100X Faster – Researchers Crank Up the Speed Dial](http://siliconangle.com/blog/2012/11/29/big-data-up-to-100x-faster-researchers-crank-up-the-speed-dial/). By John Casaretto, November 29, 2012
+    - [Introduction to Spark, Shark, BDAS and AMPLab](http://www.dbms2.com/2012/12/13/introduction-to-spark-shark-bdas-and-amplab/). On DBMS2, a blog by Curt Monash, December 13, 2012
+    - [Spark, Shark, and RDDs — technology notes](http://www.dbms2.com/2012/12/13/spark-shark-and-rdds-technology-notes/). On DBMS2, a blog by Curt Monash, December 13, 2012
+    - [Unit testing with Spark](http://blog.quantifind.com/posts/spark-unit-test/). On Quantfind’s Blog, by Imran Rashid, January 4, 2013
+    - [Configuring Spark’s logs](http://blog.quantifind.com/posts/logging-post/). On Quantfind’s Blog, by Imran Rashid, January 4, 2013
+    - [What Makes Spark Exciting](http://dev.bizo.com/2013/01/what-makes-spark-exciting.html). On Bizo Development Blog by Stephen Haberman, January 21, 2013
+    - [The future of big data with BDAS, the Berkeley Data Analytics Stack](http://strata.oreilly.com/2013/02/the-future-of-big-data-with-bdas-the-berkeley-data-analytics-stack.html#more-54859). On the O’Reilly Strata blog, by Andy Konwinski, Ion Stoica, Matei Zaharia, February 18, 2013
+    - [Five big data predictions for 2013](http://strata.oreilly.com/2013/01/five-big-data-predictions-for-2013.html). On the O’Reilly Strata blog, by Ed Dumbill, January 16, 2013
+    - [Shark: Real-time queries and analytics for big data](http://strata.oreilly.com/2012/11/shark-real-time-queries-and-analytics-for-big-data.html). On the O’Reilly Strata blog, by Ben Lorica, November 27, 2012
+    - [Seven reasons why I like Spark](http://strata.oreilly.com/2012/08/seven-reasons-why-i-like-spark.html). On the O’Reilly Strata blog, by Ben Lorica, August 21, 2012 
