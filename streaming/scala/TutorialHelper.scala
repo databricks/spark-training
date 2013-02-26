@@ -6,20 +6,10 @@ import org.apache.log4j.Logger
 import org.apache.log4j.Level
 import sys.process.stringSeqToProcess
 
-class TutorialHelper(ssc: StreamingContext) {
-  def twitterStream(username: String, password: String, filters: Seq[String] = Nil) = {
-    val stream = new TwitterInputDStream(ssc, username, password, filters, StorageLevel.MEMORY_ONLY_SER_2)
-    ssc.registerInputStream(stream)
-    stream
-    }
-  }
-
 object TutorialHelper {
   Logger.getLogger("spark").setLevel(Level.WARN)
   Logger.getLogger("spark.streaming.NetworkInputTracker").setLevel(Level.INFO)
     
-  implicit def convert(ssc: StreamingContext) = new TutorialHelper(ssc)
-  
   /** Returns the Twitter username and password from the file login.txt */
   def getTwitterCredentials (): (String, String) = {
     val file = new File("../login.txt")
