@@ -820,14 +820,13 @@ This object serves as the main entry point for all Spark Streaming functionality
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val sc = new SparkContext(sparkUrl, "Tutorial", sparkHome, Seq(jarFile))
-    val ssc = new StreamingContext(sc, Seconds(1))
+    val ssc = new StreamingContext(sparkUrl, "Tutorial", Seconds(1), sparkHome, Seq(jarFile))
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    JavaSparkContext sc = new JavaSparkContext(sparkUrl, "Tutorial", sparkHome, jarFile);
-    JavaStreamingContext ssc = new JavaStreamingContext(sc, new Duration(1000));
+    JavaStreamingContext ssc = new JavaStreamingContext(
+      sparkUrl, "Tutorial", new Duration(1000), sparkHome, new String[]{jarFile});
 ~~~
 </div>
 </div>
@@ -884,7 +883,7 @@ We also need to set an HDFS for periodic checkpointing of the intermediate data.
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    ssc.checkpoint(checkpointDir, new Duration(10000));
+    ssc.checkpoint(checkpointDir);
 ~~~
 </div>
 </div>
