@@ -2,18 +2,22 @@
 // From docs.scala-lang.org
 function styleCode()
 	{
-		if (typeof disableStyleCode != "undefined")
-		{
-				return;
+		if (typeof disableStyleCode != "undefined") {
+      return;
 		}
 		var a = false;
-		$("pre code").parent().each(function()
-		{
-				if (!$(this).hasClass("prettyprint"))
-				{
-						$(this).addClass("prettyprint lang-scala linenums");
-						a = true
-				}
+		$(".codetabs pre code").parent().each(function() {
+      if (!$(this).hasClass("prettyprint")) {
+        var lang = $(this).parent().data("lang");
+        if (lang == "python") {
+          lang = "py"
+        }
+        if (lang == "bash") {
+          lang = "bsh"
+        }
+        $(this).addClass("prettyprint lang-"+lang+" linenums");
+				a = true
+      }
 		});
 		if (a) { prettyPrint() }
 }
