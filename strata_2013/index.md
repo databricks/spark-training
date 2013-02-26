@@ -1242,7 +1242,7 @@ object WikipediaKMeans {
     val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
 
     val K = 10
-    val convergeDist = 1e-6
+    val convergeDist = 1e-5
 
     val data = sc.textFile(
         "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
@@ -1282,8 +1282,8 @@ public class WikipediaKMeans {
     JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
       sparkHome, jarFile);
 
-    int K = 4;
-    double convergeDist = .000001;
+    int K = 10;
+    double convergeDist = .00001;
 
     JavaPairRDD<String, Vector> data = sc.textFile(
         "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
@@ -1329,7 +1329,7 @@ if __name__ == "__main__":
     master = open("/root/spark-ec2/cluster-url").read().strip()
     masterHostname = open("/root/spark-ec2/masters").read().strip()
     sc = SparkContext(master, "PythonKMeans")
-    K = 4
+    K = 10
     convergeDist = 1e-5
 
     lines = sc.textFile(
@@ -1975,7 +1975,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
       val sc = new SparkContext(master, "WikipediaKMeans", sparkHome, Seq(jarFile))
   
       val K = 10
-      val convergeDist = 1e-6
+      val convergeDist = 1e-5
   
       val data = sc.textFile(
           "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
@@ -2064,8 +2064,8 @@ We are now set to start implementing the K-means algorithm, so remove or comment
       JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
         sparkHome, jarFile);
 
-      int K = 4;
-      double convergeDist = .000001;
+      int K = 10;
+      double convergeDist = .00001;
 
       JavaPairRDD<String, Vector> data = sc.textFile(
         "hdfs://" + masterHostname + ":9000/wikistats_featurized").map(
@@ -2178,7 +2178,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
       masterHostname = open("/root/spark-ec2/masters").read().strip()
       sc = SparkContext(master, "PythonKMeans")
       K = 10
-      convergeDist = 1e-4
+      convergeDist = 1e-5
   
       lines = sc.textFile(
           "hdfs://" + masterHostname + ":9000/wikistats_featurized")

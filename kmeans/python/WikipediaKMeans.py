@@ -22,7 +22,7 @@ if __name__ == "__main__":
     master = open("/root/spark-ec2/cluster-url").read().strip()
     masterHostname = open("/root/spark-ec2/masters").read().strip()
     sc = SparkContext(master, "PythonKMeans")
-    K = 4
+    K = 10
     convergeDist = 1e-5
 
     lines = sc.textFile(
