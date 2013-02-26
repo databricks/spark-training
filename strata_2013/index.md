@@ -1314,9 +1314,7 @@ import numpy as np
 from pyspark import SparkContext
 
 def setClassPath():
-    oldClassPath = ''
-    if 'SPARK_CLASSPATH' in os.environ:
-        oldClassPath = os.environ['SPARK_CLASSPATH']
+    oldClassPath = os.environ.get('SPARK_CLASSPATH', '')
     cwd = os.path.dirname(os.path.realpath(__file__))
     os.environ['SPARK_CLASSPATH'] = cwd + ":" + oldClassPath
 
@@ -2149,9 +2147,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
   from pyspark import SparkContext
   
   def setClassPath():
-      oldClassPath = ''
-      if 'SPARK_CLASSPATH' in os.environ:
-          oldClassPath = os.environ['SPARK_CLASSPATH']
+      oldClassPath = os.environ.get('SPARK_CLASSPATH', '')
       cwd = os.path.dirname(os.path.realpath(__file__))
       os.environ['SPARK_CLASSPATH'] = cwd + ":" + oldClassPath
   
