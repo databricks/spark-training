@@ -799,7 +799,11 @@ For your convenience, we have added a couple of helper function to get the param
 - `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/spark-ec2/cluster-url`.
 - `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`.
 
-Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few account we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
+
+<div class="alert alert-info">
+<i class="icon-info-sign"> 	</i>
+Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few accounts we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
+</div>
 
 <pre class="nocode">
 my.fancy.username
@@ -964,7 +968,9 @@ Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
 ...
 </pre>
 
-To stop the application, use `Ctrl + c` . Instead of this, if you see the following on your screen, it means that the authentication with Twitter failed.
+To stop the application, use `Ctrl + c` . 
+
+__Question: I don't see the above output. Instead I see the following when I run the program.__
 
 <pre class="nocode">
 13/02/04 23:41:57 INFO streaming.NetworkInputTracker: De-registered receiver for network stream 0 with message 401:Authentication credentials (https://dev.twitter.com/pages/auth) were missing or incorrect. Ensure that you have set valid consumer key/secret, access token/secret, and the system clock is in sync.
@@ -990,8 +996,7 @@ Relevant discussions can be found on the Internet at:
 TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
 </pre>
 
-Please verify whether the Twitter username and password has been set correctly in the file `login.txt` as instructed earlier. Make sure you do not have unnecessary trailing spaces.
-
+__Answer:__ Please verify whether the Twitter username and password has been set correctly in the file `login.txt` as instructed earlier. Make sure you do not have unnecessary trailing spaces.
 
 
 ## Further exercises
