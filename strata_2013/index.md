@@ -1,10 +1,10 @@
 ---
 layout: global
-title: Strata 2013 Big Data Crashcourse
+title: AMP Camp Two - Big Data Bootcamp Strata 2013
 ---
-# Introduction to Strata 2013 Big Data Crashcourse
+# Introduction
 
-Welcome to the hands-on tutorial in our Strata 2013 one-day Crashcourse on Big Data.
+Welcome to the hands-on tutorial in our Strata 2013 one-day AMP Camp Bootcamp on Big Data.
 In addition to the amazing O'Reilly Strata folks, this event has been organized by Professors and PhD students in the UC Berkeley AMPLab.
 
 This tutorial consists of a series of exercises that will have you working directly with components of our open-source software stack, called the Berkeley Data Analytics Stack (BDAS), that have been released and are ready to use.
@@ -2264,8 +2264,8 @@ We are now set to start implementing the K-means algorithm, so remove or comment
 - [Spark API reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/core/index.html#spark.package) (Java/Scala)
 - [Spark API reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/pyspark/index.html) (Python)
 - [Spark Streaming API Reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/streaming/index.html#spark.streaming.package) (Java/Scala)
-- The [official Spark website](http:spark-project.org) - Find examples, documentation, downloads, research papers, news, and more!
-- The [official Shark website](http:shark.cs.berkeley.edu)
+- [Official Spark website](http://spark-project.org) - Find examples, documentation, downloads, research papers, news, and more!
+- [Official Shark website](http://shark.cs.berkeley.edu)
 - [Spark on github](http://github.com/mesos/spark) - The official repository.
 - Check out talks (videos and slides) from the [first AMP Camp Big Data Bootcamp](http://ampcamp.berkeley.edu)
 - The Spark mailing lists:
