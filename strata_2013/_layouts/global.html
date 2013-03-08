@@ -40,9 +40,11 @@
 
         <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
+        <div class="topbar">
+          <h1>{{ page.title }}</h1>
+        </div>
         <div class="container" id="content">
-          <h1 class="title">{{ page.title }}</h1>
-          <div id="toc"></div>
+          <div id="chapter-toc" class="chapter-toc"></div>
           {{ content }}
         </div> <!-- /container -->
 

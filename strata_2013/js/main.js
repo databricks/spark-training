@@ -73,24 +73,26 @@ function codeTabs() {
 	});
 }
 
+function makeCollapsable(elt, accordionClass, accordionBodyId, title) {
+		$(elt).addClass("accordion-inner");
+		$(elt).wrap('<div class="accordion ' + accordionClass + '"></div>')
+		$(elt).wrap('<div class="accordion-group"></div>')
+		$(elt).wrap('<div id="' + accordionBodyId + '" class="accordion-body collapse"></div>')
+		$(elt).parent().before(
+			 '<div class="accordion-heading">' +
+				 '<a class="accordion-toggle" data-toggle="collapse" href="#' + accordionBodyId + '">' +
+					 title +
+				 '</a>' +
+			 '</div>'
+		);
+}
 
 function viewSolution() {
 	var counter = 0
 	$("div.solution").each(function() {
 		var id = "solution_" + counter
 
-		$(this).addClass("accordion-inner");
-		$(this).wrap('<div class="accordion" />')
-		$(this).wrap('<div class="accordion-group" />')
-		$(this).wrap('<div id="' + id + '" class="accordion-body collapse" />')
-		$(this).parent().before(
-			 '<div class="accordion-heading">' +
-				 '<a class="accordion-toggle" data-toggle="collapse" href="#' + id + '">' +
-					 '<i class="icon-ok-sign"> </i>' +
-					 'View Solution' +
-				 '</a>' +
-			 '</div>'
-		);
+    makeCollapsable(this, "", id, '<i class="icon-ok-sign"> </i>' + "View Solution");
 
 		counter++;
 	});
@@ -100,6 +102,8 @@ function viewSolution() {
 $(document).ready(function() {
 	codeTabs();
 	viewSolution();
-	$('#toc').toc({exclude: ''});
+	$('#chapter-toc').toc({exclude: '', context: '.container'});
+  $('#chapter-toc').prepend('<p class="chapter-toc-header">Table of Contents</p>');
+  makeCollapsable($('#global-toc'), "", "global-toc", "Show Table of Contents");
 	styleCode();
 });
