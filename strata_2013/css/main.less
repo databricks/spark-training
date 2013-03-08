@@ -39,6 +39,15 @@
   margin-left: 10px;
 }
 
+/* Override bootstrap-responsive's rule that removes the top-padding
+ * for views less than 979 pixels wide.
+ */
+@media (max-width: 979px) {
+  body {
+    padding-top: 60px;
+  }
+}
+
 body #content {
   line-height: 1.6; /* Inspired by Github's wiki style */
 }
@@ -188,13 +197,18 @@ a:hover code {
   border-bottom: 1px solid #e1e1e8;
 }
 
+
 .chapter-toc {
-  float: right;
-  width: 40%;
-  padding-top: 8px;
   margin: 10px 0 10px 10px;
   background-color: #f7f7f9;
   border: 1px solid #e1e1e8;
+  padding-top: 8px;
+}
+@media (min-width: 480px) {
+  .chapter-toc {
+    float: right;
+    width: 40%;
+  }
 }
 
 .chapter-toc > ul {
