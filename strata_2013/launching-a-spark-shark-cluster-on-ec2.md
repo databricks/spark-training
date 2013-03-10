@@ -1,7 +1,7 @@
 ---
 layout: global
 title: Launching a Spark/Shark Cluster on EC2
-prev: introduction.html
+prev: index.html
 next: logging-into-the-cluster.html
 ---
 
