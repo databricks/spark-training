@@ -8,7 +8,8 @@
 
 .prettyprint {
   padding: 8px;
-  background-color: #f7f7f9;
+  /* Modified by andyk to match Bootstrap @wellBackground variable  */
+  background-color: #f5f5f5;
   border: 1px solid #e1e1e8;
 }
 .prettyprint.linenums {

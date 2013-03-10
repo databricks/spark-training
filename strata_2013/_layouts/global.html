@@ -9,18 +9,14 @@
         <title>{{ page.title }}</title>
         <meta name="description" content="">
 
-        <link rel="stylesheet" href="css/bootstrap.min.css">
-        <style>
-            body {
-                padding-top: 60px;
-                padding-bottom: 40px;
-            }
-        </style>
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.css">
         <meta name="viewport" content="width=device-width">
-        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
-        <link rel="stylesheet" href="css/font-awesome.min.css">
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.css">
+        <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
         <!--[if IE 7]>
-        <link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css">
+        <link rel="stylesheet" href="assets/css/vendorfont-awesome-ie7.min.css">
         <![endif]-->
         <link rel="stylesheet" href="css/main.css">
 
@@ -40,13 +36,38 @@
 
         <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
-        <div class="topbar">
-          <h1>{{ page.title }}</h1>
+        <div class="bar topbar">
+          {% include left-page-nav-button.html %}
+          {% include right-page-nav-button.html %}
+          <div class="site-title">{{ site.title }}</div>
+          <div class="btn-group">
+            <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+              {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
+            </div>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+              {% include chapter-list.html %}
+            </ul>
+          </div>
         </div>
         <div class="container" id="content">
+          {% unless page.skip-chapter-toc %}
           <div id="chapter-toc" class="chapter-toc"></div>
+          {% endunless %}
           {{ content }}
         </div> <!-- /container -->
+        <div class="bar bottombar">
+          {% include left-page-nav-button.html %}
+          {% include right-page-nav-button.html %}
+          <div class="btn-group dropup">
+            <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+              {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
+            </div>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+              {% include chapter-list.html %}
+            </ul>
+          </div>
+          <div class="site-title">{{ site.title }}</div>
+        </div>
 
         <script src="js/vendor/jquery-1.8.3.min.js"></script>
         <script src="js/vendor/bootstrap.min.js"></script>

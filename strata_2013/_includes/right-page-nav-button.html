@@ -1,0 +1,7 @@
+{% if page.next %}
+<a class="btn page-nav" style="float:right" href="{{page.next}}">
+{% else %}
+<a class="btn page-nav" disabled="disable" style="float:right" href="#">
+{% endif %}
+  <i class="icon-arrow-right icon-2x"></i>
+</a>

@@ -3,12 +3,12 @@ include FileUtils
 
 if ENV['SKIP_LESSC'] != '1'
   if system("which lessc > /dev/null 2>&1")
-    cd("css")
+    cd("less")
 
     Dir.foreach('.') do |file|
       if file.end_with?(".less")
-        puts "Running lessc " + file + " > " + file + ".css from " + pwd
-        `lessc #{file} > #{file.gsub(".less","")}.css`
+        puts "Running lessc " + file + " > ../css/" + file.gsub(".less","") + ".css from " + pwd
+        `lessc #{file} > ../css/#{file.gsub(".less","")}.css`
       end
     end
 

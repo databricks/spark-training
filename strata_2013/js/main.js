@@ -103,7 +103,7 @@ $(document).ready(function() {
 	codeTabs();
 	viewSolution();
 	$('#chapter-toc').toc({exclude: '', context: '.container'});
-  $('#chapter-toc').prepend('<p class="chapter-toc-header">Table of Contents</p>');
+  $('#chapter-toc').prepend('<p class="chapter-toc-header">In This Chapter</p>');
   makeCollapsable($('#global-toc'), "", "global-toc", "Show Table of Contents");
 	styleCode();
 });

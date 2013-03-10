@@ -32,25 +32,14 @@
   padding: 5px;
   margin-left: 10px;
 }
-/* Override bootstrap-responsive's rule that removes the top-padding
- * for views less than 979 pixels wide.
- */
-@media (max-width: 979px) {
-  body {
-    padding-top: 60px;
-  }
+body {
+  padding-top: 60px;
+  padding-bottom: 0;
 }
 body #content {
   line-height: 1.6;
   /* Inspired by Github's wiki style */
 
-}
-.title {
-  font-size: 32px;
-}
-h1 {
-  font-size: 28px;
-  margin-top: 12px;
 }
 h2 {
   font-size: 24px;
@@ -144,9 +133,14 @@ a:hover code {
   text-decoration: underline;
 }
 .topbar {
+  margin: -60px auto 25px;
+}
+.bottombar {
+  margin: 25px auto 0;
+}
+.bar {
   text-align: center;
   max-width: 914px;
-  margin: -60px auto 25px;
   border: 1px solid #d4d4d4;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -155,9 +149,22 @@ a:hover code {
   -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
   -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
-}
-.topbar h1 {
   background-color: #f7f7f9;
+}
+.bar > a.btn {
+  margin: 30px 25px 0;
+}
+.bar div.btn-group {
+  margin: 10px 0;
+}
+.bar ul.dropdown-menu {
+  text-align: left;
+}
+.site-title {
+  font-style: italic;
+  font-size: 1.5em;
+  font-weight: bold;
+  padding: 15px 0 10px;
 }
 .container {
   max-width: 914px;
@@ -192,26 +199,11 @@ a:hover code {
   float: right;
   padding: 8px 8px 20px 8px;
   margin: 10px;
-  background-color: #f7f7f9;
+  background-color: #f5f5f5;
   border: 1px solid #e1e1e8;
 }
-/**
- * Make dropdown menus in nav bars show on hover instead of click
- * using solution at http://stackoverflow.com/questions/8878033/how-
- * to-make-twitter-bootstrap-menu-dropdown-on-hover-rather-than-click
- **/
-.dropdown-menu {
-  /* Remove the default 2px top margin which causes a small
-    gap between the hover trigger area and the popup menu */
-
-  margin-top: 0;
-}
-ul.nav li.dropdown:hover ul.dropdown-menu {
-  display: block;
-}
-a.menu:after,
-.dropdown-toggle:after {
-  content: none;
+ul.dropdown-menu {
+  margin: 0 auto;
 }
 /* Table of contents; adapted from Scala documentation site */
 div#toc ul {
