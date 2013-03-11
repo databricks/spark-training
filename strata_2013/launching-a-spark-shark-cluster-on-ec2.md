@@ -68,23 +68,15 @@ The following are some errors that you may encounter, and other frequently asked
 
 
 <div class="accordion" id="q-accordion">
-  <div class="accordion-group">
-    <div class="accordion-heading">
-      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q1" data-parent="#q-accordion">
-        I get an error when running this command: <code>UNPROTECTED KEY FILE...</code>
-      </a>
-      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q2" data-parent="#q-accordion">
-        I get an error when running this command: <code>Your requested instance type (m1.xlarge) is not supported...</code>
-      </a>
-      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
-        I get an error when running this command: <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
-      </a>
-      <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
-        Can I specify the instances types while creating the cluster?
-      </a>
-    </div>
-    <div id="collapse-q1" class="accordion-body collapse">
-      <div class="accordion-inner" markdown="1">
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q1" data-parent="#q-accordion">
+        I get the following error when running this command: <code>UNPROTECTED KEY FILE...</code>
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q1" class="accordion-body collapse">
+<div class="accordion-inner" markdown="1">
 
 __Question: I got the following permission error when I ran the above command. Help!__
 
@@ -104,12 +96,19 @@ __Answer:__ Run the next two commands.
     chmod 600 ../ampcamp.pem
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy --resume launch amplab-training
 
+</div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
 
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q2" data-parent="#q-accordion">
+    I get the following error when running this command: <code>Your requested instance type (m1.xlarge) is not supported...</code>
+  </a>
+</div><!--accordion-heading-->
 
-</div>
-</div>
-    <div id="collapse-q2" class="accordion-body collapse">
-      <div class="accordion-inner" markdown="1">
+<div id="collapse-q2" class="accordion-body collapse">
+<div class="accordion-inner" markdown="1">
 
 __Question: I got the following permission error when I ran the above command. Help!__
 
@@ -123,10 +122,19 @@ It may randomly pick an availability zone that doesn't support this instance siz
 
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> -z none --copy launch amplab-training
 
-</div>
-</div>
-   <div id="collapse-q3" class="accordion-body collapse">
-      <div class="accordion-inner" markdown="1">
+</div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
+    I get the following error when running this command: <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q3" class="accordion-body collapse">
+<div class="accordion-inner" markdown="1">
 
 __Question: I got the following error when I ran the above command. Help!__
 
@@ -166,10 +174,19 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
    ./spark-ec2 -i <key_file> -k <key_pair> copy-data amplab-training
    ~~~
 
-</div>
-</div>
-   <div id="collapse-q4" class="accordion-body collapse">
-      <div class="accordion-inner" markdown="1">
+</div><!--accordion-inner-->
+</div><!--accordion-body-->
+
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
+        Can I specify the instances types while creating the cluster?
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q4" class="accordion-body collapse">
+<div class="accordion-inner" markdown="1">
 
 __Question: Can I specify the instances types while creating the cluster?__
 
@@ -206,11 +223,11 @@ __Information:__ Sometimes the EC2 instances don't initialize within the standar
 If that happens you, will ssh errors (or check in the Amazon web console).
 In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
 
-</div>
-</div>
+</div><!--accordion-inner-->
+</div><!--accordion-body-->
 
-</div>
-</div>
+</div><!--accordion-group-->
+</div><!--accordion-->
 
 If you launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 6 m1.xlarge Amazon EC2 nodes.
 
