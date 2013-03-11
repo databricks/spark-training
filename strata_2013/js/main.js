@@ -92,7 +92,7 @@ function viewSolution() {
 	$("div.solution").each(function() {
 		var id = "solution_" + counter
 
-    makeCollapsable(this, "", id, '<i class="icon-ok-sign"> </i>' + "View Solution");
+    makeCollapsable(this, "", id, '<i class="icon-ok-sign" style="text-decoration: none; color: #0088cc"> </i>' + "View Solution");
 
 		counter++;
 	});
