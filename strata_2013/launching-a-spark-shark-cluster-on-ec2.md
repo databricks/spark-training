@@ -176,7 +176,7 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
 
 </div><!--accordion-inner-->
 </div><!--accordion-body-->
-
+</div><!--accordion-group-->
 
 <div class="accordion-group">
 <div class="accordion-heading">
@@ -225,8 +225,8 @@ In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
 
 </div><!--accordion-inner-->
 </div><!--accordion-body-->
-
 </div><!--accordion-group-->
+
 </div><!--accordion-->
 
 If you launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 6 m1.xlarge Amazon EC2 nodes.
