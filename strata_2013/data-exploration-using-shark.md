@@ -1,7 +1,7 @@
 ---
 layout: global
 title: Data Exploration Using Shark
-prev: introduction-to-the-scala-shell.html
+prev: data-exploration-using-spark.html
 next: processing-live-data-streams-with-spark-streaming.html
 skip-chapter-toc: true
 ---

@@ -132,12 +132,6 @@ a:hover code {
   color: #005580;
   text-decoration: underline;
 }
-.topbar {
-  margin: -60px auto 25px;
-}
-.bottombar {
-  margin: 25px auto 0;
-}
 .bar {
   text-align: center;
   max-width: 914px;
@@ -159,6 +153,38 @@ a:hover code {
 }
 .bar ul.dropdown-menu {
   text-align: left;
+}
+.topbar {
+  margin: -60px auto 25px;
+}
+#topbar-middle {
+  display: inline-block;
+  vertical-align: middle;
+}
+#ampcamp-logo {
+  width: 162px;
+  height: 50px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 20px;
+  background: url(../img/ampcamp-simple-trim-162x30.png) no-repeat left 10px;
+}
+/*
+@media (min-width: 768px) {
+  .topbar img {
+    padding-top: 30px;
+    padding-left: 5px;
+  }
+  #ampcamp-logo {
+    float: left;
+  }
+  #amplab-logo {
+    float: right;
+  }
+}
+*/
+.bottombar {
+  margin: 25px auto 0;
 }
 .site-title {
   font-style: italic;
@@ -197,7 +223,7 @@ a:hover code {
 .sidebar {
   width: 200px;
   float: right;
-  padding: 8px 8px 20px 8px;
+  padding: 8px 8px 10px 8px;
   margin: 10px;
   background-color: #f5f5f5;
   border: 1px solid #e1e1e8;

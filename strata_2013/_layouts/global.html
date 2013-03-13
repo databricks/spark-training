@@ -27,6 +27,19 @@
         <script src="js/vendor/prettify/prettify.js" type="text/javascript"></script>
         <script src="js/vendor/prettify/lang-scala.js" type="text/javascript"></script>
         <script src="js/vendor/prettify/lang-sql.js" type="text/javascript"></script>
+        <script type="text/javascript">
+
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-33205054-1']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+
+        </script>
 
     </head>
     <body>
@@ -37,36 +50,40 @@
         <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
         <div class="bar topbar">
-          {% include left-page-nav-button.html %}
-          {% include right-page-nav-button.html %}
-          <div class="site-title">{{ site.title }}</div>
-          <div class="btn-group">
-            <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
-              {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
+            {% include left-page-nav-button.html %}
+            {% include right-page-nav-button.html %}
+            <a href="http://ampcamp.berkeley.edu" id="ampcamp-logo"></a>
+            <!--<img src="img/amplab-small.png" alt="AMP Camp Logo" width="150" id="amplab-logo"/>-->
+            <div id="topbar-middle">
+                <div class="site-title">{{ site.title }}</div>
+                <div class="btn-group">
+                    <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                        {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
+                    </div>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      {% include chapter-list.html %}
+                    </ul>
+                </div>
             </div>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-              {% include chapter-list.html %}
-            </ul>
-          </div>
-        </div>
+        </div><!--topbar-->
         <div class="container" id="content">
-          {% unless page.skip-chapter-toc %}
-          <div id="chapter-toc" class="chapter-toc"></div>
-          {% endunless %}
-          {{ content }}
+            {% unless page.skip-chapter-toc %}
+            <div id="chapter-toc" class="chapter-toc"></div>
+            {% endunless %}
+            {{ content }}
         </div> <!-- /container -->
         <div class="bar bottombar">
-          {% include left-page-nav-button.html %}
-          {% include right-page-nav-button.html %}
-          <div class="btn-group dropup">
-            <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
-              {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
+            {% include left-page-nav-button.html %}
+            {% include right-page-nav-button.html %}
+            <div class="btn-group dropup">
+                <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                    {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
+                </div>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    {% include chapter-list.html %}
+                </ul>
             </div>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-              {% include chapter-list.html %}
-            </ul>
-          </div>
-          <div class="site-title">{{ site.title }}</div>
+            <div class="site-title">{{ site.title }}</div>
         </div>
 
         <script src="js/vendor/jquery-1.8.3.min.js"></script>

@@ -1,9 +1,11 @@
 ---
 layout: global
 title: Command Line Preprocessing and Featurization
+prev: machine-learning-with-spark.html
+next: machine-learning-with-spark.html
 ---
 
-In this section, we will walk you through the steps to preprocess and featurize the Wikipedia dataset.
+In this chapter, we will walk you through the steps to preprocess and featurize the Wikipedia dataset.
 
 ## Command Line Walkthrough
 

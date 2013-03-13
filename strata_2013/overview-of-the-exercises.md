@@ -5,7 +5,7 @@ prev: logging-into-the-cluster.html
 next: introduction-to-the-scala-shell.html
 ---
 
-The exercises in this tutorial are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming.
+The exercises in this mini course are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming.
 For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python.
 For Shark, you will be using SQL in the Shark console to interactively explore the same data.
 For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter's sample stream of tweets.

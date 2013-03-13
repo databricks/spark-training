@@ -5,6 +5,8 @@ prev: launching-a-spark-shark-cluster-on-ec2.html
 next: overview-of-the-exercises.html
 skip-chapter-toc: true
 ---
+Let's log into the cluster we just set up. Select the tab below that corresponds to the operating system you are running to find instructions for SSH-ing into your cluster on EC2.
+
 <ul class="nav nav-tabs" data-tabs="tabs">
   <li class="active"><a data-toggle="tab" href="#login_linux">Linux, Cygwin, or OS X</a></li>
   <li><a data-toggle="tab" href="#login_windows">Windows</a></li>
@@ -16,7 +18,7 @@ Log into your cluster via
 
     ssh -i <key_file> root@<master_node_hostname>
 
-where `key_file` here is the private keyfile that was given to you by the tutorial instructors (or your AWS EC2 keyfile if you spun up your own cluster).
+where `key_file` here is the private AWS EC2 keyfile.
 
 __Question: I got the following permission error when I ran the above command. Help!__
 

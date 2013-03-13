@@ -2,13 +2,13 @@
 layout: global
 title: Introduction to the Scala Shell
 prev: overview-of-the-exercises.html 
-next: data-exploration-using-shark.html
+next: data-exploration-using-spark.html
 skip-chapter-toc: true
 ---
 
-This short exercise will teach you the basics of using the Scala shell and introduce you to functional programming with collections.
+This chapter will teach you the basics of using the Scala shell and introduce you to functional programming with collections.
 
-If you're already comfortable with Scala or plan on using the Python shell for the interactive Spark sections of this tutorial, skip ahead to the next section.
+If you're already comfortable with Scala or plan on using the Python shell for the interactive Spark sections of this mini course, skip ahead to the next section.
 
 This exercise is based on a great tutorial, <a href="http://www.artima.com/scalazine/articles/steps.html" target="_blank">First Steps to Scala</a>.
 However, reading through that whole tutorial and trying the examples at the console may take considerable time, so we will provide a basic introduction to the Scala shell here. Do as much as you feel you need (in particular you might want to skip the final "bonus" question).
