@@ -8,6 +8,10 @@ next: machine-learning-with-spark.html
 In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a new component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to the Scala Shell](#introduction-to-the-scala-shell) section to learn some basics.
 
 ## Setup
+
+
+### System Setup
+
 We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
 
 <div class="sidebar">
@@ -15,7 +19,7 @@ We use a modified version of the Scala standalone project template introduced in
 Simple Build Tool, or SBT, is popular open-source a build tool for Scala and Java projects, written in Scala. Currently, Spark can be built using SBT or Maven, while Spark Streaming an Shark can be built with SBT only. Read more about SBT at <a href="https://github.com/harrah/xsbt/wiki" target="_blank">its Github page</a>.
 </div>
 
-- `login.txt:` File containing Twitter username and password
+- `twitter.txt:` File containing Twitter authentication details 
 - For Scala users
   - `scala/sbt:` Directory containing the SBT tool
   - `scala/build.sbt:` SBT project file
@@ -48,14 +52,14 @@ object Tutorial {
     val sparkUrl = getSparkUrl()
 
     // Location of the required JAR files
-    val jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar"
+    val jarFile = "target/scala-2.9.3/tutorial_2.9.3-0.1-SNAPSHOT.jar"
 
     // HDFS directory for checkpointing
     val checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/"
 
-    // Twitter credentials from login.txt
-    val (twitterUsername, twitterPassword) = getTwitterCredentials()
-
+    // Configure Twitter credentials using twitter.txt
+    TutorialHelper.configureTwitterCredentials()    
+    
     // Your code goes here
   }
 }
@@ -80,14 +84,13 @@ public class Tutorial {
     String sparkUrl = TutorialHelper.getSparkUrl();
 
     // Location of the required JAR files
-    String jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar";
+    String jarFile = "target/scala-2.9.3/tutorial_2.9.3-0.1-SNAPSHOT.jar";
 
     // HDFS directory for checkpointing
     String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
 
     // Twitter credentials from login.txt
-    String twitterUsername = TutorialHelper.getTwitterUsername();
-    String twitterPassword = TutorialHelper.getTwitterPassword();
+    TutorialHelper.configureTwitterCredentials()    
 
     // Your code goes here
   }
@@ -99,21 +102,50 @@ public class Tutorial {
 For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
 
 - `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/spark-ec2/cluster-url`.
-- `getTwitterCredential()` is another helper function that fetches the Twitter username and password from the file `/root/streaming/login.txt`.
+- `configureTwitterCredential()` is another helper function that configure Twitter's authentication detail using the file `/root/streaming/twitter.txt`. This is explained further in the next section.
 
+### Twitter Credential Setup
 
-<div class="alert alert-info">
-<i class="icon-info-sign"> 	</i>
-Since all the exercises are based on Twitter's sample tweet stream, they require you specify a Twitter account's username and password. You can either use you your own Twitter username and password, or use one of the few accounts we made for the purpose of this tutorial. The username and password needs to be set in the file `/root/streaming/login.txt`
-</div>
+Since all the exercises are based on Twitter's sample tweet stream, configuring OAuth authentication with a Twitter account is necessary. For configuring the OAuth account, you will need to setup a consumer key+secret pair and a access token+secret pair using a Twitter account. Please follow the instruction below to setup these temporary access keys for the purpose of this tutorial. This setup will not require you to provide your Twitter username or password and you can easily destroy the keys once you have finished the tutorial. So your Twitter account will not be compromised in any way.
 
-<pre class="nocode">
-my.fancy.username
-my_uncrackable_password
-</pre>
+1. Please open this <a href="https://dev.twitter.com/apps" target="_blank">link</a>. This page lists the set of Twitter-based applications that you own and have already created a consumer and access tokens for. If you have never created any application before, this will obviously be an empty list. For this tutorial, let us will create a new temporary application. Please click on the blue button "Create a new application". The new application page should look like as shown below. Please provide the required fields. The _Name_ of the application must be globally unique, so using your Twitter username as a prefix should ensure that. For the _Description_ , anything is fine. For the _Website_ , make sure it is a fully-formed URL with the prefix http:// . Then, please click on the "Yes, I agree" checkbox below the _Developer Rules of the Road_ . Finally, please fill in the CAPTCHA and click on the blue button saying "Create your Twitter application".
 
-Be sure to delete this file after the exercises are over. Even if you don't delete them, these files will be completely destroyed along with the instance, so your password will not fall into wrong hands.
+    ![Setting up new application](img/oauth-2.png)
 
+2. Once you have created the application, you will be presented with a confirmation page similar to the one shown below. As you can see that the consumer key and the consumer secret has already been generated. To generate the access token and the access token secret, please click on the blue button "Create my access token" at the end of the page. Note that there will be small green confirmation at the top of the page saying that the token has been generated. 
+
+    ![New application confirmation](img/oauth-3.png)
+
+3. To get all keys and secrets required for authentical, please click on the tab _OAuth Tool_ in the top menu on the page. You will be presented with a page similar to the one shown below. 
+
+    ![OAuth details](img/oauth-4.png)
+
+4. Finally, please update the twitter configuration file using your favorite text editor.
+
+    <pre class="prettyprint lang-bsh">
+    cd /root/streaming/
+    vim twitter.txt 
+    </pre>
+    
+    You should see the follow template of = separated key-value pairs already setup. 
+
+    <pre class="nocode">
+    consumerKey =
+    consumerSecret =
+    accessToken =
+    accessTokenSecret =
+    </pre>
+    
+    Please copy the values from the previous webpage into this appropriate keys in this file. After copying, it should look something like the following.
+
+    <pre class="nocode">
+    consumerKey = z25xt02zcaadf12 ...
+    consumerSecret = gqc9uAkjla13 ...
+    accessToken = 8mitfTqDrgAzasd ...
+    accessTokenSecret = 479920148 ...
+    </pre>
+    
+    Please double check that the right values have been assigned to the right key. Save the file and proceed to writing your first Spark Streaming program.
 
 ## First Spark Streaming program
 Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the
@@ -136,7 +168,6 @@ vim Tutorial.java
 
 The cluster machines have both vim and emacs installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim or emacs before running it.
 
-
 To express any Spark Streaming computation, a StreamingContext object needs to be created.
 This object serves as the main entry point for all Spark Streaming functionality.
 
@@ -154,12 +185,12 @@ This object serves as the main entry point for all Spark Streaming functionality
 </div>
 </div>
 
-Here, we create a StreamingContext object by providing the Spark cluster URL, the batch duration we'd like to use for streams, the Spark home directory, and the list of JAR files that are necessary to run the program. "Tutorial" is a unique name given to this application to identify it the Spark's web UI. We elect for a batch duration of 1 second. Next, we use this context and the login information to create a stream of tweets:
+Here, we create a StreamingContext object by providing the Spark cluster URL, the batch duration we'd like to use for streams, the Spark home directory, and the list of JAR files that are necessary to run the program. "Tutorial" is a unique name given to this application to identify it the Spark's web UI. We elect for a batch duration of 1 second. Next, we use this context to create a stream of tweets:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val tweets = ssc.twitterStream(twitterUsername, twitterPassword)
+    val tweets = ssc.twitterStream(None)
 ~~~
 </div>
 <div data-lang="java" markdown="1">
@@ -295,7 +326,7 @@ Relevant discussions can be found on the Internet at:
 TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
 </pre>
 
-__Answer:__ Please verify whether the Twitter username and password has been set correctly in the file `login.txt` as instructed earlier. Make sure you do not have unnecessary trailing spaces.
+__Answer:__ Please verify whether the Twitter consumer key+secret and access token+secret has been set correctly in the file `twitter.txt` as instructed earlier. 
 
 
 ## Further exercises
