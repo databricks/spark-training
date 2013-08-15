@@ -19,11 +19,11 @@ object TutorialHelper {
     }
     val lines = Source.fromFile(file.toString).getLines.filter(_.trim.size > 0).toSeq
     val pairs = lines.map(line => {
-        val splits = line.split("=")
-        if (splits.size != 2) {
-          throw new Exception("Error parsing configuration file - incorrectly formatted line [" + line + "]")
-        }
-        (splits(0).trim(), splits(1).trim())
+      val splits = line.split("=")
+      if (splits.size != 2) {
+        throw new Exception("Error parsing configuration file - incorrectly formatted line [" + line + "]")
+      }
+      (splits(0).trim(), splits(1).trim())
     })
     val map = new HashMap[String, String] ++= pairs
     val configKeys = Seq("consumerKey", "consumerSecret", "accessToken", "accessTokenSecret")
@@ -34,7 +34,7 @@ object TutorialHelper {
         }
         val fullKey = "twitter4j.oauth." + key
         System.setProperty(fullKey, map(key))
-        println("\tProperty [" + fullKey + "] set as [" + map(key) + "]") 
+        println("\tProperty " + fullKey + " set as " + map(key)) 
     })
     println()
   }

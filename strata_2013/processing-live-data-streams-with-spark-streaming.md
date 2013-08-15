@@ -5,14 +5,14 @@ prev: data-exploration-using-shark.html
 next: machine-learning-with-spark.html
 ---
 
-In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a new component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to the Scala Shell](#introduction-to-the-scala-shell) section to learn some basics.
+In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to the Scala Shell](introduction-to-the-scala-shell.html) section to learn some basics.
 
 ## Setup
-
+This section will first introduce you to the basic system setup of the standalong Spark Streaming programs, and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing Twitter's real time sample stream.
 
 ### System Setup
 
-We use a modified version of the Scala standalone project template introduced in the [Intro to Running Standalone Programs](#running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
+We use a modified version of the Scala standalone project template introduced in the [Running Standalone Spark Programs](data-exploration-using-spark.html#running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
 
 <div class="sidebar">
 <p style="font-size:1.2em"><b>What is SBT?</b></p>
@@ -106,21 +106,21 @@ For your convenience, we have added a couple of helper function to get the param
 
 ### Twitter Credential Setup
 
-Since all the exercises are based on Twitter's sample tweet stream, configuring OAuth authentication with a Twitter account is necessary. For configuring the OAuth account, you will need to setup a consumer key+secret pair and a access token+secret pair using a Twitter account. Please follow the instruction below to setup these temporary access keys for the purpose of this tutorial. This setup will not require you to provide your Twitter username or password and you can easily destroy the keys once you have finished the tutorial. So your Twitter account will not be compromised in any way.
+Since all the exercises are based on Twitter's sample tweet stream, configuring OAuth authentication with a Twitter account is necessary. To do this, you will need to setup a consumer key+secret pair and a access token+secret pair using a Twitter account. Please follow the instructions below to setup these temporary access keys with your Twitter account. These instructions will not require you to provide your Twitter username/password. You will only be required to provide the consumer key and access token pairs that you will generate, which you can easily destroy the keys once you have finished the tutorial. So your Twitter account will not be compromised in any way.
 
-1. Please open this <a href="https://dev.twitter.com/apps" target="_blank">link</a>. This page lists the set of Twitter-based applications that you own and have already created a consumer and access tokens for. If you have never created any application before, this will obviously be an empty list. For this tutorial, let us will create a new temporary application. Please click on the blue button "Create a new application". The new application page should look like as shown below. Please provide the required fields. The _Name_ of the application must be globally unique, so using your Twitter username as a prefix should ensure that. For the _Description_ , anything is fine. For the _Website_ , make sure it is a fully-formed URL with the prefix http:// . Then, please click on the "Yes, I agree" checkbox below the _Developer Rules of the Road_ . Finally, please fill in the CAPTCHA and click on the blue button saying "Create your Twitter application".
+1. Open this <a href="https://dev.twitter.com/apps" target="_blank">link</a>. This page lists the set of Twitter-based applications that you own and have already created a consumer keys and access tokens for. If you have never created any application before, then this will obviously be an empty list. For this tutorial, create a new temporary application. To do this, click on the blue button "Create a new application". The new application page should look like as shown below. Provide the required fields. The __Name__ of the application must be globally unique, so using your Twitter username as a prefix to the name should ensure that. For example, set it as [your-twitter-handle]-test. For the __Description__ , anything is fine. For the __Website__ , again any website is fine. But ensure that it is a fully-formed URL with the prefix http:// . Then, click on the "Yes, I agree" checkbox below the __Developer Rules of the Road__ . Finally, fill in the CAPTCHA and click on the blue button saying "Create your Twitter application".
 
     ![Setting up new application](img/oauth-2.png)
 
-2. Once you have created the application, you will be presented with a confirmation page similar to the one shown below. As you can see that the consumer key and the consumer secret has already been generated. To generate the access token and the access token secret, please click on the blue button "Create my access token" at the end of the page. Note that there will be small green confirmation at the top of the page saying that the token has been generated. 
+2. Once you have created the application, you will be presented with a confirmation page similar to the one shown below. You should be able to see the consumer key and the consumer secret that has been generated. To generate the access token and the access token secret, click on the blue button "Create my access token" at the end of the page (lower green arrow in the figure below). Note that there will be small green confirmation at the top of the page saying that the token has been generated. 
 
     ![New application confirmation](img/oauth-3.png)
 
-3. To get all keys and secrets required for authentical, please click on the tab _OAuth Tool_ in the top menu on the page. You will be presented with a page similar to the one shown below. 
+3. To get all keys and secrets required for authentical, click on the tab _OAuth Tool_ in the top menu on the page (upper green arrow in the previous figure). You will be presented with a page similar to the one shown below. 
 
     ![OAuth details](img/oauth-4.png)
 
-4. Finally, please update the twitter configuration file using your favorite text editor.
+4. Finally, update the twitter configuration file using your favorite text editor.
 
     <pre class="prettyprint lang-bsh">
     cd /root/streaming/
@@ -146,6 +146,10 @@ Since all the exercises are based on Twitter's sample tweet stream, configuring 
     </pre>
     
     Please double check that the right values have been assigned to the right key. Save the file and proceed to writing your first Spark Streaming program.
+5.  Once you have finished the tutorial, you can go back to the <a href="https://dev.twitter.com/apps" target="_blank">starting page</a> and delete the application you have created. To do this click on the application, and then click on _Delete_ as shown by the arrow below. This will automatically invalidate the tokens.
+
+    ![Delete application](img/oauth-5.png)
+
 
 ## First Spark Streaming program
 Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the
@@ -190,13 +194,12 @@ Here, we create a StreamingContext object by providing the Spark cluster URL, th
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val tweets = ssc.twitterStream(None)
+    val tweets = ssc.twitterStream()
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    JavaDStream<Status> tweets =
-      ssc.twitterStream(twitterUsername, twitterPassword);
+    JavaDStream<Status> tweets = ssc.twitterStream();
 ~~~
 </div>
 </div>
