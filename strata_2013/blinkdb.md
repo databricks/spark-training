@@ -74,7 +74,7 @@ Time taken: 19.454 seconds</span></pre>
    {"approx_count":122361000,"error":240887,"confidence":99}
    Time taken: 2.993 seconds</span></pre>
 
-   Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes a second column, which tells us how close BlinkDB thinks it is to the true answer.  (If you know a bit of statistics, the interval \[first value - second value, first value + second value\] is a .99 confidence interval for the true count.  The confidence level can be changed to x by appending "with confidence x" to the query.)
+   Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes two additional columns, which tell us how close BlinkDB thinks it is to the true answer. The second and third columns indicate the statistical error and the confidence respectively. A way to interpret this result is that for this query, the true answer should lie between 122361000 +/- 240887, 99% of the time. More specifically, the interval \[first value - second value, first value + second value\] is a .99 confidence interval for the true count.
 
 7. Compute the total traffic to Wikipedia pages on May 7 between 7AM - 8AM.
 
@@ -82,11 +82,9 @@ Time taken: 19.454 seconds</span></pre>
    blinkdb> select approx_sum(page_views) from wikistats_sample_cached where dt="20090507-070000";
    <span class="nocode">
    ...
-   20090507-070000	6292754 1000
-   20090505-120000	7304485 1001
-   20090506-110000	6609124 999
-   Time taken: 12.614 seconds
-   13/02/05 22:05:18 INFO CliDriver: Time taken: 12.614 seconds</span></pre>
+   OK
+   {"approx_sum":12115600,"error":831617,"confidence":99}
+   Time taken: 1.554 seconds</span></pre>
 
    
    As before, you can also compute an exact answer by running the same query on the table `wikistats_cached`, replacing "`approx_sum`" with "`sum`".
@@ -95,11 +93,9 @@ Time taken: 19.454 seconds</span></pre>
     blinkdb> select sum(page_views) from wikistats where dt="20090507-070000";
     <span class="nocode">
     ...
-    20090507-070000	6292754
-    20090505-120000	7304485
-    20090506-110000	6609124
-    Time taken: 12.614 seconds
-    13/02/05 22:05:18 INFO CliDriver: Time taken: 12.614 seconds</span></pre>
+    OK
+	13098805
+	Time taken: 19.465 seconds</span></pre>
 
 8. Next, we would like to find out the average number of hits on pages with Berkeley in the title throughout the entire period:
 
@@ -107,41 +103,24 @@ Time taken: 19.454 seconds</span></pre>
    blinkdb> select approx_avg(page_views) from wikistats_sample_cached where page_name like "%berkeley%"
    <span class="nocode">
    ...
-   index.html      310642
-   Swine_influenza 534253
-   404_error/      43822489
-   YouTube 203378
-   X-Men_Origins:_Wolverine        204604
-   Dom_DeLuise     396776
-   Special:Watchlist       311465
-   The_Beatles     317708
-   Special:Search  17657352
-   Special:Random  5816953
-   Special:Export  248624
-   Scrubs_(TV_series)      234855
-   Cinco_de_Mayo   695817
-   2009_swine_flu_outbreak 237677
-   Deadpool_(comics)       382510
-   Wiki    464935
-   Special:Randompage      3521336
-   Main_Page       18730347
-   Time taken: 68.693 seconds
-   13/02/26 08:12:42 INFO CliDriver: Time taken: 68.693 seconds</span></pre>
+   OK
+   {"approx_avg":2.75,"error":2.7595032883541744,"confidence":99.0}
+   Time taken: 2.459 seconds</span></pre>
 
 9. With all the warm up, now it is your turn to write queries. Write Hive QL queries to answer the following questions:
 
-   - Count the number of distinct date/times for English pages.  Try the same query on the original table and compare the results.  The kind of sampling available in the Alpha is not very effective for queries that depend on rare values, like `count distinct`.
+   - Count the number of distinct project_codes.  Try the same query on the original table and compare the results.  The kind of sampling available in the Alpha is not very effective for queries that depend on rare values, like `count distinct`.
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select count(distinct dt) from wikistats_sample_cached;</pre>
+   select count(distinct project_code) from wikistats_sample_cached;</pre>
    </div>
 
-   - How many hits are there on pages with Stanford in the title throughout the entire period?
+   - How many hits are there on pages with berkeley in the title throughout the entire period?
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select count(page_views) from wikistats_sample_cached where page_name like "%stanford%";
+   select approx_count(page_views) from wikistats_sample_cached where page_name like "%berkeley%";
    /* "%" in SQL is a wildcard matching all characters. */</pre>
    </div>
 
@@ -149,17 +128,17 @@ Time taken: 19.454 seconds</span></pre>
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select dt, sum(page_views) from wikistats_sample_cached where dt like "20090505%";</pre>
+   select approx_sum(page_views) from wikistats_sample_cached where dt like "20090505%";</pre>
    </div>
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select dt, sum(page_views) from wikistats_sample_cached where dt like "20090506%";</pre>
+   select approx_sum(page_views) from wikistats_sample_cached where dt like "20090506%";</pre>
    </div>
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select dt, sum(page_views) from wikistats_sample_cached where dt like "20090507%";</pre>
+   select approx_sum(page_views) from wikistats_sample_cached where dt like "20090507%";</pre>
    </div>
 
 10. To exit BlinkDB, type the following at the BlinkDB command line (and don't forget the semicolon!).
