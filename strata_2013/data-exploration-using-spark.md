@@ -194,7 +194,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    Finally we sum up the values for each key.
    There is a convenient method called `reduceByKey` in Spark for exactly this pattern.
    Note that the second argument to `reduceByKey` determines the number of reducers to use.
-   By default, Spark assumes that the reduce function is algebraic and applies combiners on the mapper side.
+   By default, Spark assumes that the reduce function is commutative and associative and applies combiners on the mapper side.
    Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let's use only one reducer.
 
    <div class="codetabs">
