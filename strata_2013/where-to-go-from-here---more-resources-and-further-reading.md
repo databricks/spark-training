@@ -1,7 +1,7 @@
 ---
 layout: global
 title: Where to Go From Here - More Resources and Further Reading
-prev: machine-learning-with-spark.html
+prev: mli-document-categorization.html
 skip-chapter-toc: true
 ---
 

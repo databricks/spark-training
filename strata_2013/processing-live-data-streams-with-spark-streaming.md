@@ -2,7 +2,7 @@
 layout: global
 title: Processing Live Data Streams with Spark Streaming
 prev: data-exploration-using-shark.html
-next: machine-learning-with-spark.html
+next: blinkdb.html
 ---
 
 In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to the Scala Shell](introduction-to-the-scala-shell.html) section to learn some basics.

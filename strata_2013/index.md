@@ -1,17 +1,24 @@
 ---
 layout: global
 title: Introduction
-next: launching-a-spark-shark-cluster-on-ec2.html
+next: overview-of-the-exercises.html
 ---
 
-Welcome to the AMP Camp hands-on big data mini course. These training materials have been produced by members of the open source community, especially PhD students in the UC Berkeley AMPLab.
+Welcome to the Dry-Run of the AMP Camp 3 hands-on exercises. Thanks for helping out and we hope you find what you're about to learn helpful!
 
-This mini course consists of a series of exercises that will have you working directly with components of Hadoop as well as components of our open-source software stack, called the <a href="https://amplab.cs.berkeley.edu/bdas/">Berkeley Data Analytics Stack (BDAS)</a>, that have been released and are ready to use.
-These components include [Spark](http://spark-project.org), Spark Streaming, and [Shark](http://shark.cs.berkeley.edu).
-We will begin by walking you through the easy process of spinning up a small cluster on EC2 using our scripts. Then we will dive into big data analytics training exercises, starting with simple interactive analysis techniques at the Spark and Shark shells, then progress to writing standalone programs with Spark Streaming, and finish by implementing some more advanced machine learning algorithms to incorporate into your analysis.
+These exercises will have you working directly with components of Hadoop as well as components of our open-source software stack, called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack (BDAS)</a>, that have been released and are ready to use.
+The components we will cover today include [Spark](http://spark-project.org), [Spark Streaming](http://spark-project.org/docs/latest/streaming-programming-guide.html), [MLbase](http://mlbase.org), and [BlinkDB](http://blinkdb.org).
+
+We have already spun up a small cluster for you on EC2 using our scripts. To access your cluster, you will need to download <a href="https://docs.google.com/file/d/0B6nc314QW_P3Wjh0ZVdxb3Bqam8/edit?usp=sharing">this private key</a>. Then, find the address of the machine in the same row as as your name in the table <a href="http://goo.gl/NRmAlZ">here</a>. You can log into the cluster with the username root using a command like:
+
+    ssh -i /path/to/ampcamp3-all.pem root@<YOUR_MACHINE_ID>
+
+
+# Providing feedback
+This is a dry-run, so you can expect to run into a few issues. When you do, please call over a TA and explain what's going on. When you find a problem with the course that needs attention, please create a new issue at the <a href="https://github.com/amplab/training/issues">training docs Github issue Tracker</a> (there is also a link to this in the footer on all pages of the exercises).
 
 # Course Prerequisites
-This mini course is meant to be hands-on introduction to Spark, Spark Streaming, and Shark. While Shark supports a simplified version of SQL, Spark and Spark Streaming both support multiple languages. For the sections about Spark and Spark Streaming, the mini course allows you to choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this mini course supports for each section. You are welcome to mix and match languages depending on your preferences and interests.
+Several components support multiple languages. For the sections about Spark and Spark Streaming, you can choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this mini course supports for each section. You are welcome to mix and match languages depending on your preferences and interests.
 
 <center>
 <style type="text/css">
@@ -35,23 +42,18 @@ table td, table th {
   <td class="no">no</td>
   <td class="yes">yes</td>
 </tr><tr>
-  <td>Shark (SQL)</td>
-  <td colspan="3" class="yes">All SQL</td>
-</tr><tr>
   <td>Spark Streaming</td>
   <td class="yes">yes</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
 </tr><tr>
-  <td class="dimmed"><b>Optional:</b> Machine Learning :: featurization</td>
-  <td class="dimmed yes">yes</td>
-  <td class="dimmed no">no</td>
-  <td class="dimmed yes">yes</td>
+  <td>BlinkDB</td>
+  <td colspan="3" class="yes">All SQL</td>
 </tr><tr>
-  <td>Machine Learning :: K-Means</td>
+  <td>MLbase</td>
   <td class="yes">yes</td>
-  <td class="yes">yes</td>
-  <td class="yes">yes</td>
+  <td class="no">no</td>
+  <td class="no">yes</td>
 </tr>
 </tbody>
 </table>

@@ -1,7 +1,7 @@
 ---
 layout: global
 title: Machine Learning With MLI
-prev: data-exploration-using-shark.html
+prev: blinkdb.html
 next: where-to-go-from-here---more-resources-and-further-reading.html
 ---
 

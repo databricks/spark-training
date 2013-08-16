@@ -1,12 +1,18 @@
-# Data Exploration Using BlinkDB
+---
+layout: global
+title: Data Exploration Using BlinkDB
+prev: processing-live-data-streams-with-spark-streaming.html
+next: mli-document-categorization.html
+skip-chapter-toc: true
+---
 
 BlinkDB is a large-scale data warehouse system like Shark that adds the ability to create and use smaller samples of large datasets to make queries even faster.  Today you're going to get a sneak peek at an Alpha release of BlinkDB.  We'll set up BlinkDB and use it to run some SQL queries against the English Wikipedia.  If you've already done the Shark exercises, you might notice that we're going to go through the same exercises.  Don't worry if you haven't used Shark, though - we haven't assumed that you have.
 
 1. First, launch the BlinkDB console:
 
-   <pre class="prettyprint lang-bsh">
-   /root/blinkdb/bin/blinkdb
-   </pre>     
+<pre class="prettyprint lang-bsh">
+/root/blinkdb/bin/blinkdb
+</pre>     
 
 2. Similar to Apache Hive, BlinkDB can query external tables (i.e. tables that are not created in BlinkDB).
    Before you do any querying, you will need to tell BlinkDB where the data is and define its schema.
