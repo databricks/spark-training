@@ -7,7 +7,7 @@ next: where-to-go-from-here---more-resources-and-further-reading.html
 
 In this chapter, we will use MLI and Spark to tackle a machine learning problem. To complete the machine learning exercises within the time available using our relatively small EC2 clusters, in this section we will work with a restricted set of the Wikipedia article data from July 2013. This dataset represents a subset of English Wikipedia articles that have categories associated with them.
 
-Our task will be to come up with a model that's capable of taking an piece of text (say, a newspaper article) and identifying what high level class it belongs to - Sports, Arts, Technology, Math, etc. This is a *supervised* learning problem. To build such a model, we'll need to provide the system with *examples* of articles that already have classes associated with them.
+Our task will be to come up with a model that's capable of taking an piece of text (say, a newspaper article) and identifying what high level class it belongs to - Sports, Arts, Technology, Math, etc. This is a *supervised* learning problem. To build such a model, we'll need to provide the system with *examples* of articles that already have classes associated with them. For this particular exercise, we're going to focus on *binary* classification - that is, telling whether an article belongs to one class or the other.
 
 Before we begin, we'll need to set up a spark console to use MLI - an API providing user-friendly access to a set of data structures and algorithms designed to make performing machine learning tasks easier. MLI uses Spark under the hood, so we'll do our work from the spark shell.
 
@@ -27,7 +27,7 @@ $ spark/spark-shell
 //Note - everything from here on out happens in the spark shell!
 > sc.addJar("/root/MLI/target/MLI-assembly-1.0.jar")
 > import mli.interface._
-> mc = new MLContext(sc)
+> val mc = new MLContext(sc)
 ~~~
 </div>
 </div>
@@ -45,7 +45,7 @@ The first thing we'll want to do is load our data and take a look at it. MLI off
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> val inputTable = mc.loadFile(sys.env("HDFS_URL")+"/enwiki_txt").filter(r => List("ART","LIFE") contains r(0).toString).cache()
+> val inputTable = mc.loadFile(sys.env("HDFS_URL")+"/enwiki_txt").filter(r => List("ARTS","LIFE") contains r(0).toString).cache()
 > val firstFive = inputTable.take(5)
 > val taggedInputTable = inputTable.project(Seq(0,2)).map(r => {
     val label = if(r(0) == "ARTS") 1.0 else 0.0
@@ -59,16 +59,17 @@ The first command loads an <code>MLTable</code> - an <code>MLTable</code> is a d
 
 The second command takes a few rows from that table for you to inspect. The third command selects only the first and third columns of that table, and then maps the first column to "1" if the article is an "ART" article, and a "0" if it is a "LIFE" article.
 
-To featurize the data we'll use an N-Gram feature extractor. N-Gram featurization consists of breaking down documents into "n-grams" or pairs, triples, etc. (bigrams, trigrams, 4-grams) of words that exist in a document, once common words (or, *stop words*) and punctuation have been removed. 
+To featurize the data we'll use an N-Gram feature extractor that comes bundled with MLI. N-Gram featurization consists of breaking down documents into "n-grams" or pairs, triples, etc. (bigrams, trigrams, 4-grams) of words that exist in a document, once common words (or, *stop words*) and punctuation have been removed. 
 
 For example - the sentence, "Machine learning is really fun!" would consist of the bigrams {"machine_learning", "learning_really", "really_fun"}. Notice that we removed the word "is". 
 
-Let's get this running while you're reading the next section.
+Let's get this running while you're reading the next section. This job will take about 5 minutes on your cluster, so while that's running we'll do some exercises to understand what's going on under the hood.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> val (featurizedData, featurizer) = NGrams.extractNGrams(inputTable.project(Seq(3)), col=1, n=2, k=10000, stopWords = NGrams.stopWords)
+> import mli.feat.NGrams
+> val (featurizedData, featurizer) = NGrams.extractNGrams(taggedInputTable, c=1, n=2, k=10000, stopWords = NGrams.stopWords)
 ~~~
 </div>
 </div>
@@ -157,7 +158,7 @@ Now that we have the data loaded and featurized.. The [featurization process](#c
 <div data-lang="scala" markdown="1">
 ~~~
 > import mli.ml.classification._
-> val model = SVMAlgorithm(featurizedData, SVMParameters(learningRate=0.001, numIterations=100))
+> val model = SVMAlgorithm.train(featurizedData, SVMParameters(learningRate=0.001, maxIterations=100))
 ~~~
 </div>
 </div>
