@@ -67,7 +67,7 @@ Time taken: 19.454 seconds</span></pre>
 6. Now approximate the same count using the sampled table.  In the Alpha release, you need to tell BlinkDB to compute an approximation by prepending "`approx_`" to your aggregation function.  (Also, only queries that compute `count`, `sum`, `average`, or `stddev` can be approximated.  In the future many more functions, including UDFs, will be approximable.)
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select approx_count(1) from wikistats_sampled;
+   blinkdb> select approx_count(1) from wikistats_sample_cached;
    <span class="nocode">
    ...
    OK
@@ -76,7 +76,7 @@ Time taken: 19.454 seconds</span></pre>
 
    Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes a second column, which tells us how close BlinkDB thinks it is to the true answer.  (If you know a bit of statistics, the interval [first value - second value, first value + second value] is a .99 confidence interval for the true count.  The confidence level can be changed to x by appending "with confidence x" to the query.)
 
-7. Compute the total traffic to Wikipedia English pages for each hour between May 7 and May 9, with one line per hour.
+7. Compute the total traffic to Wikipedia pages on May 7 between 7AM - 8AM.
 
    <pre class="prettyprint lang-sql">
    blinkdb> select approx_sum(page_views) from wikistats_sample_cached where dt="20090507-070000";
@@ -88,12 +88,11 @@ Time taken: 19.454 seconds</span></pre>
    Time taken: 12.614 seconds
    13/02/05 22:05:18 INFO CliDriver: Time taken: 12.614 seconds</span></pre>
 
-   Each line in the output includes an error level for the corresponding result.
    
    As before, you can also compute an exact answer by running the same query on the table `wikistats_cached`, replacing "`approx_sum`" with "`sum`".
 
     <pre class="prettyprint lang-sql">
-    blinkdb> select dt, sum(page_views) from wikistats_cached group by dt;
+    blinkdb> select sum(page_views) from wikistats where dt="20090507-070000";
     <span class="nocode">
     ...
     20090507-070000	6292754
@@ -102,13 +101,10 @@ Time taken: 19.454 seconds</span></pre>
     Time taken: 12.614 seconds
     13/02/05 22:05:18 INFO CliDriver: Time taken: 12.614 seconds</span></pre>
 
-8. In the Spark section, we ran a very expensive query to compute pages that were viewed more than 200,000 times. It is fairly simple to do the same thing in SQL.
-
-   To make the query run faster, we increase the number of reducers used in this query to 50 in the first command. Note that the default number of reducers, which we have been using so far in this section, is 1.
+8. Next, we would like to find out the average number of hits on pages with Berkeley in the title throughout the entire period:
 
    <pre class="prettyprint lang-sql">
-   blinkdb> set mapred.reduce.tasks=50;
-   blinkdb> select page_name, approx_sum(page_views) as views from wikistats_sampled group by page_name having views > 200000;
+   blinkdb> select approx_avg(page_views) from wikistats_sample_cached where page_name like "%berkeley%"
    <span class="nocode">
    ...
    index.html      310642
@@ -138,22 +134,32 @@ Time taken: 19.454 seconds</span></pre>
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select count(distinct dt) from wikistats_sampled;</pre>
+   select count(distinct dt) from wikistats_sample_cached;</pre>
    </div>
 
-- How many hits are there on pages with Berkeley in the title throughout the entire period?
+- How many hits are there on pages with Stanford in the title throughout the entire period?
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select count(page_views) from wikistats_sampled where page_name like "%berkeley%";
+   select count(page_views) from wikistats_sample_cached where page_name like "%stanford%";
    /* "%" in SQL is a wildcard matching all characters. */</pre>
    </div>
 
-- Generate a histogram for the number of hits for each hour on May 6, 2009; sort the output by date/time. Based on the output, which hour is Wikipedia most popular?
+- Which day (5th, 6th or 7th May 2009) was the most popular in terms of the number of hits.
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select dt, sum(page_views) from wikistats_sampled where dt like "20090506%" group by dt order by dt;</pre>
+   select dt, sum(page_views) from wikistats_sample_cached where dt like "20090505%";</pre>
+   </div>
+
+   <div class="solution" markdown="1">
+   <pre class="prettyprint lang-sql">
+   select dt, sum(page_views) from wikistats_sample_cached where dt like "20090506%";</pre>
+   </div>
+
+   <div class="solution" markdown="1">
+   <pre class="prettyprint lang-sql">
+   select dt, sum(page_views) from wikistats_sample_cached where dt like "20090507%";</pre>
    </div>
 
 10. To exit BlinkDB, type the following at the BlinkDB command line (and don't forget the semicolon!).
