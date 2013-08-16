@@ -143,8 +143,9 @@ Time taken: 19.454 seconds</span></pre>
 
 10. To exit BlinkDB, type the following at the BlinkDB command line (and don't forget the semicolon!).
 
-    <pre class="prettyprint lang-sql">
-   	blinkdb> exit;</pre>
+    <pre class="prettyprint lang-bsh">
+    blinkdb> exit;</pre>
+
 
 <!--/*
 4. Now let's create a table containing all English records and cache it in the cluster's memory.
