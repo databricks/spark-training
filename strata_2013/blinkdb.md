@@ -10,9 +10,8 @@ BlinkDB is a large-scale data warehouse system like Shark that adds the ability 
 
 1. First, launch the BlinkDB console:
 
-<pre class="prettyprint lang-bsh">
-/root/blinkdb/bin/blinkdb
-</pre>     
+    <pre class="prettyprint lang-bsh">
+    /root/blinkdb/bin/blinkdb</pre>
 
 2. Similar to Apache Hive, BlinkDB can query external tables (i.e. tables that are not created in BlinkDB).
    Before you do any querying, you will need to tell BlinkDB where the data is and define its schema.
@@ -34,7 +33,7 @@ BlinkDB is a large-scale data warehouse system like Shark that adds the ability 
    <b>FAQ:</b> If you see errors like these, you might have copied and pasted a line break, and should be able to remove it to get rid of the errors.
 
    <pre>13/02/05 21:22:16 INFO parse.ParseDriver: Parsing command: CR
-   FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'<pre
+   FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'</pre>
    
 3. Next we will compute a simple count of the number records in the original table.  For now, we're not using any sample at all.  (If you have some familiarity with databases, note that we use the "`count(1)`" syntax here since in earlier versions of Hive, the more popular "`count(*)`" operation was not supported. BlinkDB supports most of Hive SQL; its syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.)
 
@@ -45,7 +44,7 @@ BlinkDB is a large-scale data warehouse system like Shark that adds the ability 
    OK
    329641466
    Time taken: 27.889 seconds</span></pre>
-   
+
 4. Now let's create a 1% random sample of this table using the samplewith operator and cache it in the cluster's memory.
 
    <pre class="prettyprint lang-sql">
@@ -57,6 +56,7 @@ OK
 Time taken: 19.454 seconds</span></pre>
 
 5. Next Compute a simple count of the number of English records (<i>i.e., those with </i> "`project_code="en"`") of the original table.  For now, we're not using the sample at all.
+
    <pre class="prettyprint lang-sql">
    blinkdb> select count(1) from wikistats where project_code = "en";
    <span class="nocode">
@@ -74,7 +74,7 @@ Time taken: 19.454 seconds</span></pre>
    {"approx_count":122361000,"error":240887,"confidence":99}
    Time taken: 2.993 seconds</span></pre>
 
-   Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes a second column, which tells us how close BlinkDB thinks it is to the true answer.  (If you know a bit of statistics, the interval [first value - second value, first value + second value] is a .99 confidence interval for the true count.  The confidence level can be changed to x by appending "with confidence x" to the query.)
+   Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes a second column, which tells us how close BlinkDB thinks it is to the true answer.  (If you know a bit of statistics, the interval \[first value - second value, first value + second value\] is a .99 confidence interval for the true count.  The confidence level can be changed to x by appending "with confidence x" to the query.)
 
 7. Compute the total traffic to Wikipedia pages on May 7 between 7AM - 8AM.
 
@@ -130,14 +130,14 @@ Time taken: 19.454 seconds</span></pre>
 
 9. With all the warm up, now it is your turn to write queries. Write Hive QL queries to answer the following questions:
 
-- Count the number of distinct date/times for English pages.  Try the same query on the original table and compare the results.  The kind of sampling available in the Alpha is not very effective for queries that depend on rare values, like `count distinct`.
+   - Count the number of distinct date/times for English pages.  Try the same query on the original table and compare the results.  The kind of sampling available in the Alpha is not very effective for queries that depend on rare values, like `count distinct`.
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
    select count(distinct dt) from wikistats_sample_cached;</pre>
    </div>
 
-- How many hits are there on pages with Stanford in the title throughout the entire period?
+   - How many hits are there on pages with Stanford in the title throughout the entire period?
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
@@ -145,7 +145,7 @@ Time taken: 19.454 seconds</span></pre>
    /* "%" in SQL is a wildcard matching all characters. */</pre>
    </div>
 
-- Which day (5th, 6th or 7th May 2009) was the most popular in terms of the number of hits.
+   - Which day (5th, 6th or 7th May 2009) was the most popular in terms of the number of hits.
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
@@ -164,7 +164,7 @@ Time taken: 19.454 seconds</span></pre>
 
 10. To exit BlinkDB, type the following at the BlinkDB command line (and don't forget the semicolon!).
 
-   	<pre class="prettyprint lang-sql">
+    <pre class="prettyprint lang-sql">
    	blinkdb> exit;</pre>
 
 <!--/*

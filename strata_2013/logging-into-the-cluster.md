@@ -1,7 +1,7 @@
 ---
 layout: global
 title: Logging into the Cluster
-prev: launching-a-spark-shark-cluster-on-ec2.html
+prev: index.html
 next: overview-of-the-exercises.html
 skip-chapter-toc: true
 ---
