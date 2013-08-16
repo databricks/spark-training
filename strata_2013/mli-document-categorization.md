@@ -47,11 +47,17 @@ The first thing we'll want to do is load our data and take a look at it. MLI off
 ~~~
 > val inputTable = mc.loadFile(sys.env("HDFS_URL")+"/enwiki_txt").filter(r => List("ART","LIFE") contains r(0).toString).cache()
 > val firstFive = inputTable.take(5)
+> val taggedInputTable = inputTable.project(Seq(0,2)).map(r => {
+    val label = if(r(0) == "ARTS") 1.0 else 0.0
+    MLRow(label, r(1))
+}).cache()
 ~~~
 </div>
 </div>
 
-This commands loads an "MLTable" - an <code>MLTable</code> is a distributed collection of <code>MLRow</code>, all of which follow the same <code>Schema</code>. This means that every row has the same shape and data types associated with it. These data types - <code>MLValue</code> (String, Int, Double, Empty), are the elements in the table. Rows can be thought of as arrays of values, and can be indexed with single values or sequences of values. You can select a few columns from a table in the same way. <code>MLTable</code> make up the basic inputs for our machine learning problems. We can apply feature extractors to them to prepare data for input to an <code>Algorithm</code> which learns a <code>Model</code>
+The first command loads an <code>MLTable</code> - an <code>MLTable</code> is a distributed collection of <code>MLRow</code>, all of which follow the same <code>Schema</code>. This means that every row has the same shape and data types associated with it. These data types - <code>MLValue</code> (String, Int, Double, Empty), are the elements in the table. Rows can be thought of as arrays of values, and can be indexed with single values or sequences of values. You can select a few columns from a table in the same way. <code>MLTable</code> make up the basic inputs for our machine learning problems. We can apply feature extractors to them to prepare data for input to an <code>Algorithm</code> which learns a <code>Model</code>.
+
+The second command takes a few rows from that table for you to inspect. The third command selects only the first and third columns of that table, and then maps the first column to "1" if the article is an "ART" article, and a "0" if it is a "LIFE" article.
 
 To featurize the data we'll use an N-Gram feature extractor. N-Gram featurization consists of breaking down documents into "n-grams" or pairs, triples, etc. (bigrams, trigrams, 4-grams) of words that exist in a document, once common words (or, *stop words*) and punctuation have been removed. 
 
@@ -89,11 +95,11 @@ Now that you have an understanding of how ngram processing works, let's do a cou
 
 We then take that set of *items that exist in this document* and project them onto a common space. To decide on this space, we first look at the whole corpus, and rank N-grams according to their frequency. This ranking gives us an explicit order for the N-grams to be projected onto, and we can now create a binary feature vector for each document, where the features indicate the existence of a particular string in a document.
 
-Word frequency calculation is the classic "word count" followed by a sort, which you already saw in the [interactive analysis with Spark](#interactive-analysis). 
+Word frequency calculation is the classic "word count" followed by a sort, which you already saw in the [interactive analysis with Spark](#interactive-analysis) section. 
 
 Once these word frequencies have been computed, projecting the set of N-grams in a document to the feature space is just a map over that set. 
 
-    **Exercise:** In the same scala prompt, write a function that, given an ordered list of bigrams (bigrams ordered by frequency) takes the output of your "bigrams" function and produces a binary feature vector in the same order as the ordered list, indicating whether or not the set from the document contains that bigram.
+    **Exercise:** In the same scala prompt, write a function that, given the output of your "bigrams" function and an ordered list of bigrams (bigrams ordered by frequency), produces a binary feature vector in the same order as the ordered list, indicating whether or not the set from the document contains that bigram. The output of this function is a "feature vector".
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -114,7 +120,7 @@ A feature vector of 1's and 0's is kind of boring. We haven't done anything to a
 
 Let's do some feature engineering, and compute the term frequency-inverse document frequency statistic of our features. That is, we weight terms by the *inverse* of the frequency with which they show up in the raw documents. This weight is simply the reciprocal of the number of times a particular 
 
-    **Bonus Exercise:** Given a collection of identically shaped bigram feature vectors, compute their total document frequency. Hint - MLVector supports the "plus" operation for elementwise addition. Once you have this, compute the TF-IDF statistic on the original vector
+    **Bonus Exercise:** Given a collection of identically shaped bigram feature vectors, compute their total document frequency. Hint - MLVector supports the "plus" operation for elementwise addition. Once you have this, compute the TF-IDF statistic on the original vector.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -133,10 +139,15 @@ Let's do some feature engineering, and compute the term frequency-inverse docume
 </div>
 </div>
 
+## Training vs. Testing Sets
+*TODO* Add a note about training sets vs. testing sets. Add code to split the training vector into two sets. 
+
 
 ## Support Vector Machines
 
 [Support Vector Machines (SVMs)](http://en.wikipedia.org/wiki/Support_vector_machine) are a popular machine learning algorithm used for classification. MLI and Spark contain an implementation of linear SVMs based on [Stochastic Gradient Descent (SGD)](http://en.wikipedia.org/wiki/Stochastic_gradient_descent), a convex optimization algorithm that often applies to problems that are non-convex. This implementation has tuned to run well under Spark's distributed architecture. 
+
+*TODO* Add not about SVMs here.
 
 ## Building a model using SVMs
 
@@ -153,6 +164,8 @@ Now that we have the data loaded and featurized.. The [featurization process](#c
 
 ## Model assessment
 Now that we have a model built, what can we do with it? First, let's compute its "training error" - that is, how well does it do on the data it was trained on.
+
+*TODO* Add explanation of test set vs. train set.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
