@@ -146,7 +146,7 @@ Since all the exercises are based on Twitter's sample tweet stream, configuring 
     </pre>
     
     Please double check that the right values have been assigned to the right key. Save the file and proceed to writing your first Spark Streaming program.
-5.  Once you have finished the tutorial, you can go back to the <a href="https://dev.twitter.com/apps" target="_blank">starting page</a> and delete the application you have created. To do this click on the application, and then click on _Delete_ as shown by the arrow below. This will automatically invalidate the tokens.
+5.  **Once you have finished this tutorial (not now!)**, you can go back to the <a href="https://dev.twitter.com/apps" target="_blank">starting page</a> and delete the application you have created. To do this click on the application, and then click on _Delete_ as shown by the arrow below. This will automatically invalidate the tokens.
 
     ![Delete application](img/oauth-5.png)
 
