@@ -1,2 +1,0 @@
-my.fancy.username
-my_uncrackable_password

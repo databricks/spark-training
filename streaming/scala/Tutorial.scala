@@ -14,14 +14,14 @@ object Tutorial {
     val sparkUrl = TutorialHelper.getSparkUrl()
 
     // Location of the required JAR files 
-    val jarFile = "target/scala-2.9.2/tutorial_2.9.2-0.1-SNAPSHOT.jar"
+    val jarFile = "target/scala-2.9.3/tutorial_2.9.3-0.1-SNAPSHOT.jar"
 
     // HDFS directory for checkpointing
     val checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/" 
 
-    // Twitter credentials from login.txt
-    val (twitterUsername, twitterPassword) = TutorialHelper.getTwitterCredentials()
-   
+    // Configure Twitter credentials using twitter.txt
+    TutorialHelper.configureTwitterCredentials() 
+    
     // Your code goes here
   }
 }

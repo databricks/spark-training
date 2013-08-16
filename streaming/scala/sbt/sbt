@@ -1,5 +1,5 @@
 #!/bin/bash
 export MESOS_NATIVE_LIBRARY=/usr/local/lib/libmesos.so
 export SPARK_JAVA_OPTS="-XX:+UseConcMarkSweepGC -Dspark.cleaner.delay=100"
-export SPARK_MEM=1000m
-java -Dspark.cleaner.delay=100 -Xmx1000m -jar $(dirname $0)/sbt-launch-*.jar "$@"
+export SPARK_MEM=2000m
+java -Dspark.cleaner.delay=100 -Xmx2000m -jar $(dirname $0)/sbt-launch-*.jar "$@"

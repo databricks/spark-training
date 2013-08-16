@@ -1,11 +1,9 @@
 name := "Tutorial"
 
-scalaVersion := "2.9.2"
+scalaVersion := "2.9.3"
 
 libraryDependencies ++= Seq(
-  "org.spark-project" %% "spark-streaming" % "0.7.0-SNAPSHOT",
-  "org.twitter4j" % "twitter4j-core" % "3.0.2",
-  "org.twitter4j" % "twitter4j-stream" % "3.0.2"
+  "org.spark-project" %% "spark-streaming" % "0.8.0-SNAPSHOT"
 )
 
 mainClass in (Compile, run) := Some("Tutorial")

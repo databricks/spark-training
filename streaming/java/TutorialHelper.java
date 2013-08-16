@@ -3,6 +3,7 @@ import spark.storage.StorageLevel;
 import scala.io.Source;
 import java.io.*;
 import java.util.List;
+import java.util.HashMap;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
@@ -14,28 +15,35 @@ class TutorialHelper {
     Logger.getLogger("spark.streaming.NetworkInputTracker").setLevel(Level.INFO);
   }
 
-  static String getTwitterUsername() throws Exception {
-    File file = new File("../login.txt");
-    if (file.exists()) {
-      List<String> lines = readLines(file);
-      if (lines.size() < 2)
-        throw new Exception("Error parsing " + file + " - it does not have two lines");
-      return lines.get(0).trim();
-    } else {
-      throw new Exception("Could not find " + file);
+  static void configureTwitterCredentials() throws Exception {
+    File file = new File("../twitter.txt");
+    if (!file.exists()) {
+      throw new Exception("Could not find configuration file " + file);
     }
-  }
-
-  static String getTwitterPassword() throws Exception {
-    File file = new File("../login.txt");
-    if (file.exists()) {
-      List<String> lines = readLines(file);
-      if (lines.size() < 2)
-        throw new Exception("Error parsing " + file + " - it does not have two lines");
-      return lines.get(1).trim();
-    } else {
-      throw new Exception("Could not find " + file);
+    List<String> lines = readLines(file);
+    HashMap<String, String> map = new HashMap<String, String>();
+    for (int i = 0; i < lines.size(); i++) {
+      String line  = lines.get(i);
+      String[] splits = line.split("=");
+      if (splits.length != 2) {
+        throw new Exception("Error parsing configuration file - incorrectly formatted line [" + line + "]");
+      }
+      map.put(splits[0].trim(), splits[1].trim());
     }
+    String[] configKeys = { "consumerKey", "consumerSecret", "accessToken", "accessTokenSecret" };
+    for (int k = 0; k < configKeys.length; k++) {
+      String key = configKeys[k];
+      String value = map.get(key);
+      if (value == null) {
+        throw new Exception("Error setting OAuth authentication - value for " + key + " not found");
+      } else if (value.length() == 0) {
+        throw new Exception("Error setting OAuth authentication - value for " + key + " is empty");
+      }
+      String fullKey = "twitter4j.oauth." + key;
+      System.setProperty(fullKey, value);
+      System.out.println("\tProperty " + fullKey + " set as " + value);
+    }
+    System.out.println();
   }
 
   /** Returns the HDFS URL */
@@ -49,6 +57,8 @@ class TutorialHelper {
     if (file.exists()) {
       List<String> lines = readLines(file);
       return lines.get(0);
+    } else if (new File("../local").exists()) {
+      return "local[4]";
     } else {
       throw new Exception("Could not find " + file);
     }
@@ -60,7 +70,7 @@ class TutorialHelper {
     List<String> lines = new ArrayList<String>();
     String line = null;
     while ((line = bufferedReader.readLine()) != null) {
-      lines.add(line);
+      if (line.length() > 0) lines.add(line);
     }
     bufferedReader.close();
     return lines;
