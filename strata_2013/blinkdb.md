@@ -72,6 +72,8 @@ Time taken: 19.454 seconds</span></pre>
 
    Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes two additional columns, which tell us how close BlinkDB thinks it is to the true answer. The second and third columns indicate the statistical error and the confidence respectively. A way to interpret this result is that for this query, the true answer should lie between 122361000 +/- 240887, 99% of the time. More specifically, the interval [first value - second value, first value + second value] is a .99 confidence interval for the true count.
 
+   <b>NOTE: There is a bug in the dry-run BlinkDB that causes the error interval to be misreported for approx_count and approx_sum.  For now, take the number you see and multiply by 100.  Sorry.</b>
+
 7. Compute the total traffic to Wikipedia pages on May 7 between 7AM - 8AM.
 
    <pre class="prettyprint lang-sql">
@@ -96,7 +98,7 @@ Time taken: 19.454 seconds</span></pre>
 8. Next, we would like to find out the average number of hits on pages with Berkeley in the title throughout the entire period:
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select approx_avg(page_views) from wikistats_sample_cached where page_name like "%berkeley%"
+   blinkdb> select approx_avg(page_views) from wikistats_sample_cached where page_name like "%berkeley%";
    <span class="nocode">
    ...
    OK
