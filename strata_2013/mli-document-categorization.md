@@ -13,8 +13,6 @@ Before we begin, we'll need to set up a Spark console to use MLI. MLI uses Spark
 
 ##Setup
 
-*NOTE* Here I'm assuming that Spark has been published-local, and that MLI-assembly-1.0.jar has been built!
-
 From a console - register the MLI library with Spark, start a Spark shell, and load up an "MLContext" - which is similar to a SparkContext. 
 
 <div class ="codetabs">
@@ -36,9 +34,10 @@ $ spark/spark-shell
 
 To apply most machine learning algorithms, we must first preprocess and featurize our input data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of its top-level Wikipedia category (its *label*) and a set of *features* in the form of "bigrams" (pairs of words) that are present in each article.  Specifically, we will generate 10,000-dimensional feature vectors, with each feature vector entry summarizing the words used in the underlying article in the form of bigrams. The choice of *10,000* here is arbitrary, but can be an important design decision. With too many features and you risk overfitting your model to the training data and also increase your computational burden, while with too few features you may not have enough signal to discriminate between classes. 
 
-Each record in our dataset consists of a string with the format "`<category> <subcategory> <page_contents>`".  This raw dataset was derived from raw XML dumps of the wikipedia database.  If you are interested in how we mapped subcategories to higher categories and actually read through the XML dumps you can [read about the process we followed](wiki-featurization.html).
+Each record in our dataset consists of a string with the format "`<category> <subcategory> <page_contents>`".  This raw dataset was derived from raw XML dumps of the wikipedia database.
+<!--If you are interested in how we mapped subcategories to higher categories and actually read through the XML dumps you can [read about the process we followed](wiki-featurization.html). -->
 
-### Data loading and featurization.
+### Data loading and featurization
 
 The first thing we'll want to do is load our data and take a look at it. MLI offers several convenient ways to load data directly into distributed tables. We'll use one of those to load and take a look at the data.
 
@@ -72,10 +71,10 @@ Let's get this running while you're reading the next section. This job will take
 </div>
 </div>
 
-Now that you have an understanding of how ngram processing works, let's do a couple of exercises related to it.
+Now that you have an understanding of how N-gram processing works, let's do a couple of exercises related to it.
 
-    **Exercise:** In a new scala prompt, write a "bigrams" function that mimics what NGrams is doing to a single string. 
-    Given a string, convert it to lower case, tokenize it by splitting on word boundaries (spaces), and output a set of all "word1_word2" pairs that occur in sequence in the base string.
+**Exercise**: In a new scala prompt, write a "bigrams" function that mimics what NGrams is doing to a single string. 
+Given a string, convert it to lower case, tokenize it by splitting on word boundaries (spaces), and output a set of all "word1_word2" pairs that occur in sequence in the base string.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -98,7 +97,7 @@ Word frequency calculation is the classic "word count" followed by a sort, which
 
 Once these word frequencies have been computed, projecting the set of N-grams in a document to the feature space of top N-grams is just a map over that set. 
 
-    **Exercise:** In the same scala prompt, write a function that, given the output of your "bigrams" function and an ordered list of bigrams (bigrams ordered by frequency), produces a binary feature vector in the same order as the ordered list, indicating whether or not the set from the document contains that bigram. The output of this function is a "feature vector".
+**Exercise:** In the same scala prompt, write a function that, given the output of your "bigrams" function and an ordered list of bigrams (bigrams ordered by frequency), produces a binary feature vector in the same order as the ordered list, indicating whether or not the set from the document contains that bigram. The output of this function is a "feature vector".
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -119,7 +118,7 @@ A feature vector of 1's and 0's is kind of boring. We haven't done anything to a
 
 Let's do some feature engineering, and compute the term frequency-inverse document frequency statistic of our features. That is, we weight terms by the *inverse* of the frequency with which they show up across the entire corpus, thus downweighting commonly appearing terms and vice-versa. 
 
-    **Bonus Exercise:** Given a collection of identically shaped bigram feature vectors, compute their total document frequency. Hint - MLVector supports the "plus" operation for elementwise addition. Once you have this, compute the TF-IDF statistic on the original vector.
+**Bonus Exercise:** Given a collection of identically shaped bigram feature vectors, compute their total document frequency. Hint - MLVector supports the "plus" operation for elementwise addition. Once you have this, compute the TF-IDF statistic on the original vector.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -138,8 +137,8 @@ Let's do some feature engineering, and compute the term frequency-inverse docume
 </div>
 </div>
 
-## Training vs. Testing Sets
-*TODO* Add a note about training sets vs. testing sets. Add code to split the training vector into two sets. 
+<!--## Training vs. Testing Sets
+*TODO* Add a note about training sets vs. testing sets. Add code to split the training vector into two sets.  -->
 
 
 ## Building a model using SVMs
@@ -160,7 +159,8 @@ Recall that our [featurization process](#command-line-preprocessing-and-featuriz
 ## Model assessment
 Now that we have a model built, what can we do with it? First, let's compute its "training error" - that is, how well does it do on the data it was trained on.
 
-*TODO* Add explanation of test set vs. train set.
+<!--*TODO* Add explanation of test set vs. train set.-->
+
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -176,8 +176,10 @@ val trainError = trainVsTest.filter(r(0) != r(1)).numRows.toDouble/trainVsTest.n
 
 What does this mean? It means that if we give the model the same points that it was trained with, it will classify *trainError* percent of them incorrectly.
 
-## Feature importance.
-Let's drill into which features are important. Let's sort the features by their weight and take a look at those that are most important and least important.
+**WARNING FOR DRY RUN**: The model doesn't do very well right now! Subsequent steps still work, but the results are less intuitive than expected b/c this (and subsequent trained models) still need to be tweaked.  
+
+## Feature importance
+Next, let's drill into which features are important. Let's sort the features by their weight and take a look at those that are most important and least important.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -193,7 +195,7 @@ val bottomFeatures = model.features.sortWith(_._2 > _._2).take(10)
 ## Parameter Tuning
 We've seen what happens when we run with the magic parameter "learningRate=0.001" - what happens when we vary this parameter? It turns out that we may get better results depending on how we set this parameter. Too high and we may never find an optimal model - too low and we might not get to a good model in the number of iterations required.
 
-    **Exercise:** Train a model for several different values of learningRate - calculate the training error for each one, and report the one that has the best error. (Hint: Try moving in steps of 10x = e.g. learning rate = 0.0001, 0.001, 0.01, ...)
+**Exercise:** Train a model for several different values of learningRate - calculate the training error for each one, and report the one that has the best error. (Hint: Try moving in steps of 10x = e.g. learning rate = 0.0001, 0.001, 0.01, ...)
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -223,22 +225,18 @@ val bestModel = //
 ## Test the model on new data
 Now that we're pretty sure we have a good model, let's see how well it does at actually predicting based on some new text.
 
-Let's create a new TextModel, which expects a *Model* and a *Featurizer* and will be able to predict the class of arbitrary text.
+Let's create a new TextModel, which expects a model and a featurizer and will be able to predict the class of arbitrary text.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
 ~~~
 > val textModel = new TextModel(bestModel, featurizer) //you should still have your featurizer from the initial featurization process!
 
 //TextModels have a *predict* method which takes a string as input. Try it out on this article from Wikipedia: 
 > textModel.predict(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Baroque").mkString)
 
-//What class did the model predict? Was it right? Note that that article has NO category information associated with it. Try on other articles - is it reasonable?
+//What class did the model predict? Was it right? Note that that article has NO category information associated with it.
 ~~~
 </div>
 </div>
-</div>
-
-## Cross-Validation
-
+**Bonus Exercise** Try on other articles - are the predictions reasonable?
