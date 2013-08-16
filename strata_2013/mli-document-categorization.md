@@ -68,7 +68,7 @@ Let's get this running while you're reading the next section.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> val (featurizedData, featureizer) = NGrams.extractNGrams(inputTable.project(Seq(3)), col=1, n=2, k=10000, stopWords = NGrams.stopWords)
+> val (featurizedData, featurizer) = NGrams.extractNGrams(inputTable.project(Seq(3)), col=1, n=2, k=10000, stopWords = NGrams.stopWords)
 ~~~
 </div>
 </div>
@@ -147,7 +147,7 @@ Let's do some feature engineering, and compute the term frequency-inverse docume
 
 [Support Vector Machines (SVMs)](http://en.wikipedia.org/wiki/Support_vector_machine) are a popular machine learning algorithm used for classification. MLI and Spark contain an implementation of linear SVMs based on [Stochastic Gradient Descent (SGD)](http://en.wikipedia.org/wiki/Stochastic_gradient_descent), a convex optimization algorithm that often applies to problems that are non-convex. This implementation has tuned to run well under Spark's distributed architecture. 
 
-*TODO* Add not about SVMs here.
+*TODO* Add note about SVMs here.
 
 ## Building a model using SVMs
 
