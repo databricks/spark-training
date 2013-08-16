@@ -88,16 +88,39 @@ However, reading through that whole tutorial and trying the examples at the cons
    scala> import scala.io.Source
    import scala.io.Source
 
-   scala> val  lines = Source.fromFile("/root/mesos/README").getLines.toArray
+   scala> val lines = Source.fromFile("/root/mesos/README").getLines.toArray
    lines: Array[String] = Array(hlep, help, plot, set terminal pdf, pdf, set terminal pdf color, set output "monolithic-utilization-thru-day.pdf", set terminal pdf enhanced color, set terminal pdf monochrome, set terminal pdf mono, set output "graph.pdf", set terminal x11 enhanced color, help terminal, x11, quit, plot "utilization" using 1:2, plot "utilization" using 1/2:2, #plot "utilization" using 1:($2/), RadDeg, x!, Inv, sin, ln, π, cos, log, e, tan, √, Ans, EXP, xy, (, ), %, AC, 7, 8, 9, ÷, 4, 5, 6, ×, 1, 2, 3, -, 0, ., =, +, plot "utilization" using 1:($2/278400), plot "utilization.cpu.and.mem" using 1:($3/556800), plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:2, plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:($2/12500*8), plot [0:1] "7-day-mono-ya-c_0.01-stdout...
 
    scala> val counts = new collection.mutable.HashMap[String, Int].withDefaultValue(0)
    counts: scala.collection.mutable.Map[String,Int] = Map()
 
-   scala> lines.flatMap(line => line.split(" ")).map(word => counts(word) += 1)
+   scala> lines.flatMap(line => line.split(" ")).foreach(word => counts(word) += 1)
    res: Array[Unit] = Array((), (), (), (), (), (), (), (),...
 
    scala> counts
    res: scala.collection.mutable.Map[String,Int] = Map(2.6) -> 1, will -> 4, contain -> 1, Once -> 1, might -> 3, (requires -> 1, cluster. -> 3, up -> 2, There -> 1, addition, -> 1, host -> 3, distribution -> 2, [build] -> 2, Then -> 1, tests -> 3, ========================== -> 1, ZooKeeper -> 1, JAVA_HOME, -> 1, deploy -> 1, is -> 3, Cluster -> 1, [build]/bin/mesos-build-env.sh.in). -> 1, require -> 1, see -> 1, specific -> 3, necessary -> 2, JAVA_CPPFLAGS, -> 1, via: -> 1, collection -> 1, always, -> 1, configure -> 3, CPPFLAGS -> 1, email: -> 1, a -> 18, for -> 8, --localstatedir -> 1, building -> 1, slave(s) -> 1, After -> 2, populated -> 1, located -> 1, necessary) -> 1, we -> 3, doing: -> 2, with -> 4, Building -> 1, are: -> 1, JAR -> 1, [build]/src -> 1, --help -> 1, JAVA_CPPFLAGS...
+   </pre>
+   </div>
+
+   <div class="solution" markdown="1">
+   Or, a purely functional solution:
+
+   <pre class="prettyprint lang-scala">
+   scala> import scala.io.Source
+   import scala.io.Source
+
+   scala> val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+   lines: Array[String] = Array(hlep, help, plot, set terminal pdf, pdf, set terminal pdf color, set output "monolithic-utilization-thru-day.pdf", set terminal pdf enhanced color, set terminal pdf monochrome, set terminal pdf mono, set output "graph.pdf", set terminal x11 enhanced color, help terminal, x11, quit, plot "utilization" using 1:2, plot "utilization" using 1/2:2, #plot "utilization" using 1:($2/), RadDeg, x!, Inv, sin, ln, π, cos, log, e, tan, √, Ans, EXP, xy, (, ), %, AC, 7, 8, 9, ÷, 4, 5, 6, ×, 1, 2, 3, -, 0, ., =, +, plot "utilization" using 1:($2/278400), plot "utilization.cpu.and.mem" using 1:($3/556800), plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:2, plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:($2/12500*8), plot [0:1] "7-day-mono-ya-c_0.01-stdout...
+
+   scala> val emptyCounts = Map[String,Int]().withDefaultValue(0)
+   emptyCounts: scala.collection.immutable.Map[String,Int] = Map()
+
+   scala> val words = lines.flatMap(line => line.split(" "))
+   words: Array[java.lang.String] = Array(Building, and, Installing, =======================, "", For, the, impatient:,...
+
+   scala> val counts = words.foldLeft(emptyCounts)({(currentCounts: Map[String,Int], word: String) => currentCounts.updated(word, currentCounts(word) + 1)})
+   counts: scala.collection.immutable.Map[String,Int] = Map(used -> 3, "deploy" -> 2, launch -> 1,...
+
+   scala> counts
    </pre>
    </div>
