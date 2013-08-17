@@ -53,7 +53,7 @@ table td, table th {
   <td>MLbase</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
-  <td class="no">yes</td>
+  <td class="no">no</td>
 </tr>
 </tbody>
 </table>
