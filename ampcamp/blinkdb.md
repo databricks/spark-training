@@ -2,7 +2,7 @@
 layout: global
 title: Data Exploration Using BlinkDB
 prev: processing-live-data-streams-with-spark-streaming.html
-next: mli-document-categorization.html
+next: mesos.html
 skip-chapter-toc: true
 ---
 
