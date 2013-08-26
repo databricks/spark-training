@@ -8,7 +8,7 @@ next: blinkdb.html
 In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to the Scala Shell](introduction-to-the-scala-shell.html) section to learn some basics.
 
 ## Setup
-This section will first introduce you to the basic system setup of the standalong Spark Streaming programs, and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing Twitter's real time sample stream.
+This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing Twitter's real time sample stream.
 
 ### System Setup
 
@@ -102,50 +102,66 @@ public class Tutorial {
 For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
 
 - `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/spark-ec2/cluster-url`.
-- `configureTwitterCredential()` is another helper function that configure Twitter's authentication detail using the file `/root/streaming/twitter.txt`. This is explained further in the next section.
+- `configureTwitterCredential()` is another helper function that configures Twitter's authentication detail using the file `/root/streaming/twitter.txt`. This is explained further in the next section.
 
 ### Twitter Credential Setup
 
-Since all the exercises are based on Twitter's sample tweet stream, configuring OAuth authentication with a Twitter account is necessary. To do this, you will need to setup a consumer key+secret pair and a access token+secret pair using a Twitter account. Please follow the instructions below to setup these temporary access keys with your Twitter account. These instructions will not require you to provide your Twitter username/password. You will only be required to provide the consumer key and access token pairs that you will generate, which you can easily destroy the keys once you have finished the tutorial. So your Twitter account will not be compromised in any way.
+Since all of the exercises are based on Twitter's sample tweet stream, it is necessary to configure OAuth authentication with a Twitter account. To do this, you will need to setup a consumer key+secret pair and an access token+secret pair using a Twitter account. Please follow the instructions below to setup these temporary access keys with your Twitter account. These instructions will not require you to provide your Twitter username/password. You will only be required to provide the consumer key and access token pairs that you will generate, which you can easily destroy once you have finished the tutorial. So, your Twitter account will not be compromised in any way.
 
-1. Open this <a href="https://dev.twitter.com/apps" target="_blank">link</a>. This page lists the set of Twitter-based applications that you own and have already created a consumer keys and access tokens for. If you have never created any application before, then this will obviously be an empty list. For this tutorial, create a new temporary application. To do this, click on the blue button "Create a new application". The new application page should look like as shown below. Provide the required fields. The __Name__ of the application must be globally unique, so using your Twitter username as a prefix to the name should ensure that. For example, set it as [your-twitter-handle]-test. For the __Description__ , anything is fine. For the __Website__ , again any website is fine. But ensure that it is a fully-formed URL with the prefix http:// . Then, click on the "Yes, I agree" checkbox below the __Developer Rules of the Road__ . Finally, fill in the CAPTCHA and click on the blue button saying "Create your Twitter application".
+1. Open this <a href="https://dev.twitter.com/apps" target="_blank">link</a>.
+   This page lists the set of Twitter-based applications that you own and have
+   already created consumer keys and access tokens for.  This list will be
+   empty if you have never created any applications. For this tutorial, create
+   a new temporary application. To do this, click on the blue "Create a new
+   application" button. The new application page should look the page shown
+   below. Provide the required fields. The __Name__ of the application must be
+   globally unique, so using your Twitter username as a prefix to the name
+   should ensure that. For example, set it as [your-twitter-handle]-test. For
+   the __Description__ , anything is fine. For the __Website__ , similarly, any
+   website is fine, but ensure that it is a fully-formed URL with the prefix
+   http:// . Then, click on the "Yes, I agree" checkbox below the __Developer
+   Rules of the Road__ . Finally, fill in the CAPTCHA and click on the blue
+   "Create your Twitter application" button.
 
     ![Setting up new application](img/oauth-2.png)
 
-2. Once you have created the application, you will be presented with a confirmation page similar to the one shown below. You should be able to see the consumer key and the consumer secret that has been generated. To generate the access token and the access token secret, click on the blue button "Create my access token" at the end of the page (lower green arrow in the figure below). Note that there will be small green confirmation at the top of the page saying that the token has been generated. 
+2. Once you have created the application, you will be presented with
+   a confirmation page similar to the one shown below. You should be able to
+   see the consumer key and the consumer secret that have been generated. To
+   generate the access token and the access token secret, click on the blue
+   "Create my access token" button at the bottom of the page (lower green arrow
+   in the figure below). Note that there will be a small green confirmation at
+   the top of the page saying that the token has been generated.
 
     ![New application confirmation](img/oauth-3.png)
 
-3. To get all keys and secrets required for authentical, click on the tab _OAuth Tool_ in the top menu on the page (upper green arrow in the previous figure). You will be presented with a page similar to the one shown below. 
+3. To get all of the keys and secrets required for authentication, click on the
+   _OAuth Tool_ tab in the top menu on the page (upper green arrow in the
+   previous figure). You will be presented with a page similar to the one shown
+   below:
 
     ![OAuth details](img/oauth-4.png)
 
-4. Finally, update the twitter configuration file using your favorite text editor.
+4. Finally, update the twitter configuration file using your favorite text editor:
 
-    <pre class="prettyprint lang-bsh">
-    cd /root/streaming/
-    vim twitter.txt 
-    </pre>
+       cd /root/streaming/
+       vim twitter.txt
     
     You should see the follow template of = separated key-value pairs already setup. 
 
-    <pre class="nocode">
-    consumerKey =
-    consumerSecret =
-    accessToken =
-    accessTokenSecret =
-    </pre>
+       consumerKey =
+       consumerSecret =
+       accessToken =
+       accessTokenSecret =
     
-    Please copy the values from the previous webpage into this appropriate keys in this file. After copying, it should look something like the following.
+    Please copy the values from the previous webpage into this appropriate keys in this file. After copying, it should look something like the following:
 
-    <pre class="nocode">
-    consumerKey = z25xt02zcaadf12 ...
-    consumerSecret = gqc9uAkjla13 ...
-    accessToken = 8mitfTqDrgAzasd ...
-    accessTokenSecret = 479920148 ...
-    </pre>
+       consumerKey = z25xt02zcaadf12 ...
+       consumerSecret = gqc9uAkjla13 ...
+       accessToken = 8mitfTqDrgAzasd ...
+       accessTokenSecret = 479920148 ...
     
-    Please double check that the right values have been assigned to the right key. Save the file and proceed to writing your first Spark Streaming program.
+    Please double-check that the right values have been assigned to the right keys. Save the file and proceed to writing your first Spark Streaming program.
 5.  **Once you have finished this tutorial (not now!)**, you can go back to the <a href="https://dev.twitter.com/apps" target="_blank">starting page</a> and delete the application you have created. To do this click on the application, and then click on _Delete_ as shown by the arrow below. This will automatically invalidate the tokens.
 
     ![Delete application](img/oauth-5.png)
@@ -179,7 +195,7 @@ This object serves as the main entry point for all Spark Streaming functionality
 <div data-lang="scala" markdown="1">
 ~~~
     val ssc = new StreamingContext(sparkUrl, "Tutorial", Seconds(1), sparkHome, Seq(jarFile))
-~~~
+~~~ 
 </div>
 <div data-lang="java" markdown="1">
 ~~~
@@ -225,7 +241,11 @@ The object `tweets` is a DStream of tweet statuses. More specifically, it is con
 </div>
 </div>
 
-Similar to RDD transformation in the earlier Spark exercises, the `map` operation on `tweets` maps each Status object to its text to create a new 'transformed' DStream named `statuses`. The `print` output operation tells the context to print first 10 records in each RDD in a DStream, which in this case, are 1 second batches of received status texts.
+Similar to RDD transformation in the earlier Spark exercises, the `map`
+operation on `tweets` maps each Status object to its text to create a new
+'transformed' DStream named `statuses`. The `print` output operation tells the
+context to print first 10 records in each RDD in a DStream, which in this case
+are 1 second batches of received status texts.
 
 We also need to set an HDFS for periodic checkpointing of the intermediate data.
 
@@ -336,7 +356,7 @@ __Answer:__ Please verify whether the Twitter consumer key+secret and access tok
 Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 5 minutes. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
 
 1. __Get the stream of hashtags from the stream of tweets__:
-   To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows.
+   To get the hashtags from the status string, we need to identify only those words in the message that start with "#". This can be done as follows:
 
 
    <div class="codetabs">
@@ -370,10 +390,10 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    </div>
 
    The `flatMap` operation applies a one-to-many operation to each record in a DStream and then flattens the records to create a new DStream.
-   In this case, each status string is split by space to produce a DStream whose each record is a word.
+   In this case, each status string is split by space to produce a DStream where each record is a word.
    Then we apply the `filter` function to retain only the hashtags. The resulting `hashtags` DStream is a stream of RDDs having only the hashtags.
    If you want to see the result, add `hashtags.print()` and try running the program.
-   You should see something like this (assuming no other DStream has `print` on it).
+   You should see something like this (assuming no other DStream has `print` on it):
 
    <pre class="nocode">
    -------------------------------------------
@@ -387,10 +407,10 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    </pre>
 
 2. __Count the hashtags over a 5 minute window__: Next, we'd like to count these hashtags over a 5 minute moving window.
-   A simple way to do this would be to gather together last 5 minutes of data and process them using the usual map-reduce way - map each tag to a (tag, 1) key-value pair and
+   A simple way to do this would be to gather together the last 5 minutes of data and process it in the usual map-reduce way --- map each tag to a (tag, 1) key-value pair and
    then reduce by adding the counts. However, in this case, counting over a sliding window can be done more intelligently. As the window moves, the counts of the new data can
    be added to the previous window's counts, and the counts of the old data that falls out of the window can be 'subtracted' from the previous window's counts. This can be
-   done using DStreams as follows.
+   done using DStreams as follows:
 
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
@@ -400,7 +420,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
                             .reduceByKeyAndWindow(_ + _, _ - _, Seconds(60 * 5), Seconds(1))
    ~~~
 
-   The `_ + _` and `_ - _` are Scala short-hands for specifying functions to add and subtract two numbers. `Seconds(60 * 5)` specifies
+   The `_ + _` and `_ - _` are Scala shorthands for specifying functions to add and subtract two numbers. `Seconds(60 * 5)` specifies
    the window size and `Seconds(1)` specifies the movement of the window.
 
    </div>
@@ -433,9 +453,9 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    </div>
    </div>
 
-   Note, that only 'invertible' reduce operations that have 'inverse' functions (like subtracting is the inverse function of adding)
+   Note that only 'invertible' reduce operations that have 'inverse' functions (like how subtraction is the inverse of addition)
    can be optimized in this manner. The generated `counts` DStream will have records that are (hashtag, count) tuples.
-   If you `print` counts and run this program, you should see something like this.
+   If you `print` counts and run this program, you should see something like this:
 
    <pre class="nocode">
    -------------------------------------------
@@ -508,7 +528,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    The resulting 'sortedCounts' DStream is a stream of RDDs having sorted hashtags.
    The `foreach` operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case,
    `foreach` is used to get the first 10 hashtags from each RDD in `sortedCounts` and print them, every second.
-   If you run this program, you should see something like this.
+   If you run this program, you should see something like this:
 
    <pre class="nocode">
    Top 10 hashtags:
