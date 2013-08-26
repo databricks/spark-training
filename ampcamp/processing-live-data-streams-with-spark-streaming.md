@@ -1,7 +1,7 @@
 ---
 layout: global
 title: Processing Live Data Streams with Spark Streaming
-prev: data-exploration-using-spark.html
+prev: data-exploration-using-shark.html
 next: blinkdb.html
 ---
 
