@@ -113,15 +113,32 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    This should launch 177 Spark tasks on the Spark cluster.
    If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
    Because we are reading 20G of data from HDFS, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).
-￼
+
    While it's running, you can open the Spark web console to see the progress.
    To do this, open your favorite browser, and type in the following URL.
 
+   `http://<master_node_hostname>:3030`
+
+   You should have been given `master_node_hostname` at the beginning of the
+   tutorial, or you might have [launched your own
+   cluster](launching-a-cluster.html) and made a note of it then. You should
+   see the Spark application status web interface, similar to the following:
+
+   ![Spark Application Status Web UI](img/application-webui640.png)
+
+   The links in this interface allow you to track the job's progress and
+   various metrics about its execution, including task durations and cache
+   statistics.
+
+   In addition, the Spark Standalone cluster status web interface displays
+   information that pertains to the entire Spark cluster.  To view this UI,
+   browse to
+
    `http://<master_node_hostname>:8080`
 
-   You should have been given `master_node_hostname` at the beginning of the tutorial, or you might have [launched your own cluster](launching-a-cluster.html) and made a note of it then. You should see the Spark Standalone mode web interface, similar to the following (yours will probably show five slaves).
+   You should see a page similar to the following (yours will probably show five slaves):
 
-   ![Spark Standalone Web UI](img/standalone-webui640.png)
+   ![Spark Cluster Status Web UI](img/standalone-webui640.png)
 
    When your query finishes running, it should return the following count:
 
