@@ -31,18 +31,25 @@ load up an "MLContext" - which is similar to a SparkContext.
 
 <div class ="codetabs">
 <div data-lang="scala" markdown="1">
-~~~
-#Note - this is in your bash prompt.
-$ export SPARK_CLASSPATH=/root/MLI/target/MLI-assembly-1.0.jar
-$ spark/spark-shell
+At the bash shell prompt, run
 
-//Note - everything from here on out happens in the Spark shell!
-> sc.addJar("/root/MLI/target/MLI-assembly-1.0.jar")
-> import mli.interface._
-> val mc = new MLContext(sc)
 ~~~
+export SPARK_CLASSPATH=/root/MLI/target/MLI-assembly-1.0.jar
+/root/spark/spark-shell
+~~~
+
+In the Spark shell, run
+
+~~~
+sc.addJar("/root/MLI/target/MLI-assembly-1.0.jar")
+import mli.interface._
+val mc = new MLContext(sc)
+~~~
+
 </div>
 </div>
+
+From here onwards, we'll run all of our commands in the Spark shell.
 
 ## Command Line Preprocessing and Featurization
 
@@ -58,9 +65,9 @@ The first thing we'll want to do is load our data and take a look at it. MLI off
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> val inputTable = mc.loadFile("/enwiki_txt").filter(r => List("ARTS","LIFE") contains r(0).toString).cache()
-> val firstFive = inputTable.take(5)
-> val taggedInputTable = inputTable.project(Seq(0,2)).map(r => {
+val inputTable = mc.loadFile("/enwiki_txt").filter(r => List("ARTS","LIFE") contains r(0).toString).cache()
+val firstFive = inputTable.take(5)
+val taggedInputTable = inputTable.project(Seq(0,2)).map(r => {
     val label = if(r(0) == "ARTS") 1.0 else 0.0
     MLRow(label, r(1))
 }).cache()
@@ -79,8 +86,8 @@ Let's get this running while you're reading the next section. This job will take
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> import mli.feat.NGrams
-> val (featurizedData, featurizer) = NGrams.extractNGrams(taggedInputTable, c=1, n=2, k=10000, stopWords = NGrams.stopWords)
+import mli.feat.NGrams
+val (featurizedData, featurizer) = NGrams.extractNGrams(taggedInputTable, c=1, n=2, k=10000, stopWords = NGrams.stopWords)
 ~~~
 </div>
 </div>
@@ -94,12 +101,13 @@ Given a string, convert it to lower case, tokenize it by splitting on word bound
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-      def bigram(s: String): Set[String] = {
-          s.toLowerCase.split(" ").sliding(2).map(_.mkString("_")).toSet
-      }
-      
-      > bigram("How does bigramming work on a test string")
-      res2: Set[String] = Set(on_a, a_test, test_string, does_bigramming, bigramming_work, how_does, work_on)
+def bigram(s: String): Set[String] = {
+    s.toLowerCase.split(" ").sliding(2).map(_.mkString("_")).toSet
+}
+
+bigram("How does bigramming work on a test string")
+// This should output
+// res2: Set[String] = Set(on_a, a_test, test_string, does_bigramming, bigramming_work, how_does, work_on)
 ~~~
 </div>
 </div>
@@ -118,12 +126,13 @@ Once these word frequencies have been computed, projecting the set of N-grams in
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-      def bigramFeature(s: Set[String], orderedGrams: Seq[String]): Seq[Double] = {
-          orderedGrams.map(g => if(s.contains(g)) 1.0 else 0.0)
-      }
-      
-      > bigramFeature(bigram("This is a test string"), List("is_a", "test_string", "flying_porpoise"))
-      res5: Seq[Double] = List(1.0, 1.0, 0.0)
+def bigramFeature(s: Set[String], orderedGrams: Seq[String]): Seq[Double] = {
+    orderedGrams.map(g => if(s.contains(g)) 1.0 else 0.0)
+}
+
+bigramFeature(bigram("This is a test string"), List("is_a", "test_string", "flying_porpoise"))
+// This should output
+// res5: Seq[Double] = List(1.0, 1.0, 0.0)
 ~~~
 </div>
 </div>
@@ -152,8 +161,8 @@ Recall that our [featurization process](#command-line-preprocessing-and-featuriz
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> import mli.ml.classification._
-> val model = SVMAlgorithm.train(featurizedData, SVMParameters(learningRate=0.001, maxIterations=100))
+import mli.ml.classification._
+val model = SVMAlgorithm.train(featurizedData, SVMParameters(learningRate=0.001, maxIterations=100))
 ~~~
 </div>
 </div>
@@ -250,10 +259,10 @@ Let's create a new TextModel, which expects a model and a featurizer and will be
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> val textModel = new TextModel(bestModel, featurizer) //you should still have your featurizer from the initial featurization process!
+val textModel = new TextModel(bestModel, featurizer) //you should still have your featurizer from the initial featurization process!
 
 //TextModels have a *predict* method which takes a string as input. Try it out on this article from Wikipedia: 
-> textModel.predict(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Baroque").mkString)
+textModel.predict(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Baroque").mkString)
 
 //What class did the model predict? Was it right? Note that that article has NO category information associated with it.
 ~~~
@@ -287,14 +296,14 @@ TF-IDF statistic on the original vector.
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-      def documentFrequency(features: Set[MLVector]): MLVector = {
-          features.reduce(_ plus _)
-      }
-      
-      def tfIdf(features: Set[MLVector]): Set[MLVector] = {
-          val df = documentFrequency(features)
-          features.map(_ over df)
-      }
+def documentFrequency(features: Set[MLVector]): MLVector = {
+    features.reduce(_ plus _)
+}
+
+def tfIdf(features: Set[MLVector]): Set[MLVector] = {
+    val df = documentFrequency(features)
+    features.map(_ over df)
+}
 ~~~
 </div>
 </div>
