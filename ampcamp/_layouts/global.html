@@ -73,7 +73,6 @@
             {{ content }}
         </div> <!-- /container -->
         <div class="bar bottombar">
-          <div><a target="_blank" href="https://github.com/amplab/training/issues">Submit an issue to the Github training docs issue tracker</a></div>
             {% include left-page-nav-button.html %}
             {% include right-page-nav-button.html %}
             <div class="btn-group dropup">
@@ -83,6 +82,12 @@
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                     {% include chapter-list.html %}
                 </ul>
+            </div>
+            <div class="btn-group dropup">
+              <a class="btn btn-large" target="_blank" href="https://github.com/amplab/training/issues">
+                <i class="icon-exclamation-sign"> </i>
+                Submit an issue on GitHub
+              </a>
             </div>
             <div class="site-title">{{ site.title }}</div>
         </div>
