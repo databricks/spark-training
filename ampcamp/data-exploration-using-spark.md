@@ -123,9 +123,9 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 
    ![Spark Standalone Web UI](img/standalone-webui640.png)
 
-   When your count does finish running, it should return the following result:
+   When your query finishes running, it should return the following count:
 
-       res: Long = 329641466
+       329641466
 
 4. Recall from above when we described the format of the data set, that the second field is the "project code" and contains information about the language of the pages.
    For example, the project code "en" indicates an English page.
@@ -202,16 +202,19 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
        scala> enKeyValuePairs.reduceByKey(_+_, 1).collect
        ...
        res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,202617618), (20090505,207698578))
+
+     The `collect` method at the end converts the result from an RDD to an array.
+     Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res`<i>N</i> is automatically created.
    </div>
    <div data-lang="python" markdown="1">
        >>> enKeyValuePairs.reduceByKey(lambda x, y: x + y, 1).collect()
        ...
        [(u'20090506', 204190442), (u'20090507', 202617618), (u'20090505', 207698578)]
+
+     The `collect` method at the end converts the result from an RDD to an array.
    </div>
    </div>
 
-   The `collect` method at the end converts the result from an RDD to an array.
-   Note that when we don't specify a name for the result of a command (e.g. `val enTuples` above), a variable with name `res`<i>N</i> is automatically created.
 
    We can combine the previous three commands into one:
 
