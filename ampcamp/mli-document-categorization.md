@@ -248,7 +248,7 @@ To do this, we test for equality between the two elements of each MLRow, and cou
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val trainError = trainVsTest.filter(r(0) != r(1)).numRows.toDouble/trainVsTest.numRows
+val trainError = trainVsTest.filter(r => r(0) != r(1)).numRows.toDouble/trainVsTest.numRows
 ~~~
 </div>
 </div>
