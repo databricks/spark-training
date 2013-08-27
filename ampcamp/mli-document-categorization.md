@@ -8,59 +8,70 @@ next: where-to-go-from-here---more-resources-and-further-reading.html
 In this chapter, we will use MLI and Spark to tackle a machine learning
 problem. Recall that MLI, a component of <a href="http://www.mlbase.org"
 target="_blank">MLbase</a>, is an API providing user-friendly access to a set
-of data structures and algorithms designed to simplify the tasks of executing
-machine learning tasks as well as developing new featurization and learning
+of data structures and algorithms designed to simplify the execution of machine
+learning tasks and the development of new featurization and learning
 algorithms.
 
-To complete the machine learning exercises within the time
-available using our relatively small EC2 clusters, in this section we will work
+To complete these machine learning exercises within the available time
+using our relatively small EC2 clusters, we will work
 with a restricted set of the Wikipedia article data from July 2013. This
 dataset represents a subset of English Wikipedia articles that have categories
 associated with them.
 
-Our task will be to come up with a model that's capable of taking a piece of text (say, a newspaper article) and identifying what high level class it belongs to - Sports, Arts, Technology, Math, etc. We frame this task as a *supervised* learning problem whereby we train a model by providing the system with *labeled examples*, i.e., articles that already have classes associated with them. For this particular exercise, we're going to focus on *binary* classification - that is, telling whether an article belongs to one class or the other.
+Our task will be to build a model that's capable of taking a piece of text (say, a newspaper article) and identifying what high-level class it belongs to --- Sports, Arts, Technology, Math, etc. We frame this task as a *supervised* learning problem whereby we train a model by providing the system with *labeled examples*, i.e., articles that already have classes associated with them. For this particular exercise, we're going to focus on *binary* classification --- that is, assigning articles to one of two classes.
 
-Before we begin, we'll need to set up a Spark console to use MLI. MLI uses
+Before we begin, we'll need to configure a Spark console to use MLI. MLI uses
 Spark under the hood, so we'll do our work from the Spark shell (as reviewed in
 a [previous section](introduction-to-the-scala-shell.html)).
 
 ##Setup
 
-From a console - register the MLI library with Spark, start a Spark shell, and
-load up an "MLContext" - which is similar to a SparkContext. 
+From a console, we'll register the MLI library with Spark, start a Spark shell,
+and create an `MLContext`, which is similar to a `SparkContext`.
+
 
 <div class ="codetabs">
 <div data-lang="scala" markdown="1">
-~~~
-#Note - this is in your bash prompt.
-$ export SPARK_CLASSPATH=/root/MLI/target/MLI-assembly-1.0.jar
-$ spark/spark-shell
+At the bash shell prompt, run
 
-//Note - everything from here on out happens in the Spark shell!
-> sc.addJar("/root/MLI/target/MLI-assembly-1.0.jar")
-> import mli.interface._
-> val mc = new MLContext(sc)
 ~~~
+export SPARK_CLASSPATH=/root/MLI/target/MLI-assembly-1.0.jar
+/root/spark/spark-shell
+~~~
+
+In the Spark shell, run
+
+~~~
+sc.addJar("/root/MLI/target/MLI-assembly-1.0.jar")
+import mli.interface._
+val mc = new MLContext(sc)
+~~~
+
 </div>
 </div>
+
+From here onwards, we'll run all of our commands in the Spark shell.
 
 ## Command Line Preprocessing and Featurization
 
-To apply most machine learning algorithms, we must first preprocess and featurize our input data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of its top-level Wikipedia category (its *label*) and a set of *features* in the form of "bigrams" (pairs of words) that are present in each article.  Specifically, we will generate 10,000-dimensional feature vectors, with each feature vector entry summarizing the words used in the underlying article in the form of bigrams. The choice of *10,000* here is arbitrary, but can be an important design decision. With too many features and you risk overfitting your model to the training data and also increase your computational burden, while with too few features you may not have enough signal to discriminate between classes. 
+To apply most machine learning algorithms, we must first preprocess and featurize our input data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of its top-level Wikipedia category (its *label*) and a set of *features* in the form of "bigrams" (pairs of words) that are present in each article.  Specifically, we will generate 10,000-dimensional feature vectors, with each vector entry summarizing the bigrams that appear in the underlying article.  The choice of *10,000* here is arbitrary, but can be an important design decision.  Using too many features risks overfitting your model to the training data and increases the computational burden, while with too few features there may not be enough signal to discriminate between classes.
 
-Each record in our dataset consists of a string with the format "`<category> <subcategory> <page_contents>`".  This raw dataset was derived from raw XML dumps of the wikipedia database.
+Each record in our raw dataset consists of a string in the format "`<category> <subcategory> <page_contents>`".
+This dataset was derived from raw XML dumps of the Wikipedia database.
 <!--If you are interested in how we mapped subcategories to higher categories and actually read through the XML dumps you can [read about the process we followed](wiki-featurization.html). -->
 
 ### Data loading and featurization
 
-The first thing we'll want to do is load our data and take a look at it. MLI offers several convenient ways to load data directly into distributed tables. We'll use one of those to load and take a look at the data.
+First, we'll load our data and take a look at it.
+MLI offers several convenient ways to load data directly into distributed tables.
+We'll use one of those methods, `mc.loadFile`, to load and inspect our data.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> val inputTable = mc.loadFile("/enwiki_txt").filter(r => List("ARTS","LIFE") contains r(0).toString).cache()
-> val firstFive = inputTable.take(5)
-> val taggedInputTable = inputTable.project(Seq(0,2)).map(r => {
+val inputTable = mc.loadFile("/enwiki_txt").filter(r => List("ARTS","LIFE") contains r(0).toString).cache()
+val firstFive = inputTable.take(5)
+val taggedInputTable = inputTable.project(Seq(0,2)).map(r => {
     val label = if(r(0) == "ARTS") 1.0 else 0.0
     MLRow(label, r(1))
 }).cache()
@@ -68,74 +79,117 @@ The first thing we'll want to do is load our data and take a look at it. MLI off
 </div>
 </div>
 
-The first command loads an <code>MLTable</code>.  An <code>MLTable</code> is a distributed collection of <code>MLRow</code>, all of which follow the same <code>Schema</code>. This means that every row has the same shape and data types associated with it. These data types - <code>MLValue</code> (String, Int, Double, Empty), are the elements in the table. Rows can be thought of as arrays of values, and can be indexed with single values or sequences of values. You can select a few columns from a table in the same way. <code>MLTable</code> is the common input for all of our machine learning algorithms. Moreover, we can apply feature extractors to them as part of preprocessing.
+The first command loads data into an `MLTable`.
+An `MLTable` is a distributed collection of `MLRow`, all of which
+follow the same `Schema`. This means that every row has the same
+shape and data types associated with it. These data types ---
+`MLValue` (String, Int, Double, Empty) --- are the elements in the
+table.
+Rows can be thought of as arrays of values, and can be indexed with
+single values or sequences of values.
+You can select a few columns from a table in the same way.
+`MLTable` is the common input for all of our machine learning algorithms.
+Moreover, we can apply feature extractors to `MLTables` during preprocessing.
 
-The second command takes a few rows from that table for you to inspect. The third command selects only the first and third columns of that table, and then maps the first column to "1" if the article is an "ART" article, and a "0" if it is a "LIFE" article.
+The second command takes a few rows from the table for you to inspect.
 
-To featurize the data we'll use an N-Gram feature extractor that comes bundled with MLI. N-Gram featurization consists of breaking down documents into "N-grams" or subsequences of n words that exist in a document, once common words (or *stop words*) and punctuation have been removed. For example - the sentence, "Machine learning is really fun!" would consist of the following bigrams: {"machine_learning", "learning_really", "really_fun"}. Notice that we removed the stop word "is". 
+The third command selects only the first and third columns of that table, and
+then maps the first column to "1" if the article is an "ART" article or "0"
+if it is a "LIFE" article.
 
-Let's get this running while you're reading the next section. This job will take about 5 minutes on your cluster, so while that's running we'll do some exercises to understand what's going on under the hood.
+To featurize the data, we'll use an N-Gram feature extractor that's bundled
+with MLI.
+N-Gram featurization breaks documents into "N-grams" or subsequences of _n_
+adjacent words, once common words (or *stop words*) and punctuation have been
+removed.
+For example, the sentence "Machine learning is really fun!" consists of
+the following bigrams: {"machine_learning", "learning_really", "really_fun"}.
+Notice that we removed the stop word "is".
+
+The featurization job will take about 5 minutes to run on your cluster, so
+let's start it now:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> import mli.feat.NGrams
-> val (featurizedData, featurizer) = NGrams.extractNGrams(taggedInputTable, c=1, n=2, k=10000, stopWords = NGrams.stopWords)
+import mli.feat.NGrams
+val (featurizedData, featurizer) = NGrams.extractNGrams(taggedInputTable, c=1, n=2, k=10000, stopWords = NGrams.stopWords)
 ~~~
 </div>
 </div>
 
-Now, let's do a couple of exercises to get some more intuition about N-grams.
+While we wait for this job to finish, let's do a couple of exercises to get
+some more intuition about N-grams and understand what's happening under the
+hood.
 
-**Exercise**: Open a new scala prompt (locally if you have scala installed on your machine, or otherwise, by ssh'ing to the cluster in a new terminal). In the new scala prompt, write a "bigrams" function that mimics what NGrams is doing to a single string. 
-Given a string, convert it to lower case, tokenize it by splitting on word boundaries (spaces), and output a set of all "word1_word2" pairs that occur in sequence in the base string.
+**Exercise**: Open a new `scala` prompt (locally if you have `scala` installed on your machine, or otherwise by [logging into your cluster](logging-into-the-cluster.html) in a new terminal).
+In the new `scala` prompt, write a `bigrams` function that mimics what `NGrams` does for a single string.
+Given a string, convert it to lower case, tokenize it by splitting on word boundaries (spaces), and output a set of all "word1_word2" pairs that occur in sequence in the input string.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-      def bigram(s: String): Set[String] = {
-          s.toLowerCase.split(" ").sliding(2).map(_.mkString("_")).toSet
-      }
-      
-      > bigram("How does bigramming work on a test string")
-      res2: Set[String] = Set(on_a, a_test, test_string, does_bigramming, bigramming_work, how_does, work_on)
+def bigram(s: String): Set[String] = {
+    s.toLowerCase.split(" ").sliding(2).map(_.mkString("_")).toSet
+}
+
+bigram("How does bigramming work on a test string")
+// This should output
+// res2: Set[String] = Set(on_a, a_test, test_string, does_bigramming, bigramming_work, how_does, work_on)
 ~~~
 </div>
 </div>
 </div>
 
-Once we compute all N-grams appearing in a document, we could in theory represent the document using all of these N-grams.  However, the full set of N-grams in a corpus is typically quite large, and in our wikipedia prediction task we choose (largely for computational reasons) to consider a restricted subset of N-grams to represent each document. To decide on the subset of N-grams to consider, we first rank each N-gram by its frequency across the entire corpus of documents. This ranking gives us an explicit ordering for selecting a restricted subset of top N-grams, and we can now create a binary feature vector for each document, where the features indicate the existence of these top N-grams in a document.
+Once we compute all of a document's N-grams, we could theoretically represent
+the document using these N-grams.  However, the full set of N-grams in
+a corpus is typically quite large, and in our Wikipedia prediction task we
+choose (largely for computational reasons) to consider a restricted subset of
+N-grams to represent each document. To decide on this subset of N-grams,
+we first rank each N-gram by its frequency across the entire corpus
+of documents. This ranking gives us an explicit ordering for selecting
+a restricted subset of top N-grams, and we can now create a binary feature
+vector for each document, where the features indicate the presence of these
+top N-grams.
 
-Word frequency calculation is the classic "word count" followed by a sort, which you already saw in the [interactive analysis with Spark](data-exploration-using-spark.html) section. 
+Word frequency calculation is the classic "word count" followed by a sort, which you already saw in the [interactive analysis with Spark](data-exploration-using-spark.html) section.
 
-Once these word frequencies have been computed, projecting the set of N-grams in a document to the feature space of top N-grams is just a map over that set. 
+Once these word frequencies have been computed, we can just map over this set to project a document's N-grams into the feature space of top N-grams.
 
-**Exercise:** In the same scala prompt, write a function that, given the output of your "bigrams" function and an ordered list of bigrams (bigrams ordered by frequency), produces a binary feature vector in the same order as the ordered list, indicating whether or not the set from the document contains that bigram. The output of this function is a "feature vector".
+**Exercise:** In the same `scala` prompt, write a `bigramFeature` function
+that, given the output of your `bigrams` function and an ordered list of
+bigrams (bigrams ordered by frequency), produces a binary feature vector in the
+same order as the ordered list, indicating whether or not the set from the
+document contains that bigram. The output of this function is a "feature
+vector".
 
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-      def bigramFeature(s: Set[String], orderedGrams: Seq[String]): Seq[Double] = {
-          orderedGrams.map(g => if(s.contains(g)) 1.0 else 0.0)
-      }
-      
-      > bigramFeature(bigram("This is a test string"), List("is_a", "test_string", "flying_porpoise"))
-      res5: Seq[Double] = List(1.0, 1.0, 0.0)
+def bigramFeature(s: Set[String], orderedGrams: Seq[String]): Seq[Double] = {
+    orderedGrams.map(g => if(s.contains(g)) 1.0 else 0.0)
+}
+
+bigramFeature(bigram("This is a test string"), List("is_a", "test_string", "flying_porpoise"))
+// This should output
+// res5: Seq[Double] = List(1.0, 1.0, 0.0)
 ~~~
 </div>
 </div>
 </div>
 
-Hopefully the cluster job has completed by now.  Note that the outputs of
-*NGrams.extractNGrams* are *featurizedData* and *featurizer*. *featurizedData* is
-an MLTable containing N-gram representations of each document, using bigrams
-and only including the top 10,000 N-grams. *featurizer* is a function that
-takes raw documents and applies the aforementioned featurization process.  This function
+By now, hopefully the cluster has completed our featurization job.
+
+Note that the outputs of `NGrams.extractNGrams` are `featurizedData` and
+`featurizer`. `featurizedData` is an `MLTable` containing N-gram
+representations of each document, using bigrams and only including the 
+10,000 most frequent bigrams. `featurizer` is a function that takes raw
+documents and applies the aforementioned featurization process.  This function
 will be used along with a trained classifier to make predictions on new text
-documents in a later [section](#test-the-model-on-new-data). 
+documents in a [later section](#test-the-model-on-new-data). 
 
 
 
@@ -145,23 +199,24 @@ documents in a later [section](#test-the-model-on-new-data).
 
 ## Building a model using SVMs
 
-<a href="http://en.wikipedia.org/wiki/Support_vector_machine" target="_blank">Support Vector Machines (SVMs)</a> are a popular machine learning algorithm used for binary classification. The MLI implementation of linear SVMs is based on <a href="http://en.wikipedia.org/wiki/Stochastic_gradient_descent" target="_blank">Stochastic Gradient Descent (SGD)</a>, a robust, highly scalable optimization algorithm. Our implementation has been tuned to run well under Spark's distributed architecture. 
+<a href="http://en.wikipedia.org/wiki/Support_vector_machine" target="_blank">Support Vector Machines (SVMs)</a> are a popular machine learning algorithm used for binary classification. The MLI implementation of linear SVMs is based on <a href="http://en.wikipedia.org/wiki/Stochastic_gradient_descent" target="_blank">Stochastic Gradient Descent (SGD)</a>, a robust, highly-scalable optimization algorithm. Our implementation has been tuned to run well under Spark's distributed architecture.
 
-Recall that our [featurization process](#command-line-preprocessing-and-featurization) created a 10,000-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the contents of that page in the form of the top 10,000 bigrams appearing in the corpus. Now let's train a model on those features.
+Recall that our [featurization process](#command-line-preprocessing-and-featurization) created a 10,000-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the contents of that page in the form of the top 10,000 bigrams appearing in the corpus. Now, let's train a model on those features:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> import mli.ml.classification._
-> val model = SVMAlgorithm.train(featurizedData, SVMParameters(learningRate=0.001, maxIterations=100))
+import mli.ml.classification._
+val model = SVMAlgorithm.train(featurizedData, SVMParameters(learningRate=0.001, maxIterations=100))
 ~~~
 </div>
 </div>
 
 ## Model assessment
-Now that we have a model built, what can we do with it? First, let's compute its "training error" - that is, how well does it do on the data it was trained on.
+Now that we've built a model, what can we do with it?
 
 <!--*TODO* Add explanation of test set vs. train set.-->
+
 First, let's see how to make predictions using our model.  The following code demonstrates how to generate a prediction from the first data point in our training set.
 
 <div class="codetabs">
@@ -174,7 +229,7 @@ model.predict(firstDataPoint(1 until firstDataPoint.length))
 </div>
 </div>
 
-**Exercise:** Next, create an MLTable where the first column is the true label and the second column is the predicted label generated by our trained model. Hint - Map each row of *featurizedData* into a two dimensional MLRow, with the first element being the true label (the first column of *featurizedData*) and the second element being the model prediction (generated as shown above).
+**Exercise:** Next, create an `MLTable` where the first column is the true label and the second column is the predicted label generated by our trained model. Hint: map each row of `featurizedData` into a two-dimensional `MLRow`, with the first element being the true label (the first column of `featurizedData`) and the second element being the model prediction (generated as shown above).
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -186,25 +241,28 @@ val trainVsTest = featurizedData.map(r => MLRow(r(0), model.predict(r(1 until r.
 </div>
 </div>
 
-Now, let's calculate the training error, by computing the fraction of incorrect predictions.  To do this, we test for equality between the two elements of each MLRow, and count the number of inequalities.
+Now, let's compute the model's "training error" --- that is, how well it performs on the data it was trained on.
+We'll calculate the training error by computing the fraction of incorrect predictions.
+To do this, we test for equality between the two elements of each MLRow, and count the number of inequalities (mispredictions).
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val trainError = trainVsTest.filter(r(0) != r(1)).numRows.toDouble/trainVsTest.numRows
+val trainError = trainVsTest.filter(r => r(0) != r(1)).numRows.toDouble/featurizedData.numRows
 ~~~
 </div>
 </div>
 
-What does this mean? It means that if we give the model the same points that it was trained with, it will classify *trainError* percent of them incorrectly.
+What does this mean? It means that if we give the model the same points that it was trained with, it will classify `trainError` percent of them incorrectly.
 
 ## Feature importance
-Next, let's drill into which features are important. Let's sort the features by their weight and take a look at those that are most important and least important.
+Next, let's drill into our model to figure out which features are important.
+Let's sort the features by their weight and look at the most and least important features:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-//This will match the features to our N-Grams and tell us which ones are most interesting.
+// This will match the features to our N-Grams and tell us which ones are most interesting.
 val topFeatures = model.features.sortWith(_._2 < _._2).take(10)
 val bottomFeatures = model.features.sortWith(_._2 > _._2).take(10)
 ~~~
@@ -213,9 +271,13 @@ val bottomFeatures = model.features.sortWith(_._2 > _._2).take(10)
 
 
 ## Parameter Tuning
-We've seen what happens when we run with the magic parameter "learningRate=0.001" - what happens when we vary this parameter? It turns out that we may get better results depending on how we set this parameter. Too high and we may never find an optimal model - too low and we might not get to a good model in the number of iterations required.
+We've seen what happens when we run with the magic parameter
+`learningRate=0.001`.  What happens when we vary this parameter? It turns out
+that we may get better results depending on how we set this parameter. If it's
+too high, we may never find an optimal model; if it's too low, we may not build
+a good model in the required number of iterations.
 
-**Exercise:** Train a model for several different values of learningRate - calculate the training error for each one, and report the one that has the best error. (Hint: Try moving in steps of 10x = e.g. learning rate = 0.0001, 0.001, 0.01, ...)
+**Exercise:** Train a model for several different values of `learningRate`.  Calculate the training error for each model and report the `learningRate` that minimizes the error. (Hint: Try moving in steps of 10x = e.g. `learningRate` = 0.0001, 0.001, 0.01, ...)
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -243,58 +305,65 @@ val bestModel = //
 
 
 ## Test the model on new data
-Now that we're pretty sure we have a good model, let's see how well it does at actually predicting based on some new text.
+Now that we're pretty sure we've built a good model, let's see how well it classifies new text that it wasn't trained on.
 
-Let's create a new TextModel, which expects a model and a featurizer and will be able to predict the class of arbitrary text.
+Let's create a new `TextModel`, which expects a model and a featurizer and uses them to classify arbitrary text.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-> val textModel = new TextModel(bestModel, featurizer) //you should still have your featurizer from the initial featurization process!
+// you should still have your featurizer from the initial featurization process!
+val textModel = new TextModel(bestModel, featurizer)
 
-//TextModels have a *predict* method which takes a string as input. Try it out on this article from Wikipedia: 
-> textModel.predict(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Baroque").mkString)
+// TextModels have a `predict` method which takes a string as input. Try it out on this article from Wikipedia: 
+textModel.predict(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Baroque").mkString)
 
-//What class did the model predict? Was it right? Note that that article has NO category information associated with it.
 ~~~
 </div>
 </div>
-**Bonus Exercise** Try on other articles - are the predictions reasonable?
+
+What class did the model predict? Was it right? Note that that article has NO
+category information associated with it.
+
+**Bonus Exercise**: Try this on other articles --- are the predictions
+reasonable?
 
 ## TF-IDF Features 
 
-In this section, we'll take a step back, and revisit the task of featurization
+In this section, we'll step back and revisit the task of featurization
 in order to illustrate how the MLI provides an easy-to-use platform for
-developing a new featurization algorithms.  So far we've been focusing on simple
-counting-based features, but feature vector of 1's and 0's is kind of boring.
+developing new featurization algorithms.
+So far, we've focused on simple counting-based features, but feature vector of
+1's and 0's is kind of boring.
 We haven't done anything to add more weight to terms that are less frequently
 used but may be more important when they are used. For example, the N-Gram
 "lebron_james" might be highly indicative of a sports article, but probably
 only shows up in a small fraction of the dataset. When we do see it in a
-document, we want to classify the document as Sports with higher probability.
+document, we want to classify the document as "Sports" with higher probability.
 
-Let's do some feature engineering, and compute the term frequency-inverse
-document frequency statistic of our features. That is, we weight terms by the
-*inverse* of the frequency with which they show up across the entire corpus,
-thus downweighting commonly appearing terms and vice-versa. 
+Let's do some feature engineering, and compute the <a
+href="http://en.wikipedia.org/wiki/Tf%E2%80%93idf">term frequency-inverse
+document frequency</a> statistic of our features. That is, we weight terms by the
+*inverse* of the frequency with which they appear in the entire corpus,
+thus downweighting commonly-appearing terms and promoting infrequent ones.
 
-**Exercise:** Given a collection of identically shaped bigram feature
-vectors, compute their total document frequency. Hint - MLVector supports the
+**Exercise:** Given a collection of identically-shaped bigram feature
+vectors, compute their total document frequency. (Hint: `MLVector` supports the
 "plus" operation for elementwise addition. Once you have this, compute the
-TF-IDF statistic on the original vector.
+TF-IDF statistic on the original vector.)
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-      def documentFrequency(features: Set[MLVector]): MLVector = {
-          features.reduce(_ plus _)
-      }
-      
-      def tfIdf(features: Set[MLVector]): Set[MLVector] = {
-          val df = documentFrequency(features)
-          features.map(_ over df)
-      }
+def documentFrequency(features: Set[MLVector]): MLVector = {
+    features.reduce(_ plus _)
+}
+
+def tfIdf(features: Set[MLVector]): Set[MLVector] = {
+    val df = documentFrequency(features)
+    features.map(_ over df)
+}
 ~~~
 </div>
 </div>
