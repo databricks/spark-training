@@ -162,12 +162,12 @@ a:hover code {
   vertical-align: middle;
 }
 #ampcamp-logo {
-  width: 162px;
-  height: 50px;
+  width: 294px;
+  height: 65px;
   display: inline-block;
   vertical-align: middle;
-  margin-right: 20px;
-  background: url(../img/ampcamp-simple-trim-162x30.png) no-repeat left 10px;
+  margin-right: 15px;
+  background: url(../img/ampcamp3-wide-and-skinny-294x65px.png) no-repeat left 10px;
 }
 /*
 @media (min-width: 768px) {
