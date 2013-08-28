@@ -19,18 +19,18 @@ BlinkDB is in its alpha stage of developement, and hence you may notice some of 
    Before you do any querying, you will need to tell BlinkDB where the data is and define its schema.
 
    <pre class="prettyprint lang-sql">
-   blinkdb> create external table wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';   
+   blinkdb> create external table wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';
    <span class="nocode">OK
    Time taken: 0.232 seconds</span></pre>
 
-   <b>FAQ:</b> If you see the following errors, don’t worry. Things are still working under the hood.
+   **FAQ:** If you see the following errors, don’t worry. Things are still working under the hood.
 
    <pre class="nocode">
    12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.core.resources" but it cannot be resolved.
    12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.core.runtime" but it cannot be resolved.
    12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.text" but it cannot be resolved.</pre>
 
-   <b>FAQ:</b> If you see errors like these, you might have copied and pasted a line break, and should be able to remove it to get rid of the errors.
+   **FAQ:** If you see errors like these, you might have copied and pasted a line break, and should be able to remove it to get rid of the errors.
 
    <pre>13/02/05 21:22:16 INFO parse.ParseDriver: Parsing command: CR
    FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'</pre>
@@ -59,23 +59,23 @@ BlinkDB is in its alpha stage of developement, and hence you may notice some of 
 Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_sample_cached
 OK
 Time taken: 22.703 seconds</span></pre>
-   
+
    In the Alpha release, we need to tell BlinkDB the size of the sample and of the original table.  First, check the sample's size.  Since the sample size is random, you may get a slightly different answer than the one listed here.  It should be close to 1% of the original table's size.
-   
+
    <pre class="prettyprint lang-sql">
    blinkdb> select count(1) from wikistats_sample_cached;
    <span class="nocode">OK
    3294551
    Time taken: 3.011 seconds
    </span></pre>
-   
+
    Now declare the sample size.  Replace the number here with the result of the `count` query you just ran.
-   
+
    <pre class="prettyprint lang-sql">
    set blinkdb.sample.size=3294551; -- <-- Replace this with the result of your query. </pre>
-   
+
    Finally, declare the original table's size.
-   
+
    <pre class="prettyprint lang-sql">
    set blinkdb.dataset.size=329641466;</pre>
 
@@ -101,7 +101,7 @@ Time taken: 22.703 seconds</span></pre>
    <pre class="prettyprint lang-sql">
    blinkdb> select approx_avg(page_views) from wikistats_sample_cached where lcase(page_name) like "%san_francisco%";
    <span class="nocode">OK
-   3.053745928338762 +/- 0.9373634631550505 (99% Confidence) 
+   3.053745928338762 +/- 0.9373634631550505 (99% Confidence)
    Time taken: 12.09 seconds</span></pre>
 
    You can also compute an exact answer by running the same query on the table `wikistats_cached`, replacing "`approx_avg`" with "`avg`":
@@ -124,18 +124,18 @@ Time taken: 22.703 seconds</span></pre>
    20090506-170000	2.5080237868203986E7 +/- 337587.0 (99% Confidence)
    20090506-120000	4.075047502715797E7 +/- 907448.0 (99% Confidence)
    Time taken: 1.195 seconds</span></pre>
-   
+
    <b>NOTE:</b> Currently BlinkDB alpha-0.1.0 only supports lexographic ordering using the `orderby` operator. We will introduce numerical ordering in alpha-0.2.0.
 
 10. The hour `"20090506-120000"` seems to have a lot of traffic.  Now let's see which project codes (roughly, which languages) contributed to this:
-   
+
   	<pre class="prettyprint lang-sql">
-   blinkdb> select project_code, approx_sum(page_views) as views from wikistats_sample_cached where 
+   blinkdb> select project_code, approx_sum(page_views) as views from wikistats_sample_cached where
    dt="20090506-120000" group by project_code;
    <span class="nocode">OK
    vi.d	10197.941673238138 +/- 2724.0 (99% Confidence)
    sr	10297.921493564003 +/- 2984.0 (99% Confidence)
-   . . . . . . . . . . . . . . . . . . . . . . . . . . 
+   . . . . . . . . . . . . . . . . . . . . . . . . . .
    . . . . . . . . . . . . . . . . . . . . . . . . . .
    io.d	999.798203258641 +/- 859.0 (99% Confidence)
    nds	999.798203258641 +/- 974.0 (99% Confidence)
@@ -146,21 +146,21 @@ Time taken: 22.703 seconds</span></pre>
     <pre class="prettyprint lang-sql">
     blinkdb> select project_code, approx_count(1) as num_pages, approx_sum(page_views) as views from
     wikistats_sample_cached where dt="20090506-160000" group by project_code;
-    <span class="nocode">OK      
+    <span class="nocode">OK
 	fr	315836 +/- 14463.0 (99% Confidence)  1003897.3758920014 +/- 45994.0 (99% Confidence)
     de.b	5798 +/- 1961.0 (99% Confidence) 	10397.901313889866 +/- 3516.0 (99% Confidence)
-    . . . . . . . . . . . . . . . . . . . . . . . . . .. . . . . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . . . . . . . . . . .. . . . . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . . . . . . . . . . . .. . . . . . . . . . . . . . . . . . . .
     vi.b	699 +/- 682.0 (99% Confidence) 	999.798203258641 +/- 974.0 (99% Confidence)
     kk	699 +/- 682.0 (99% Confidence) 	999.798203258641 +/- 974.0 (99% Confidence)
     Time taken: 0.907 seconds</span></pre>
 
 12. However, we should remember that random sampling doesn't always work well. For instance, try computing the average number of hits on all pages:
-   
+
     <pre class="prettyprint lang-sql">
     blinkdb> select approx_avg(page_views) from wikistats_sample_cached;
     <span class="nocode">OK
-    3.6420454545454546 +/- 1.7610655103860877 (99% Confidence) 
+    3.6420454545454546 +/- 1.7610655103860877 (99% Confidence)
     Time taken: 3.407 seconds</span></pre>
 
     Also try computing the true average on the original table.  You'll probably notice that the 99% confidence interval provided   by BlinkDB doesn't cover the true answer.
@@ -173,15 +173,15 @@ Time taken: 22.703 seconds</span></pre>
     <span class="nocode">OK
     [1.0,1.0,1.0,1.0,1.9999999999999998,4.867578875914043,35.00000000000001,151.9735162220546]
     Time taken: 31.241 seconds</span></pre>
-   
+
     Note that `percentile_approx` is not a BlinkDB approximation operator; it is a Hive operator that computes approximate percentiles on a given column. Most pages have only a few views, but there are some pages with a very large number of views.  If a sample misses one of these outliers, it will look very different from the original table, and accuracy of both approximations and confidence intervals will suffer.
 
 14. Sometimes it is acceptable to remove outliers from your data, or at least reduce their impact on query answers.  In this case, we could try taking the natural logarithm of `page_views`.
- 
+
     <pre class="prettyprint lang-sql">
     blinkdb> select approx_avg(log(page_views)) from wikistats_sample_cached;
     <span class="nocode">OK
-    0.4915571985283967 +/- 0.001178986199704763 (99% Confidence) 
+    0.4915571985283967 +/- 0.001178986199704763 (99% Confidence)
     Time taken: 1.847 seconds
     </span>
     blinkdb> select avg(log(page_views)) from wikistats_cached;
@@ -227,7 +227,7 @@ Time taken: 22.703 seconds</span></pre>
       <pre class="prettyprint lang-sql">
       blinkdb> select approx_sum(page_views) from wikistats_sample_cached where dt="20090507-070000";
       <span class="nocode">OK
-      1.1811077507224506E7 +/- 147736.0 (99% Confidence) 
+      1.1811077507224506E7 +/- 147736.0 (99% Confidence)
       Time taken: 0.649 seconds</span></pre>
 
       As before, you can also compute an exact answer by running the same query on the table `wikistats`, replacing "`approx_sum`" with "`sum`".
