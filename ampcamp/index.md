@@ -6,18 +6,25 @@ navigation:
   show: true
 ---
 
-Welcome to the Dry-Run of the AMP Camp 3 hands-on exercises. Thanks for helping out and we hope you find what you're about to learn helpful!
-
-These exercises will have you working directly with components of Hadoop as well as components of our open-source software stack, called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack (BDAS)</a>, that have been released and are ready to use.
-The components we will cover today include [Spark](http://spark-project.org), [Spark Streaming](http://spark-project.org/docs/latest/streaming-programming-guide.html), [MLbase](http://mlbase.org), and [BlinkDB](http://blinkdb.org).
-
-We have already spun up a small cluster for you on EC2 using our scripts. To access your cluster, you will need to download <a href="https://docs.google.com/file/d/0B6nc314QW_P3Wjh0ZVdxb3Bqam8/edit?usp=sharing">this private key</a>. Then, find the address of the machine in the same row as as your name in the table <a href="http://goo.gl/NRmAlZ">here</a>. You can log into the cluster with the username root using a command like:
-
-    ssh -i /path/to/ampcamp3-all.pem root@<YOUR_MACHINE_ID>
+# Welcome
+Welcome to the AMP Camp 3 hands-on exercises. These exercises will have you working directly with components of our open-source software stack,
+called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack
+(BDAS)</a>.
 
 
-# Providing feedback
-This is a dry-run, so you can expect to run into a few issues. When you do, please call over a TA and explain what's going on. When you find a problem with the course that needs attention, please create a new issue at the <a href="https://github.com/amplab/training/issues">training docs Github issue Tracker</a> (there is also a link to this in the footer on all pages of the exercises).
+The components we will cover over the two days of AMP Camp 3 are:
+
+## Day 1
+
+* [Spark](http://spark.incubator.apache.org) - a fast cluster compute engine.
+* [Shark](http://shark.cs.berkeley.edu) - a SQL layer on top of Spark.
+* [Spark Streaming](http://spark-project.org/docs/latest/streaming-programming-guide.html) - A stream processing layer on top of Spark.
+
+## Day 2
+* [BlinkDB](http://blinkdb.org) - A SQL processing system providing approximate results and bounded time and errors.
+* [MLbase](http://mlbase.org) - A machine learning system including a library of ML algorithms and tools to make ML easy to use.
+* [Mesos](http://mesos.apache.org) - A fault tolerant cluster-level operating system for managing cluster resources and frameworks.
+
 
 # Course Prerequisites
 Several components support multiple languages. For the sections about Spark and Spark Streaming, you can choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this mini course supports for each section. You are welcome to mix and match languages depending on your preferences and interests.
@@ -44,6 +51,9 @@ table td, table th {
   <td class="no">no</td>
   <td class="yes">yes</td>
 </tr><tr>
+  <td>Shark Interactive</td>
+  <td colspan="3" class="yes">All SQL</td>
+</tr><tr>
   <td>Spark Streaming</td>
   <td class="yes">yes</td>
   <td class="yes">yes</td>
@@ -61,3 +71,10 @@ table td, table th {
 </table>
 </center>
 
+# Providing feedback
+We are using the cutting edge versions (i.e., the master branches) of most of our software components, which means you may run into a few issues. If you do, please call over a TA and explain what's going on. To report a problem, please create a new issue at the <a href="https://github.com/amplab/training/issues">training docs Github issue Tracker</a> (there is also a link to this in the footer on all pages of the exercises).
+
+# Getting Started
+
+Ok, If you are attending AMP Camp in-person, we have probably given you a hostname and instructions for downloading the private key you will need in the next section to access your cluster.
+If you are participating in the exercises from a remote location, you will want to [launch a BDAS cluster on Amazon EC2](launching-a-bdas-cluster-on-ec2.html) for yourself.

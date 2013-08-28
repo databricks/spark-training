@@ -9,6 +9,10 @@
   {% endif %}
 {% endfor %}
 
+{% if page.next %}
+  {% assign next_page = page.next %}
+{% endif %}
+
 {% if next_page %}
 <a class="btn page-nav" style="float:right" href="{{next_page | remove_first:'/'}}">
 {% else %}

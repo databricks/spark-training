@@ -1,8 +1,8 @@
 ---
 layout: global
-title: Launching a Spark/Shark Cluster on EC2
 prev: index.html
 next: logging-into-the-cluster.html
+title: Launching a Spark/Shark Cluster on EC2
 ---
 
 This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this [intro to AMIs](https://aws.amazon.com/amis/)).
@@ -242,8 +242,10 @@ You can find the master hostname (`<master_node_hostname>` in the instructions b
 At this point, it would be helpful to open a text file and copy `<master_node_hostname>` there.
 In a later exercise, you will want to have `<master_node_hostname>` ready at hand without having to scroll through your terminal history.
 
-## Terminating the cluster (Not yet, only after you do the rest of the exercises!)
-__After you are done with your exercises__, you can terminate the cluster by running
+<h2>Terminating the cluster <span>(Not yet, only after you do the rest of the exercises!)</span></h2>
+__After you are done with your exercises (and only then)__, you can terminate the cluster by running
 
     ./spark-ec2 -i <key_file> -k <key_pair> destroy amplab-training
 
+## Log into your cluster
+Move onto the next section for instructions that walk you through logging into your shiney new BDAS cluster.
