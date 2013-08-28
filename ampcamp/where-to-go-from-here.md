@@ -1,20 +1,20 @@
 ---
 layout: global
-title: Where to Go From Here - More Resources and Further Reading
-prev: mli-document-categorization.html
+title: Where to Go From Here
+navigation:
+  weight: 110
+  show: true
 skip-chapter-toc: true
 ---
 
 - [Spark API reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/core/index.html#spark.package) (Java/Scala)
 - [Spark API reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/pyspark/index.html) (Python)
 - [Spark Streaming API Reference](http://www.cs.berkeley.edu/~pwendell/strataconf/api/streaming/index.html#spark.streaming.package) (Java/Scala)
-- [Official Spark website](http://spark-project.org) - Find examples, documentation, downloads, research papers, news, and more!
+- [Official Spark website](http://spark.incubator.apache.org) - Find examples, documentation, downloads, research papers, news, and more!
 - [Official Shark website](http://shark.cs.berkeley.edu)
 - [Spark on github](http://github.com/mesos/spark) - The official repository.
-- Check out talks (videos and slides) from the [first AMP Camp Big Data Bootcamp](http://ampcamp.berkeley.edu)
-- The Spark mailing lists:
-    - [spark-users](http://groups.google.com/group/spark-users) is for usage questions, help, and announcements
-    - [spark-developers](http://groups.google.com/group/spark-developers) is for people who want to contribute code to Spark
+- Check out talks (videos and slides) from the [first](http://ampcamp.berkeley.edu/1) and [second AMP Camp](http://ampcamp.berkeley.edu/1).
+- Subscribe to the [Spark mailing lists](http://spark.incubator.apache.org/mailing-lists.html):
 - The [Spark issue tracker](https://spark-project.atlassian.net/browse/SPARK)
 - Various [Spark related articles on Quora](http://www.quora.com/Spark-Cluster-Computing)
 - Some blog posts about Spark:
@@ -28,4 +28,4 @@ skip-chapter-toc: true
     - [The future of big data with BDAS, the Berkeley Data Analytics Stack](http://strata.oreilly.com/2013/02/the-future-of-big-data-with-bdas-the-berkeley-data-analytics-stack.html#more-54859). On the O’Reilly Strata blog, by Andy Konwinski, Ion Stoica, Matei Zaharia, February 18, 2013
     - [Five big data predictions for 2013](http://strata.oreilly.com/2013/01/five-big-data-predictions-for-2013.html). On the O’Reilly Strata blog, by Ed Dumbill, January 16, 2013
     - [Shark: Real-time queries and analytics for big data](http://strata.oreilly.com/2012/11/shark-real-time-queries-and-analytics-for-big-data.html). On the O’Reilly Strata blog, by Ben Lorica, November 27, 2012
-    - [Seven reasons why I like Spark](http://strata.oreilly.com/2012/08/seven-reasons-why-i-like-spark.html). On the O’Reilly Strata blog, by Ben Lorica, August 21, 2012 
+    - [Seven reasons why I like Spark](http://strata.oreilly.com/2012/08/seven-reasons-why-i-like-spark.html). On the O’Reilly Strata blog, by Ben Lorica, August 21, 2012

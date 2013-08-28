@@ -1,7 +1,9 @@
 ---
 layout: global
 title: Introduction
-next: logging-into-the-cluster.html
+navigation:
+  weight: 10
+  show: true
 ---
 
 Welcome to the Dry-Run of the AMP Camp 3 hands-on exercises. Thanks for helping out and we hope you find what you're about to learn helpful!

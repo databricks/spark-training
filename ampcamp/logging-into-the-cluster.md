@@ -1,8 +1,9 @@
 ---
 layout: global
 title: Logging into the Cluster
-prev: index.html
-next: overview-of-the-exercises.html
+navigation:
+  weight: 20
+  show: true
 skip-chapter-toc: true
 ---
 Let's log into the cluster we just set up. Select the tab below that corresponds to the operating system you are running to find instructions for SSH-ing into your cluster on EC2.

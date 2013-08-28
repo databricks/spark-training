@@ -1,8 +1,10 @@
 ---
 layout: global
 title: Data Exploration Using BlinkDB
-prev: processing-live-data-streams-with-spark-streaming.html
-next: mesos.html
+categories: [module]
+navigation:
+  weight: 80
+  show: true
 skip-chapter-toc: true
 ---
 

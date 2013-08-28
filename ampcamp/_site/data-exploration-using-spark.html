@@ -2,7 +2,8 @@
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" xmlns="http://www.w3.org/1999/html"> <!--<![endif]-->
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -47,7 +48,6 @@
             <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
         <![endif]-->
 
-        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
         <div class="bar topbar">
             
@@ -65,13 +65,13 @@
             <a href="http://ampcamp.berkeley.edu/ampcamp3-exercises/" id="ampcamp-logo"></a>
             <!--<img src="img/amplab-small.png" alt="AMP Camp Logo" width="150" id="amplab-logo"/>-->
             <div id="topbar-middle">
-                <div class="site-title">AMP Camp 3 Exercises Dry-Run</div>
+                <div class="site-title">Hands-on Exercises</div>
                 <div class="btn-group">
-                    <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                    <div class="btn btn-med dropdown-toggle pull-right" data-toggle="dropdown">
                         Data Exploration Using Spark &nbsp; <i class="icon-list-ul icon"></i>
                     </div>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    
 
   <li>
     
@@ -156,7 +156,8 @@
     <a href="/where-to-go-from-here.html">Where to Go From Here</a>
   </li>
 
-</ul>
+
+                  </ul>
                 </div>
             </div>
         </div><!--topbar-->
@@ -493,6 +494,8 @@ The Spark ones can be found in the <code>/root/scala-app-template</code> and <co
 Feel free to browse through the contents of those directories. You can also find examples of building and running Spark standalone jobs <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-java">in Java</a> and <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-scala">in Scala</a> as part of the Spark Quick Start Guide. For even more details, see Matei Zaharia&#8217;s <a href="http://ampcamp.berkeley.edu/wp-content/uploads/2012/06/matei-zaharia-part-2-amp-camp-2012-standalone-programs.pdf" target="_blank">slides</a> and <a href="http://www.youtube.com/watch?v=7k4yDKBYOcw&amp;t=59m37s" target="_blank">talk video</a> about Standalone Spark jobs at the <a href="http://ampcamp.berkeley.edu/agenda-2012" target="blank">first AMP Camp</a>.</p>
 
         </div> <!-- /container -->
+
+
         <div class="bar bottombar">
             
 <a class="btn page-nav" disabled="disable" style="float:left">
@@ -506,13 +509,18 @@ Feel free to browse through the contents of those directories. You can also find
   <i class="icon-arrow-right icon-2x"></i>
 </a>
 
+          <div class="btn-group dropup">
+            <a class="btn btn-med" target="_blank" href="https://github.com/amplab/training/issues">
+              <i class="icon-exclamation-sign"> </i>
+              Submit an issue on GitHub
+            </a>
+          </div>
             <div class="btn-group dropup">
-                <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                <div class="btn btn-med dropdown-toggle" data-toggle="dropdown">
                     Data Exploration Using Spark &nbsp; <i class="icon-list-ul icon"></i>
                 </div>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-
+                    
 
   <li>
     
@@ -597,16 +605,10 @@ Feel free to browse through the contents of those directories. You can also find
     <a href="/where-to-go-from-here.html">Where to Go From Here</a>
   </li>
 
-</ul>
+
                 </ul>
             </div>
-            <div class="btn-group dropup">
-              <a class="btn btn-large" target="_blank" href="https://github.com/amplab/training/issues">
-                <i class="icon-exclamation-sign"> </i>
-                Submit an issue on GitHub
-              </a>
-            </div>
-            <div class="site-title">AMP Camp 3 Exercises Dry-Run</div>
+            <div class="site-title">Hands-on Exercises</div>
         </div>
 
         <script src="js/vendor/jquery-1.8.3.min.js"></script>

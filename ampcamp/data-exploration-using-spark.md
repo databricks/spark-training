@@ -1,8 +1,10 @@
 ---
 layout: global
 title: Data Exploration Using Spark
-prev: introduction-to-the-scala-shell.html
-next: data-exploration-using-shark.html
+categories: [module]
+navigation:
+  weight: 50
+  show: true
 skip-chapter-toc: true
 ---
 

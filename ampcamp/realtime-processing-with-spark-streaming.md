@@ -1,8 +1,10 @@
 ---
 layout: global
-title: Processing Live Data Streams with Spark Streaming
-prev: data-exploration-using-shark.html
-next: blinkdb.html
+title: Stream Processing w/ Spark Streaming
+categories: [module]
+navigation:
+  weight: 70
+  show: true
 ---
 
 In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to the Scala Shell](introduction-to-the-scala-shell.html) section to learn some basics.
@@ -19,7 +21,7 @@ We use a modified version of the Scala standalone project template introduced in
 Simple Build Tool, or SBT, is popular open-source a build tool for Scala and Java projects, written in Scala. Currently, Spark can be built using SBT or Maven, while Spark Streaming an Shark can be built with SBT only. Read more about SBT at <a href="https://github.com/harrah/xsbt/wiki" target="_blank">its Github page</a>.
 </div>
 
-- `twitter.txt:` File containing Twitter authentication details 
+- `twitter.txt:` File containing Twitter authentication details
 - For Scala users
   - `scala/sbt:` Directory containing the SBT tool
   - `scala/build.sbt:` SBT project file
@@ -58,8 +60,8 @@ object Tutorial {
     val checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/"
 
     // Configure Twitter credentials using twitter.txt
-    TutorialHelper.configureTwitterCredentials()    
-    
+    TutorialHelper.configureTwitterCredentials()
+
     // Your code goes here
   }
 }
@@ -90,7 +92,7 @@ public class Tutorial {
     String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
 
     // Twitter credentials from login.txt
-    TutorialHelper.configureTwitterCredentials()    
+    TutorialHelper.configureTwitterCredentials()
 
     // Your code goes here
   }
@@ -146,21 +148,21 @@ Since all of the exercises are based on Twitter's sample tweet stream, it is nec
 
        cd /root/streaming/
        vim twitter.txt
-    
-    You should see the follow template of = separated key-value pairs already setup. 
+
+    You should see the follow template of = separated key-value pairs already setup.
 
        consumerKey =
        consumerSecret =
        accessToken =
        accessTokenSecret =
-    
+
     Please copy the values from the previous webpage into this appropriate keys in this file. After copying, it should look something like the following:
 
        consumerKey = z25xt02zcaadf12 ...
        consumerSecret = gqc9uAkjla13 ...
        accessToken = 8mitfTqDrgAzasd ...
        accessTokenSecret = 479920148 ...
-    
+
     Please double-check that the right values have been assigned to the right keys. Save the file and proceed to writing your first Spark Streaming program.
 5.  **Once you have finished this tutorial (not now!)**, you can go back to the <a href="https://dev.twitter.com/apps" target="_blank">starting page</a> and delete the application you have created. To do this click on the application, and then click on _Delete_ as shown by the arrow below. This will automatically invalidate the tokens.
 
@@ -195,7 +197,7 @@ This object serves as the main entry point for all Spark Streaming functionality
 <div data-lang="scala" markdown="1">
 ~~~
     val ssc = new StreamingContext(sparkUrl, "Tutorial", Seconds(1), sparkHome, Seq(jarFile))
-~~~ 
+~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
@@ -349,7 +351,7 @@ Relevant discussions can be found on the Internet at:
 TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
 </pre>
 
-__Answer:__ Please verify whether the Twitter consumer key+secret and access token+secret has been set correctly in the file `twitter.txt` as instructed earlier. 
+__Answer:__ Please verify whether the Twitter consumer key+secret and access token+secret has been set correctly in the file `twitter.txt` as instructed earlier.
 
 
 ## Further exercises

@@ -1,8 +1,10 @@
 ---
 layout: global
 title: Machine Learning With MLI
-prev: blinkdb.html
-next: where-to-go-from-here---more-resources-and-further-reading.html
+categories: [module]
+navigation:
+  weight: 90
+  show: true
 ---
 
 In this chapter, we will use MLI and Spark to tackle a machine learning
@@ -185,11 +187,11 @@ By now, hopefully the cluster has completed our featurization job.
 
 Note that the outputs of `NGrams.extractNGrams` are `featurizedData` and
 `featurizer`. `featurizedData` is an `MLTable` containing N-gram
-representations of each document, using bigrams and only including the 
+representations of each document, using bigrams and only including the
 10,000 most frequent bigrams. `featurizer` is a function that takes raw
 documents and applies the aforementioned featurization process.  This function
 will be used along with a trained classifier to make predictions on new text
-documents in a [later section](#test-the-model-on-new-data). 
+documents in a [later section](#test-the-model-on-new-data).
 
 
 
@@ -222,7 +224,7 @@ First, let's see how to make predictions using our model.  The following code de
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-// note: take(1) returns a sequence with a single MLRow, and we want this MLRow 
+// note: take(1) returns a sequence with a single MLRow, and we want this MLRow
 val firstDataPoint = featurizedData.take(1)(0)
 model.predict(firstDataPoint(1 until firstDataPoint.length))
 ~~~
@@ -285,15 +287,15 @@ a good model in the required number of iterations.
 ~~~
 val learningRates = List(0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0)
 
-val models = learningRates.map({lr => 
+val models = learningRates.map({lr =>
     SVMAlgorithm(featurizedData, SVMParameters(learningRate=0.001, numIterations=100))
     })
-    
+
 val modelErrors = models.map(model => {
     val trainVsTest = featurizedData.map(r => MLRow(r(0), model.predict(r(1 until r.length))))
     trainVsTest.filter(r(0) != r(1)).numRows.toDouble/trainVsTest.numRows
     })
-    
+
 val sortedParms = learningRates.zip(modelErrors)
 
 //Best model is the one with lowest error.
@@ -315,7 +317,7 @@ Let's create a new `TextModel`, which expects a model and a featurizer and uses 
 // you should still have your featurizer from the initial featurization process!
 val textModel = new TextModel(bestModel, featurizer)
 
-// TextModels have a `predict` method which takes a string as input. Try it out on this article from Wikipedia: 
+// TextModels have a `predict` method which takes a string as input. Try it out on this article from Wikipedia:
 textModel.predict(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Baroque").mkString)
 
 ~~~
@@ -328,7 +330,7 @@ category information associated with it.
 **Bonus Exercise**: Try this on other articles --- are the predictions
 reasonable?
 
-## TF-IDF Features 
+## TF-IDF Features
 
 In this section, we'll step back and revisit the task of featurization
 in order to illustrate how the MLI provides an easy-to-use platform for

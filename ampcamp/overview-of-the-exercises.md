@@ -1,8 +1,9 @@
 ---
 layout: global
 title: Overview Of The Exercises
-prev: logging-into-the-cluster.html
-next: introduction-to-the-scala-shell.html
+navigation:
+  weight: 30
+  show: true
 ---
 
 The exercises in this mini course are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming.

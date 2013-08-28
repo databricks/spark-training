@@ -167,10 +167,10 @@ a:hover code {
   display: inline-block;
   vertical-align: middle;
   margin-right: 15px;
-  background: url(../img/ampcamp3-wide-and-skinny-294x65px.png) no-repeat left 10px;
+  background: url(../img/ampcamp3-wide-and-skinny-294x65px.png) no-repeat left 2px;
 }
 /*
-@media (min-width: 768px) {
+@media (ax-width: 755px) {
   .topbar img {
     padding-top: 30px;
     padding-left: 5px;
@@ -187,10 +187,17 @@ a:hover code {
   margin: 25px auto 0;
 }
 .site-title {
-  font-style: italic;
+  margin-top: 0;
   font-size: 1.5em;
   font-weight: bold;
-  padding: 15px 0 0px;
+}
+@media (min-width: 755px) {
+  .site-title {
+    margin: 15px 0 0;
+  }
+}
+.bottombar .site-title {
+  margin:0 0 15px;
 }
 .container {
   max-width: 914px;

@@ -1,8 +1,10 @@
 ---
 layout: global
 title: Data Exploration Using Shark
-prev: data-exploration-using-spark.html
-next: processing-live-data-streams-with-spark-streaming.html
+categories: [module]
+navigation:
+  weight: 60
+  show: true
 skip-chapter-toc: true
 ---
 
