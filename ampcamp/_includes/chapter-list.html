@@ -7,6 +7,6 @@
     {% else %}
       {% capture module_tag %}{% endcapture %}
     {% endif %}
-    <a href="{{p.url}}">{{module_tag}}{{p.title}}</a>
+    <a href="{{p.url | remove_first: '/'}}">{{module_tag}}{{p.title}}</a>
   </li>
 {% endfor %}
