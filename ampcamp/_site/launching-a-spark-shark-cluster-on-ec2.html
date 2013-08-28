@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Launching a Spark/Shark Cluster on EC2</title>
+        <meta name="description" content="">
+
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.css">
+        <meta name="viewport" content="width=device-width">
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.css">
+        <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
+        <!--[if IE 7]>
+        <link rel="stylesheet" href="assets/css/vendorfont-awesome-ie7.min.css">
+        <![endif]-->
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+         <!-- prettify js and CSS, used for code highlighting -->
+        <link rel="stylesheet" href="css/vendor/prettify/prettify.css" type="text/css" />
+        <script src="js/vendor/prettify/prettify.js" type="text/javascript"></script>
+        <script src="js/vendor/prettify/lang-scala.js" type="text/javascript"></script>
+        <script src="js/vendor/prettify/lang-sql.js" type="text/javascript"></script>
+        <script type="text/javascript">
+
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-33205054-1']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+
+        </script>
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="bar topbar">
+            
+<a class="btn page-nav" style="float:left" a href="index.html">
+
+  <i class="icon-arrow-left icon-2x"></i>
+</a>
+
+            
+<a class="btn page-nav" style="float:right" href="logging-into-the-cluster.html">
+
+  <i class="icon-arrow-right icon-2x"></i>
+</a>
+
+            <a href="http://ampcamp.berkeley.edu/ampcamp3-exercises/" id="ampcamp-logo"></a>
+            <!--<img src="img/amplab-small.png" alt="AMP Camp Logo" width="150" id="amplab-logo"/>-->
+            <div id="topbar-middle">
+                <div class="site-title">AMP Camp 3 Exercises Dry-Run</div>
+                <div class="btn-group">
+                    <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                        Launching a Spark/Shark Cluster on EC2 &nbsp; <i class="icon-list-ul icon"></i>
+                    </div>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+
+
+  <li>
+    
+      
+    
+    <a href="/index.html">Introduction</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/logging-into-the-cluster.html">Logging into the Cluster</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/overview-of-the-exercises.html">Overview Of The Exercises</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-spark.html">  1. Data Exploration Using Spark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-shark.html">  2. Data Exploration Using Shark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/blinkdb.html">  4. Data Exploration Using BlinkDB</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mli-document-categorization.html">  5. Machine Learning With MLI</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mesos.html">  6. Mesos - Cluster & Framework Mgmt</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/where-to-go-from-here.html">Where to Go From Here</a>
+  </li>
+
+</ul>
+                </div>
+            </div>
+        </div><!--topbar-->
+        <div class="container" id="content">
+            
+            <div id="chapter-toc" class="chapter-toc"></div>
+            
+            <p>This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this <a href="https://aws.amazon.com/amis/">intro to AMIs</a>).</p>
+
+<h2 id="pre-requisites">Pre-requisites</h2>
+
+<p>The cluster setup script we&#8217;ll use below requires Python 2.x and has been tested to work on Linux or OS X.
+We will use the <a href="http://www.gnu.org/software/bash/manual/bashref.html">Bash shell</a> in our examples below.
+If you are using Windows, consider installing <a href="http://www.cygwin.com/">Cygwin</a> (note that we have not tested this, hence providing debug support would be hard).</p>
+
+<h2 id="setting-up-ec2-keys">Setting up EC2 keys</h2>
+
+<p>Make sure you have an Amazon EC2 account.
+Set the environment variables <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> to your Amazon EC2 access key ID and secret access key.
+These can be obtained from the <a href="http://aws.amazon.com/">AWS homepage</a> by clicking <code>Account &gt; Security Credentials &gt; Access Credentials</code>:</p>
+
+<p><img src="img/aws-accesskey.png" alt="Downloading AWS access keys" /></p>
+
+<pre><code>export AWS_ACCESS_KEY_ID=&lt;ACCESS_KEY_ID&gt;
+export AWS_SECRET_ACCESS_KEY=&lt;SECRET_ACCESS_KEY&gt;
+</code></pre>
+
+<p>Create an Amazon EC2 key pair for yourself.
+This can be done by logging into your Amazon Web Services account through the <a href="http://aws.amazon.com/console/">AWS console</a>, selecting <code>EC2</code> from the <code>Services</code> menu,  selecting <code>Key Pairs</code> on the left sidebar, and creating and downloading a key:</p>
+
+<p><img src="img/aws-keypair.png" alt="Downloading an EC2 Keypair" /></p>
+
+<p>Make sure that you set the permissions for the private key file to <code>600</code> (i.e. only you can read and write it) so that <code>ssh</code> will work (commands to do this are provided farther below).</p>
+
+<div class="alert alert-info">
+<i class="icon-info-sign"> 	</i>
+The AMI we are using for this exercise is only available in the `us-east` region.
+So make sure you create a key-pair in that region!
+</div>
+
+<h2 id="getting-the-scripts-to-launch-ec2-cluster">Getting the scripts to launch EC2 cluster</h2>
+
+<p>Check out the launch scripts by cloning the github repository.</p>
+
+<pre><code>git clone git://github.com/amplab/training-scripts.git
+</code></pre>
+
+<p>You can also obtain them by downloading the zip file at <code>https://github.com/amplab/training-scripts/archive/master.zip</code></p>
+
+<h2 id="launching-the-cluster">Launching the cluster</h2>
+<p>Launch the cluster by running the following command.
+This script will launch a cluster, create a HDFS cluster and configure Mesos, Spark, and Shark.
+Finally, it will copy the datasets used in the exercises from S3 to the HDFS cluster.
+<em>This can take around 15-20 mins.</em></p>
+
+<pre><code>cd training-scripts
+./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; --copy launch amplab-training
+</code></pre>
+
+<p>Where <code>&lt;name_of_key_pair&gt;</code> is the name of your EC2 key pair (that you gave it when you created it), <code>&lt;key_file&gt;</code> is the private key file for your key pair.</p>
+
+<p>For example, if you created a key pair named <code>ampcamp-key</code> and the private key (<code>&lt;key_file&gt;</code>) is in your home directory and is called <code>ampcamp.pem</code>, then the command would be</p>
+
+<pre><code>./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key --copy launch amplab-training
+</code></pre>
+
+<p>This command may take a 30-40 minutes or longer and should produce a bunch of output as it first spins up the nodes for your cluster, sets up <a href="http://amplab.cs.berkeley.edu/bdas">BDAS</a> on them, and performs a large distributed file copy of the wikipedia files we&#8217;ll use in these training documents from S3 to your instance of HDFS.</p>
+
+<p>The following are some errors that you may encounter, and other frequently asked questions:</p>
+
+<div class="accordion" id="q-accordion">
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q1" data-parent="#q-accordion">
+        I get the following error when running this command: <code>UNPROTECTED KEY FILE...</code>
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q1" class="accordion-body collapse">
+<div class="accordion-inner">
+
+        <p><strong>Question: I got the following permission error when I ran the above command. Help!</strong></p>
+
+        <pre class="nocode">
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ WARNING: UNPROTECTED PRIVATE KEY FILE! @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Permissions 0644 for ‘../ampcamp.pem' are too open.
+It is recommended that your private key files are NOT accessible by others.
+This private key will be ignored.
+bad permissions: ignore key: ../ampcamp.pem
+Permission denied (publickey).
+</pre>
+
+        <p><strong>Answer:</strong> Run the next two commands.</p>
+
+        <pre><code>chmod 600 ../ampcamp.pem
+./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; --copy --resume launch amplab-training
+</code></pre>
+
+      </div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q2" data-parent="#q-accordion">
+    I get the following error when running this command: <code>Your requested instance type (m1.xlarge) is not supported...</code>
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q2" class="accordion-body collapse">
+<div class="accordion-inner">
+
+        <p><strong>Question: I got the following permission error when I ran the above command. Help!</strong></p>
+
+        <pre class="nocode">
+"Your requested instance type (m1.xlarge) is not supported in your requested Availability Zone (us-east-1b).  Please retry your request by not specifying an Availability Zone or choosing us-east-1d, us-east-1c, us-east-1a, us-east-1e."
+</pre>
+
+        <p><strong>Answer:</strong> Add the <code>-z</code> flag to your command line arguments to use an availability zone other than <code>us-east-1b</code>.
+You can set the value of that flag to &#8220;none&#8221;, as in the following example command, which tells the script to pick a random availability zone.
+It may randomly pick an availability zone that doesn&#8217;t support this instance size (such as <code>us-east-1b</code>), so you may need to try this command a few times to get it to work.</p>
+
+        <pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; -z none --copy launch amplab-training
+</code></pre>
+
+      </div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
+    I get the following error when running this command: <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q3" class="accordion-body collapse">
+<div class="accordion-inner">
+
+        <p><strong>Question: I got the following error when I ran the above command. Help!</strong></p>
+
+        <pre class="nocode">
+12/08/21 16:50:45 INFO tools.DistCp: destPath=hdfs://ip-10-42-151-150.ec2.internal:9000/wiki/pagecounts
+java.lang.IllegalArgumentException: Invalid hostname in URI
+s3n://AKIAJIFGXUZ4MDJNYCGQ:COWo3AxVhjyu43Ug5kDvTnO/V3wQloBRIEOYEQgG@ampcamp-data/wikistats_20090505-07
+</pre>
+
+        <p><strong>Answer:</strong> The data copy from S3 to your EC2 cluster has failed. Do the following steps:</p>
+
+        <ol>
+          <li>
+            <p>Login to the master node by running</p>
+
+            <pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;key_pair&gt; login amplab-training
+</code></pre>
+          </li>
+          <li>
+            <p>Open the HDFS config file at <code>/root/ephemeral-hdfs/conf/core-site.xml</code> and
+copy your AWS access key and secret key into the respective fields.</p>
+          </li>
+          <li>
+            <p>Restart HDFS</p>
+
+            <pre><code>/root/ephemeral-hdfs/bin/stop-dfs.sh
+/root/ephemeral-hdfs/bin/start-dfs.sh
+</code></pre>
+          </li>
+          <li>
+            <p>Delete the directory the data was supposed to be copied to</p>
+
+            <pre><code>/root/ephemeral-hdfs/bin/hadoop fs -rmr /wiki
+</code></pre>
+          </li>
+          <li>
+            <p>Logout and run the following command to retry copying data from S3</p>
+
+            <pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;key_pair&gt; copy-data amplab-training
+</code></pre>
+          </li>
+        </ol>
+
+      </div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
+        Can I specify the instances types while creating the cluster?
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q4" class="accordion-body collapse">
+<div class="accordion-inner">
+
+        <p><strong>Question: Can I specify the instances types while creating the cluster?</strong></p>
+
+        <p><strong>Answer:</strong> These exercises have been designed to work with at least 5 slave
+machines using instances of type <strong>m1.xlarge</strong>.
+You can also launch the cluster with different <a href="http://aws.amazon.com/ec2/instance-types/">instance types</a>.
+However, you should ensure two things:</p>
+
+        <ol>
+          <li>
+            <p><strong>Correct number of slaves:</strong> Make sure that the total memory in the slaves is about 54GB as the exercises are designed accordingly.
+So if you are using <code>m1.large</code> instances (which have 7.5 GB memory), then you should launch a cluster with at least 8 slaves.</p>
+
+            <p>You can specify the instance type in the above command by setting the flag <code>-t &lt;instance_type&gt;</code> .
+Similarly, you can specify the number of slaves by setting the flag <code>-s &lt;number of slaves&gt;</code>.
+For example, to launching a cluster with 8 <code>m1.large</code> slaves, use</p>
+
+            <pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;name_of_key_pair&gt; -t m1.large -s 8 --copy launch amplab-training
+</code></pre>
+          </li>
+          <li>
+            <p><strong>Correct java heap setting for Spark:</strong> Make sure to change the <code>SPARK_MEM</code> variable in
+<code>/root/spark/conf/spark-env.sh</code> and <code>/root/shark/conf/shark-env.sh</code> on all of the instances to match the amount of memory available in the instance type you use.
+This is typically set it to the total amount of memory of the instance minus 1 GB for the OS (that is, for <code>m1.large</code> with 7.5GB memory, set <code>SPARK_MEM=6g</code>).
+There is a easy way to change this configuration on all the instances.
+First, change this file in the master.
+Then run</p>
+
+            <pre><code>/root/mesos-ec2/copy-dir /root/spark/conf/ .
+</code></pre>
+
+            <p>to copy the configuration directory to all slaves.</p>
+          </li>
+        </ol>
+
+        <p><strong>Information:</strong> Sometimes the EC2 instances don&#8217;t initialize within the standard waiting time of 120 seconds.
+If that happens you, will ssh errors (or check in the Amazon web console).
+In this case, try increasing the waiting to 4 minutes using the <code>-w 240</code> option.</p>
+
+      </div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+</div>
+<!--accordion-->
+
+<p>If you launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 6 m1.xlarge Amazon EC2 nodes.</p>
+
+<p><img src="img/aws-runninginstances.png" alt="Running EC2 instances in AWS Management Console" /></p>
+
+<h2 id="post-launch-steps">Post-launch steps</h2>
+<p>Your cluster should be ready to use.
+You can find the master hostname (<code>&lt;master_node_hostname&gt;</code> in the instructions below) by running</p>
+
+<pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;key_pair&gt; get-master amplab-training
+</code></pre>
+
+<p>At this point, it would be helpful to open a text file and copy <code>&lt;master_node_hostname&gt;</code> there.
+In a later exercise, you will want to have <code>&lt;master_node_hostname&gt;</code> ready at hand without having to scroll through your terminal history.</p>
+
+<h2 id="terminating-the-cluster-not-yet-only-after-you-do-the-rest-of-the-exercises">Terminating the cluster (Not yet, only after you do the rest of the exercises!)</h2>
+<p><strong>After you are done with your exercises</strong>, you can terminate the cluster by running</p>
+
+<pre><code>./spark-ec2 -i &lt;key_file&gt; -k &lt;key_pair&gt; destroy amplab-training
+</code></pre>
+
+
+        </div> <!-- /container -->
+        <div class="bar bottombar">
+            
+<a class="btn page-nav" style="float:left" a href="index.html">
+
+  <i class="icon-arrow-left icon-2x"></i>
+</a>
+
+            
+<a class="btn page-nav" style="float:right" href="logging-into-the-cluster.html">
+
+  <i class="icon-arrow-right icon-2x"></i>
+</a>
+
+            <div class="btn-group dropup">
+                <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                    Launching a Spark/Shark Cluster on EC2 &nbsp; <i class="icon-list-ul icon"></i>
+                </div>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+
+
+  <li>
+    
+      
+    
+    <a href="/index.html">Introduction</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/logging-into-the-cluster.html">Logging into the Cluster</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/overview-of-the-exercises.html">Overview Of The Exercises</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-spark.html">  1. Data Exploration Using Spark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-shark.html">  2. Data Exploration Using Shark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/blinkdb.html">  4. Data Exploration Using BlinkDB</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mli-document-categorization.html">  5. Machine Learning With MLI</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mesos.html">  6. Mesos - Cluster & Framework Mgmt</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/where-to-go-from-here.html">Where to Go From Here</a>
+  </li>
+
+</ul>
+                </ul>
+            </div>
+            <div class="btn-group dropup">
+              <a class="btn btn-large" target="_blank" href="https://github.com/amplab/training/issues">
+                <i class="icon-exclamation-sign"> </i>
+                Submit an issue on GitHub
+              </a>
+            </div>
+            <div class="site-title">AMP Camp 3 Exercises Dry-Run</div>
+        </div>
+
+        <script src="js/vendor/jquery-1.8.3.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <!-- Table of contents plugin -->
+        <script src="js/vendor/toc.js" type="text/javascript"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>

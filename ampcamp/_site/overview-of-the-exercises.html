@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Overview Of The Exercises</title>
+        <meta name="description" content="">
+
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.css">
+        <meta name="viewport" content="width=device-width">
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.css">
+        <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
+        <!--[if IE 7]>
+        <link rel="stylesheet" href="assets/css/vendorfont-awesome-ie7.min.css">
+        <![endif]-->
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+         <!-- prettify js and CSS, used for code highlighting -->
+        <link rel="stylesheet" href="css/vendor/prettify/prettify.css" type="text/css" />
+        <script src="js/vendor/prettify/prettify.js" type="text/javascript"></script>
+        <script src="js/vendor/prettify/lang-scala.js" type="text/javascript"></script>
+        <script src="js/vendor/prettify/lang-sql.js" type="text/javascript"></script>
+        <script type="text/javascript">
+
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-33205054-1']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+
+        </script>
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="bar topbar">
+            
+<a class="btn page-nav" disabled="disable" style="float:left">
+
+  <i class="icon-arrow-left icon-2x"></i>
+</a>
+
+            
+<a class="btn page-nav" disabled="disable" style="float:right" href="#">
+
+  <i class="icon-arrow-right icon-2x"></i>
+</a>
+
+            <a href="http://ampcamp.berkeley.edu/ampcamp3-exercises/" id="ampcamp-logo"></a>
+            <!--<img src="img/amplab-small.png" alt="AMP Camp Logo" width="150" id="amplab-logo"/>-->
+            <div id="topbar-middle">
+                <div class="site-title">AMP Camp 3 Exercises Dry-Run</div>
+                <div class="btn-group">
+                    <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                        Overview Of The Exercises &nbsp; <i class="icon-list-ul icon"></i>
+                    </div>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+
+
+  <li>
+    
+      
+    
+    <a href="/index.html">Introduction</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/logging-into-the-cluster.html">Logging into the Cluster</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/overview-of-the-exercises.html">Overview Of The Exercises</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-spark.html">  1. Data Exploration Using Spark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-shark.html">  2. Data Exploration Using Shark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/blinkdb.html">  4. Data Exploration Using BlinkDB</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mli-document-categorization.html">  5. Machine Learning With MLI</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mesos.html">  6. Mesos - Cluster & Framework Mgmt</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/where-to-go-from-here.html">Where to Go From Here</a>
+  </li>
+
+</ul>
+                </div>
+            </div>
+        </div><!--topbar-->
+        <div class="container" id="content">
+            
+            <div id="chapter-toc" class="chapter-toc"></div>
+            
+            <p>The exercises in this mini course are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming.
+For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python.
+For Shark, you will be using SQL in the Shark console to interactively explore the same data.
+For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter&#8217;s sample stream of tweets.
+Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark.</p>
+
+<h2 id="cluster-details">Cluster Details</h2>
+<p>Your cluster contains 6 m1.xlarge Amazon EC2 nodes.
+One of these 6 nodes is the master node, responsible for scheduling tasks as well as maintaining the HDFS metadata (a.k.a. HDFS name node).
+The other 5 are the slave nodes on which tasks are actually executed.
+You will mainly interact with the master node.
+If you haven&#8217;t already, let&#8217;s ssh onto the master node (see instructions above).</p>
+
+<p>Once you&#8217;ve used SSH to log into the master, run the <code>ls</code> command and you will see a number of directories.
+Some of the more important ones are listed below:</p>
+
+<ul>
+  <li>Templates for exercises:
+    <ul>
+      <li><code>kmeans</code>: Template for the k-means clustering exercise</li>
+      <li><code>streaming</code>: Standalone program for Spark Streaming exercises</li>
+      <li><code>java-app-template</code>: Template for standalone Spark programs written in Java</li>
+      <li><code>scala-app-template</code>: Template for standalone Spark programs written in Scala</li>
+      <li><code>shark-0.2</code>: Shark installation</li>
+      <li><code>spark</code>: Spark installation</li>
+    </ul>
+  </li>
+  <li>Useful scripts/documentation:
+    <ul>
+      <li><code>mesos-ec2</code>: Suite of scripts to manage Mesos on EC2</li>
+      <li><code>spark-ec2</code>: Suite of scripts to manage Spark on EC2</li>
+      <li><code>training</code>: Documentation and code used for training exercises</li>
+    </ul>
+  </li>
+  <li>Infrastructure:
+    <ul>
+      <li><code>ephemeral-hdfs</code>: Hadoop installation</li>
+      <li><code>scala-2.9.2</code>: Scala installation</li>
+      <li><code>hive-0.9.0-bin</code>: Hive installation</li>
+      <li><code>mesos</code>: Mesos installation</li>
+    </ul>
+  </li>
+</ul>
+
+<p>You can find a list of your 5 slave nodes in spark-ec2/slaves:</p>
+
+<pre><code>cat spark-ec2/slaves
+</code></pre>
+
+<p>For stand-alone Spark programs, you will have to know the Spark cluster URL. You can find that in spark-ec2/cluster-url:</p>
+
+<pre><code>cat spark-ec2/cluster-url
+</code></pre>
+
+<h2 id="dataset-for-exploration">Dataset For Exploration</h2>
+<p>Your HDFS cluster should come preloaded with 20GB of Wikipedia traffic statistics data obtained from http://aws.amazon.com/datasets/4182 .
+To make the analysis feasible (within the short timeframe of the exercise), we took three days worth of data (May 5 to May 7, 2009; roughly 20G and 329 million entries).
+You can list the files:</p>
+
+<pre class="prettyprint lang-bsh">
+ephemeral-hdfs/bin/hadoop fs -ls /wiki/pagecounts
+</pre>
+
+<p>There are 74 files (2 of which are intentionally left empty).</p>
+
+<p>The data are partitioned by date and time.
+Each file contains traffic statistics for all pages in a specific hour.
+Let&#8217;s take a look at the file:</p>
+
+<pre class="prettyprint lang-bsh">
+ephemeral-hdfs/bin/hadoop fs -cat /wiki/pagecounts/part-00148 | less
+</pre>
+
+<p>The first few lines of the file are copied here:</p>
+
+<pre class="prettyprint lang-bsh">
+20090507-040000 aa ?page=http://www.stockphotosharing.com/Themes/Images/users_raw/id.txt 3 39267
+20090507-040000 aa Main_Page 7 51309
+20090507-040000 aa Special:Boardvote 1 11631
+20090507-040000 aa Special:Imagelist 1 931
+</pre>
+
+<p>Each line, delimited by a space, contains stats for one page.
+The schema is:</p>
+
+<p><code>&lt;date_time&gt; &lt;project_code&gt; &lt;page_title&gt; &lt;num_hits&gt; &lt;page_size&gt;</code></p>
+
+<p>The <code>&lt;date_time&gt;</code> field specifies a date in the YYYYMMDD format (year, month, day) followed by a hyphen and then the hour in the HHmmSS format (hour, minute, second).
+There is no information in mmSS.
+The <code>&lt;project_code&gt;</code> field contains information about the language of the pages.
+For example, project code &#8220;en&#8221; indicates an English page.
+The <code>&lt;page_title&gt;</code> field gives the title of the Wikipedia page.
+The <code>&lt;num_hits&gt;</code> field gives the number of page views in the hour-long time slot starting at <code>&lt;data_time&gt;</code>.
+The <code>&lt;page_size&gt;</code> field gives the size in bytes of the Wikipedia page.</p>
+
+<p>To quit <code>less</code>, stop viewing the file, and return to the command line, press <code>q</code>.</p>
+
+
+        </div> <!-- /container -->
+        <div class="bar bottombar">
+            
+<a class="btn page-nav" disabled="disable" style="float:left">
+
+  <i class="icon-arrow-left icon-2x"></i>
+</a>
+
+            
+<a class="btn page-nav" disabled="disable" style="float:right" href="#">
+
+  <i class="icon-arrow-right icon-2x"></i>
+</a>
+
+            <div class="btn-group dropup">
+                <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                    Overview Of The Exercises &nbsp; <i class="icon-list-ul icon"></i>
+                </div>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+
+
+  <li>
+    
+      
+    
+    <a href="/index.html">Introduction</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/logging-into-the-cluster.html">Logging into the Cluster</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/overview-of-the-exercises.html">Overview Of The Exercises</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-spark.html">  1. Data Exploration Using Spark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-shark.html">  2. Data Exploration Using Shark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/blinkdb.html">  4. Data Exploration Using BlinkDB</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mli-document-categorization.html">  5. Machine Learning With MLI</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mesos.html">  6. Mesos - Cluster & Framework Mgmt</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/where-to-go-from-here.html">Where to Go From Here</a>
+  </li>
+
+</ul>
+                </ul>
+            </div>
+            <div class="btn-group dropup">
+              <a class="btn btn-large" target="_blank" href="https://github.com/amplab/training/issues">
+                <i class="icon-exclamation-sign"> </i>
+                Submit an issue on GitHub
+              </a>
+            </div>
+            <div class="site-title">AMP Camp 3 Exercises Dry-Run</div>
+        </div>
+
+        <script src="js/vendor/jquery-1.8.3.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <!-- Table of contents plugin -->
+        <script src="js/vendor/toc.js" type="text/javascript"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Introduction to the Scala Shell</title>
+        <meta name="description" content="">
+
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.css">
+        <meta name="viewport" content="width=device-width">
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.css">
+        <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
+        <!--[if IE 7]>
+        <link rel="stylesheet" href="assets/css/vendorfont-awesome-ie7.min.css">
+        <![endif]-->
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+         <!-- prettify js and CSS, used for code highlighting -->
+        <link rel="stylesheet" href="css/vendor/prettify/prettify.css" type="text/css" />
+        <script src="js/vendor/prettify/prettify.js" type="text/javascript"></script>
+        <script src="js/vendor/prettify/lang-scala.js" type="text/javascript"></script>
+        <script src="js/vendor/prettify/lang-sql.js" type="text/javascript"></script>
+        <script type="text/javascript">
+
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-33205054-1']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+
+        </script>
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="bar topbar">
+            
+<a class="btn page-nav" disabled="disable" style="float:left">
+
+  <i class="icon-arrow-left icon-2x"></i>
+</a>
+
+            
+<a class="btn page-nav" disabled="disable" style="float:right" href="#">
+
+  <i class="icon-arrow-right icon-2x"></i>
+</a>
+
+            <a href="http://ampcamp.berkeley.edu/ampcamp3-exercises/" id="ampcamp-logo"></a>
+            <!--<img src="img/amplab-small.png" alt="AMP Camp Logo" width="150" id="amplab-logo"/>-->
+            <div id="topbar-middle">
+                <div class="site-title">AMP Camp 3 Exercises Dry-Run</div>
+                <div class="btn-group">
+                    <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                        Introduction to the Scala Shell &nbsp; <i class="icon-list-ul icon"></i>
+                    </div>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+
+
+  <li>
+    
+      
+    
+    <a href="/index.html">Introduction</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/logging-into-the-cluster.html">Logging into the Cluster</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/overview-of-the-exercises.html">Overview Of The Exercises</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-spark.html">  1. Data Exploration Using Spark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-shark.html">  2. Data Exploration Using Shark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/blinkdb.html">  4. Data Exploration Using BlinkDB</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mli-document-categorization.html">  5. Machine Learning With MLI</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mesos.html">  6. Mesos - Cluster & Framework Mgmt</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/where-to-go-from-here.html">Where to Go From Here</a>
+  </li>
+
+</ul>
+                </div>
+            </div>
+        </div><!--topbar-->
+        <div class="container" id="content">
+            
+            <p>This chapter will teach you the basics of using the Scala shell and introduce you to functional programming with collections.</p>
+
+<p>If you&#8217;re already comfortable with Scala or plan on using the Python shell for the interactive Spark sections of this mini course, skip ahead to the next section.</p>
+
+<p>This exercise is based on a great tutorial, <a href="http://www.artima.com/scalazine/articles/steps.html" target="_blank">First Steps to Scala</a>.
+However, reading through that whole tutorial and trying the examples at the console may take considerable time, so we will provide a basic introduction to the Scala shell here. Do as much as you feel you need (in particular you might want to skip the final &#8220;bonus&#8221; question).</p>
+
+<ol>
+  <li>
+    <p>Launch the Scala console by typing:</p>
+
+    <pre><code>scala
+</code></pre>
+  </li>
+  <li>
+    <p>Declare a list of integers as a variable called &#8220;myNumbers&#8221;.</p>
+
+    <div class="solution">
+      <pre class="prettyprint lang-scala">
+scala&gt; val myNumbers = List(1, 2, 5, 4, 7, 3)
+myNumbers: List[Int] = List(1, 2, 5, 4, 7, 3)
+</pre>
+    </div>
+  </li>
+  <li>
+    <p>Declare a function, <code>cube</code>, that computes the cube (third power) of an Int.
+See steps 2-4 of First Steps to Scala.</p>
+
+    <div class="solution">
+      <pre class="prettyprint lang-scala">
+scala&gt; def cube(a: Int): Int = a * a * a
+cube: (a: Int)Int
+</pre>
+    </div>
+  </li>
+  <li>
+    <p>Apply the function to <code>myNumbers</code> using the <code>map</code> function. Hint: read about the <code>map</code> function in <a href="http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.List" target="_blank">the Scala List API</a> and also in Table 1 about halfway through the <a href="http://www.artima.com/scalazine/articles/steps.html" target="_blank">First Steps to Scala</a> tutorial.</p>
+
+    <div class="solution">
+      <pre class="prettyprint lang-scala">
+scala&gt; myNumbers.map(x =&gt; cube(x))
+       res: List[Int] = List(1, 8, 125, 64, 343, 27)
+       // Scala also provides some shorthand ways of writing this:
+       // myNumbers.map(cube(_))
+       // myNumbers.map(cube)
+</pre>
+    </div>
+  </li>
+  <li>
+    <p>Then also try writing the function inline in a <code>map</code> call, using closure notation.</p>
+
+    <div class="solution">
+      <pre class="prettyprint lang-scala">
+scala&gt; myNumbers.map{x =&gt; x * x * x}
+res: List[Int] = List(1, 8, 125, 64, 343, 27)
+</pre>
+    </div>
+  </li>
+  <li>
+    <p>Define a <code>factorial</code> function that computes n! = 1 * 2 * &#8230; * n given input n.
+You can use either a loop or recursion, in our solution we use recursion (see steps 5-7 of <a href="http://www.artima.com/scalazine/articles/steps.html" target="_blank">First Steps to Scala</a>).
+Then compute the sum of factorials in <code>myNumbers</code>. Hint: check out the <code>sum</code> function in <a href="http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.List" target="_blank">the Scala List API</a>.</p>
+
+    <div class="solution">
+      <pre class="prettyprint lang-scala">
+scala&gt; def factorial(n:Int):Int = if (n==0) 1 else n * factorial(n-1) // From http://bit.ly/b2sVKI
+factorial: (Int)Int
+scala&gt; myNumbers.map(factorial).sum
+res: Int = 5193
+</pre>
+    </div>
+  </li>
+  <li>
+    <p><i><strong>BONUS QUESTION.</strong> This is a more challenging task and may require 10 minutes or more to complete, so you should consider skipping it depending on your timing so far.</i> Do a wordcount of a textfile. More specifically, create and populate a Map with words as keys and counts of the number of occurrences of the word as values.</p>
+
+    <p>You can load a text file as an array of lines as shown below:</p>
+
+    <pre class="prettyprint lang-scala linenums">
+import scala.io.Source
+val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+</pre>
+
+    <p>Then, instantiate a <code>collection.mutable.HashMap[String,Int]</code> and use functional methods to populate it with wordcounts. Hint, in our solution, which is inspired by <a href="http://bit.ly/6mhGvo" target="_blank">this solution online</a>, we use <a href="http://richard.dallaway.com/in-praise-of-flatmap" target="_blank"><code>flatMap</code></a> and then <code>map</code>.</p>
+
+    <div class="solution">
+      <pre class="prettyprint lang-scala">
+scala&gt; import scala.io.Source
+import scala.io.Source
+
+scala&gt; val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+lines: Array[String] = Array(hlep, help, plot, set terminal pdf, pdf, set terminal pdf color, set output "monolithic-utilization-thru-day.pdf", set terminal pdf enhanced color, set terminal pdf monochrome, set terminal pdf mono, set output "graph.pdf", set terminal x11 enhanced color, help terminal, x11, quit, plot "utilization" using 1:2, plot "utilization" using 1/2:2, #plot "utilization" using 1:($2/), RadDeg, x!, Inv, sin, ln, π, cos, log, e, tan, √, Ans, EXP, xy, (, ), %, AC, 7, 8, 9, ÷, 4, 5, 6, ×, 1, 2, 3, -, 0, ., =, +, plot "utilization" using 1:($2/278400), plot "utilization.cpu.and.mem" using 1:($3/556800), plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:2, plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:($2/12500*8), plot [0:1] "7-day-mono-ya-c_0.01-stdout...
+
+scala&gt; val counts = new collection.mutable.HashMap[String, Int].withDefaultValue(0)
+counts: scala.collection.mutable.Map[String,Int] = Map()
+
+scala&gt; lines.flatMap(line =&gt; line.split(" ")).foreach(word =&gt; counts(word) += 1)
+
+scala&gt; counts
+res: scala.collection.mutable.Map[String,Int] = Map(2.6) -&gt; 1, will -&gt; 4, contain -&gt; 1, Once -&gt; 1, might -&gt; 3, (requires -&gt; 1, cluster. -&gt; 3, up -&gt; 2, There -&gt; 1, addition, -&gt; 1, host -&gt; 3, distribution -&gt; 2, [build] -&gt; 2, Then -&gt; 1, tests -&gt; 3, ========================== -&gt; 1, ZooKeeper -&gt; 1, JAVA_HOME, -&gt; 1, deploy -&gt; 1, is -&gt; 3, Cluster -&gt; 1, [build]/bin/mesos-build-env.sh.in). -&gt; 1, require -&gt; 1, see -&gt; 1, specific -&gt; 3, necessary -&gt; 2, JAVA_CPPFLAGS, -&gt; 1, via: -&gt; 1, collection -&gt; 1, always, -&gt; 1, configure -&gt; 3, CPPFLAGS -&gt; 1, email: -&gt; 1, a -&gt; 18, for -&gt; 8, --localstatedir -&gt; 1, building -&gt; 1, slave(s) -&gt; 1, After -&gt; 2, populated -&gt; 1, located -&gt; 1, necessary) -&gt; 1, we -&gt; 3, doing: -&gt; 2, with -&gt; 4, Building -&gt; 1, are: -&gt; 1, JAR -&gt; 1, [build]/src -&gt; 1, --help -&gt; 1, JAVA_CPPFLAGS...
+</pre>
+    </div>
+
+    <div class="solution">
+      <p>Or, a purely functional solution:</p>
+
+      <pre class="prettyprint lang-scala">
+scala&gt; import scala.io.Source
+import scala.io.Source
+
+scala&gt; val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+lines: Array[String] = Array(hlep, help, plot, set terminal pdf, pdf, set terminal pdf color, set output "monolithic-utilization-thru-day.pdf", set terminal pdf enhanced color, set terminal pdf monochrome, set terminal pdf mono, set output "graph.pdf", set terminal x11 enhanced color, help terminal, x11, quit, plot "utilization" using 1:2, plot "utilization" using 1/2:2, #plot "utilization" using 1:($2/), RadDeg, x!, Inv, sin, ln, π, cos, log, e, tan, √, Ans, EXP, xy, (, ), %, AC, 7, 8, 9, ÷, 4, 5, 6, ×, 1, 2, 3, -, 0, ., =, +, plot "utilization" using 1:($2/278400), plot "utilization.cpu.and.mem" using 1:($3/556800), plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:2, plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:($2/12500*8), plot [0:1] "7-day-mono-ya-c_0.01-stdout...
+
+scala&gt; val emptyCounts = Map[String,Int]().withDefaultValue(0)
+emptyCounts: scala.collection.immutable.Map[String,Int] = Map()
+
+scala&gt; val words = lines.flatMap(line =&gt; line.split(" "))
+words: Array[java.lang.String] = Array(Building, and, Installing, =======================, "", For, the, impatient:,...
+
+scala&gt; val counts = words.foldLeft(emptyCounts)({(currentCounts: Map[String,Int], word: String) =&gt; currentCounts.updated(word, currentCounts(word) + 1)})
+counts: scala.collection.immutable.Map[String,Int] = Map(used -&gt; 3, "deploy" -&gt; 2, launch -&gt; 1,...
+
+scala&gt; counts
+</pre>
+    </div>
+  </li>
+</ol>
+
+        </div> <!-- /container -->
+        <div class="bar bottombar">
+            
+<a class="btn page-nav" disabled="disable" style="float:left">
+
+  <i class="icon-arrow-left icon-2x"></i>
+</a>
+
+            
+<a class="btn page-nav" disabled="disable" style="float:right" href="#">
+
+  <i class="icon-arrow-right icon-2x"></i>
+</a>
+
+            <div class="btn-group dropup">
+                <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                    Introduction to the Scala Shell &nbsp; <i class="icon-list-ul icon"></i>
+                </div>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+
+
+  <li>
+    
+      
+    
+    <a href="/index.html">Introduction</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/logging-into-the-cluster.html">Logging into the Cluster</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/overview-of-the-exercises.html">Overview Of The Exercises</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-spark.html">  1. Data Exploration Using Spark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/data-exploration-using-shark.html">  2. Data Exploration Using Shark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/blinkdb.html">  4. Data Exploration Using BlinkDB</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mli-document-categorization.html">  5. Machine Learning With MLI</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="/mesos.html">  6. Mesos - Cluster & Framework Mgmt</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="/where-to-go-from-here.html">Where to Go From Here</a>
+  </li>
+
+</ul>
+                </ul>
+            </div>
+            <div class="btn-group dropup">
+              <a class="btn btn-large" target="_blank" href="https://github.com/amplab/training/issues">
+                <i class="icon-exclamation-sign"> </i>
+                Submit an issue on GitHub
+              </a>
+            </div>
+            <div class="site-title">AMP Camp 3 Exercises Dry-Run</div>
+        </div>
+
+        <script src="js/vendor/jquery-1.8.3.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <!-- Table of contents plugin -->
+        <script src="js/vendor/toc.js" type="text/javascript"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>
