@@ -1,5 +1,16 @@
-{% if page.next %}
-<a class="btn page-nav" style="float:right" href="{{page.next}}">
+{% for p in site.navigation %}
+  {% if found_page %}
+    {% assign next_page = p.url %}
+    {% assign found_page = false %}
+  {% else %}
+    {% if p.url == page.url %}
+      {% assign found_page = true %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% if next_page %}
+<a class="btn page-nav" style="float:right" href="{{next_page | remove_first:'/'}}">
 {% else %}
 <a class="btn page-nav" disabled="disable" style="float:right" href="#">
 {% endif %}
