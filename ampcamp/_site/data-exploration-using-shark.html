@@ -296,7 +296,7 @@ FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTa
     <pre>drop table wikistats;</pre>
   </li>
   <li>
-    <p>Let&#8217;s create a table containing all English records and cache it in the cluster&#8217;s memory.</p>
+    <p>Let&#8217;s create a table containing all English records and cache it in the cluster&#8217;s memory. Shark automatically caches any table having a name with the suffix &#8220;<code>_cached</code>&#8221;.</p>
 
     <pre class="prettyprint lang-sql">
 shark&gt; create table wikistats_cached as select * from wikistats where project_code="en";

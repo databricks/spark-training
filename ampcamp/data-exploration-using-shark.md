@@ -47,7 +47,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
    
    <pre>drop table wikistats;</pre>
 
-1. Let's create a table containing all English records and cache it in the cluster's memory.
+1. Let's create a table containing all English records and cache it in the cluster's memory. Shark automatically caches any table having a name with the suffix "`_cached`".
 
    <pre class="prettyprint lang-sql">
    shark> create table wikistats_cached as select * from wikistats where project_code="en";
