@@ -379,7 +379,7 @@ Time taken: 68.693 seconds
 
     <div class="solution">
       <pre class="prettyprint lang-sql">
- select count(page_views) from wikistats_cached where page_name like "%berkeley%";
+ select sum(page_views) from wikistats_cached where page_name like "%berkeley%";
  /* "%" in SQL is a wildcard matching all characters. */</pre>
     </div>
   </li>

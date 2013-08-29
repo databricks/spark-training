@@ -122,7 +122,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select count(page_views) from wikistats_cached where page_name like "%berkeley%";
+   select sum(page_views) from wikistats_cached where page_name like "%berkeley%";
    /* "%" in SQL is a wildcard matching all characters. */</pre>
    </div>
 
