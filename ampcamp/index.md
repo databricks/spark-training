@@ -66,6 +66,9 @@ table td, table th {
   <td class="yes">yes</td>
   <td class="no">no</td>
   <td class="no">no</td>
+</tr><tr>
+  <td>Mesos</td>
+  <td colspan="3" class="yes">Command Line and WebUI</td>
 </tr>
 </tbody>
 </table>
