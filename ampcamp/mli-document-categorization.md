@@ -56,7 +56,7 @@ From here onwards, we'll run all of our commands in the Spark shell.
 
 ## Command Line Preprocessing and Featurization
 
-To apply most machine learning algorithms, we must first preprocess and featurize our input data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of its top-level Wikipedia category (its *label*) and a set of *features* in the form of "bigrams" (pairs of words) that are present in each article.  Specifically, we will generate 10,000-dimensional feature vectors, with each vector entry summarizing the bigrams that appear in the underlying article.  The choice of *10,000* here is arbitrary, but can be an important design decision.  Using too many features risks overfitting your model to the training data and increases the computational burden, while with too few features there may not be enough signal to discriminate between classes.
+To apply most machine learning algorithms, we must first preprocess and featurize our input data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of its top-level Wikipedia category (its *label*) and a set of *features* in the form of "bigrams" (pairs of words) that are present in each article.  Specifically, we will generate 1,000-dimensional feature vectors, with each vector entry summarizing the bigrams that appear in the underlying article.  The choice of *1,000* here is arbitrary, but can be an important design decision.  Using too many features risks overfitting your model to the training data and increases the computational burden, while with too few features there may not be enough signal to discriminate between classes.
 
 Each record in our raw dataset consists of a string in the format "`<category> <subcategory> <page_contents>`".
 This dataset was derived from raw XML dumps of the Wikipedia database.
@@ -74,7 +74,7 @@ We'll use one of those methods, `mc.loadFile`, to load and inspect our data.
 val inputTable = mc.loadFile("/enwiki_txt").filter(r => List("ARTS","LIFE") contains r(0).toString).cache()
 val firstFive = inputTable.take(5)
 val taggedInputTable = inputTable.project(Seq(0,2)).map(r => {
-    val label = if(r(0) == "ARTS") 1.0 else 0.0
+    val label = if(r(0).toString == "ARTS") 1.0 else -1.0
     MLRow(label, r(1))
 }).cache()
 ~~~
@@ -96,7 +96,7 @@ Moreover, we can apply feature extractors to `MLTables` during preprocessing.
 The second command takes a few rows from the table for you to inspect.
 
 The third command selects only the first and third columns of that table, and
-then maps the first column to "1" if the article is an "ART" article or "0"
+then maps the first column to "1" if the article is an "ART" article or "-1"
 if it is a "LIFE" article.
 
 To featurize the data, we'll use an N-Gram feature extractor that's bundled
@@ -106,7 +106,8 @@ adjacent words, once common words (or *stop words*) and punctuation have been
 removed.
 For example, the sentence "Machine learning is really fun!" consists of
 the following bigrams: {"machine_learning", "learning_really", "really_fun"}.
-Notice that we removed the stop word "is".
+Notice that we removed the stop word "is". 
+Finally, we remove data points that don't have at least 5 features and scale the data. Scaling is necessary here because our learning algorithm is sensitive to the scale of its inputs.
 
 The featurization job will take about 5 minutes to run on your cluster, so
 let's start it now:
@@ -114,8 +115,9 @@ let's start it now:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-import mli.feat.NGrams
-val (featurizedData, featurizer) = NGrams.extractNGrams(taggedInputTable, c=1, n=2, k=10000, stopWords = NGrams.stopWords)
+import mli.feat._
+val (featurizedData, ngfeaturizer) = NGrams.extractNGrams(taggedInputTable, c=1, n=2, k=1000, stopWords = NGrams.stopWords)
+val (scaledData, featurizer) = Scale.scale(featurizedData.filter(_.nonZeros.length > 5).cache(), 0, ngfeaturizer)
 ~~~
 </div>
 </div>
@@ -188,28 +190,38 @@ By now, hopefully the cluster has completed our featurization job.
 Note that the outputs of `NGrams.extractNGrams` are `featurizedData` and
 `featurizer`. `featurizedData` is an `MLTable` containing N-gram
 representations of each document, using bigrams and only including the
-10,000 most frequent bigrams. `featurizer` is a function that takes raw
+1,000 most frequent bigrams. `featurizer` is a function that takes raw
 documents and applies the aforementioned featurization process.  This function
 will be used along with a trained classifier to make predictions on new text
 documents in a [later section](#test-the-model-on-new-data).
 
 
+## Training vs. Testing Sets
 
-<!--## Training vs. Testing Sets
-*TODO* Add a note about training sets vs. testing sets. Add code to split the training vector into two sets.  -->
+An important concept in supervised machine learning is *training error* vs. *testing error*. Since we are generally less interested in how our model works on the data it was trained on than how it works on *new data*, we need to create a *test set* (sometimes also called a *holdout set*). MLI provides a function to split up your data randomly into train set vs. test set. By default, it will make the training set 90% of your input data, and the testing set the remaining 10%.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val (trainData, testData) = MLTableUtils.trainTest(scaledData)
+~~~
+</div>
+</div>
+
+We will train our model on the *training set* and evaluate it on the *testing set.*
 
 
 ## Building a model using SVMs
 
 <a href="http://en.wikipedia.org/wiki/Support_vector_machine" target="_blank">Support Vector Machines (SVMs)</a> are a popular machine learning algorithm used for binary classification. The MLI implementation of linear SVMs is based on <a href="http://en.wikipedia.org/wiki/Stochastic_gradient_descent" target="_blank">Stochastic Gradient Descent (SGD)</a>, a robust, highly-scalable optimization algorithm. Our implementation has been tuned to run well under Spark's distributed architecture.
 
-Recall that our [featurization process](#command-line-preprocessing-and-featurization) created a 10,000-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the contents of that page in the form of the top 10,000 bigrams appearing in the corpus. Now, let's train a model on those features:
+Recall that our [featurization process](#command-line-preprocessing-and-featurization) created a 1,000-dimensional feature vector for each article in our Wikipedia dataset, with each vector entry summarizing the contents of that page in the form of the top 1,000 bigrams appearing in the corpus. Now, let's train a model on those features:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
 import mli.ml.classification._
-val model = SVMAlgorithm.train(featurizedData, SVMParameters(learningRate=0.001, maxIterations=100))
+val model = SVMAlgorithm.train(trainData, SVMParameters(learningRate=10.0, regParam=1.0, maxIterations=50))
 ~~~
 </div>
 </div>
@@ -217,16 +229,14 @@ val model = SVMAlgorithm.train(featurizedData, SVMParameters(learningRate=0.001,
 ## Model assessment
 Now that we've built a model, what can we do with it?
 
-<!--*TODO* Add explanation of test set vs. train set.-->
-
 First, let's see how to make predictions using our model.  The following code demonstrates how to generate a prediction from the first data point in our training set.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
 // note: take(1) returns a sequence with a single MLRow, and we want this MLRow
-val firstDataPoint = featurizedData.take(1)(0)
-model.predict(firstDataPoint(1 until firstDataPoint.length))
+val firstDataPoint = trainData.take(1)(0)
+model.predict(firstDataPoint.tail)
 ~~~
 </div>
 </div>
@@ -237,7 +247,7 @@ model.predict(firstDataPoint(1 until firstDataPoint.length))
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-val trainVsTest = featurizedData.map(r => MLRow(r(0), model.predict(r(1 until r.length))))
+val trainVsPred = trainData.map(r => MLRow(r(0), model.predict(r.tail)))
 ~~~
 </div>
 </div>
@@ -250,12 +260,29 @@ To do this, we test for equality between the two elements of each MLRow, and cou
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val trainError = trainVsTest.filter(r => r(0) != r(1)).numRows.toDouble/featurizedData.numRows
+val trainError = trainVsPred.filter(r => r(0) != r(1)).numRows.toDouble/trainData.numRows
 ~~~
 </div>
 </div>
 
 What does this mean? It means that if we give the model the same points that it was trained with, it will classify `trainError` percent of them incorrectly.
+
+Define the following function at your scala prompt - it will be used to evaluate models later:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+def evalModel(model: SVMModel, testData: MLTable) = {
+	val trainData = model.trainingData
+	val trainVsPred = trainData.map(r => MLRow(r(0), model.predict(r.tail)))
+	val trainErr = trainVsPred.filter(r => r(0).toNumber != r(1).toNumber).numRows.toDouble / trainData.numRows
+	val testVsPred = testData.map(r => MLRow(r(0), model.predict(r.tail)))
+	val testErr = testVsPred.filter(r => r(0).toNumber != r(1).toNumber).numRows.toDouble / testData.numRows
+	(trainErr, testErr)
+}
+~~~
+</div>
+</div>
 
 ## Feature importance
 Next, let's drill into our model to figure out which features are important.
@@ -274,7 +301,7 @@ val bottomFeatures = model.features.sortWith(_._2 > _._2).take(10)
 
 ## Parameter Tuning
 We've seen what happens when we run with the magic parameter
-`learningRate=0.001`.  What happens when we vary this parameter? It turns out
+`learningRate=10.0`.  What happens when we vary this parameter? It turns out
 that we may get better results depending on how we set this parameter. If it's
 too high, we may never find an optimal model; if it's too low, we may not build
 a good model in the required number of iterations.
@@ -288,22 +315,30 @@ a good model in the required number of iterations.
 val learningRates = List(0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0)
 
 val models = learningRates.map({lr =>
-    SVMAlgorithm(featurizedData, SVMParameters(learningRate=0.001, numIterations=100))
+    SVMAlgorithm.train(trainData, SVMParameters(learningRate=lr, regParam=1.0, maxIterations=50))
     })
 
-val modelErrors = models.map(model => {
-    val trainVsTest = featurizedData.map(r => MLRow(r(0), model.predict(r(1 until r.length))))
-    trainVsTest.filter(r(0) != r(1)).numRows.toDouble/trainVsTest.numRows
-    })
+val modelErrors = models.map(model => evalModel(model, testData))
 
-val sortedParms = learningRates.zip(modelErrors)
+val sortedParams = learningRates.zip(modelErrors)
 
-//Best model is the one with lowest error.
-val bestModel = //
+//Best model is the one with lowest test error.
+val bestModel = models(modelErrors.map(_._2).zipWithIndex.min._2)
 ~~~
 </div>
 </div>
 </div>
+
+If we look at "sortedParams", we can see that the models are very sensitive to learning rate - and indeed need a learning rate of "1.0" for this number of iterations. To evaluate the performance of "bestModel" we can simply run the following:
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+evalModel(bestModel, testData)
+~~~
+</div>
+</div>
+
+This indicates that this model has a 25.5% training error, and a 24.7% test error - usually test error is worse than training error, but in this case the test error is a little bit better.
 
 
 ## Test the model on new data
@@ -315,17 +350,19 @@ Let's create a new `TextModel`, which expects a model and a featurizer and uses 
 <div data-lang="scala" markdown="1">
 ~~~
 // you should still have your featurizer from the initial featurization process!
-val textModel = new TextModel(bestModel, featurizer)
+import mli.ml._
+val textModel = new TextModel(bestModel, (s: MLString) => featurizer(MLRow(1.0, s)).tail)
 
 // TextModels have a `predict` method which takes a string as input. Try it out on this article from Wikipedia:
-textModel.predict(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Baroque").mkString)
+textModel.predict(MLString(Some(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Got_Live_If_You_Want_It!_(album)").mkString)))
+
+textModel.predict(MLString(Some(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Death").mkString)))
 
 ~~~
 </div>
 </div>
 
-What class did the model predict? Was it right? Note that that article has NO
-category information associated with it.
+What classes did the model predict? Was it right?
 
 **Bonus Exercise**: Try this on other articles --- are the predictions
 reasonable?
