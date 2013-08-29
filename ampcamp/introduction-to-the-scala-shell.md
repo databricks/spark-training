@@ -23,10 +23,10 @@ However, reading through that whole tutorial and trying the examples at the cons
 1. Declare a list of integers as a variable called "myNumbers".
 
    <div class="solution" markdown="1">
-   <div data-lang="scala" markdown="1">
+   <pre class="prettyprint lang-scala">
    scala> val myNumbers = List(1, 2, 5, 4, 7, 3)
    myNumbers: List[Int] = List(1, 2, 5, 4, 7, 3)
-   </div>
+   </pre>
    </div>
 
 1. Declare a function, `cube`, that computes the cube (third power) of an Int.
