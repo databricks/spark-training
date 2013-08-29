@@ -118,6 +118,12 @@ table {
 pre {
   font-family: "Menlo", "Lucida Console", monospace;
 }
+pre.prettyprint {
+  margin:5px;
+}
+.accordion-inner {
+  padding: 6px;
+}
 code {
   font-family: "Menlo", "Lucida Console", monospace;
   background: white;
