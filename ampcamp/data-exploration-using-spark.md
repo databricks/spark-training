@@ -121,6 +121,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 
    `http://<master_node_hostname>:3030`
 
+   Note that this page is only available if you have an active job or Spark shell.  
    You should have been given `master_node_hostname` at the beginning of the
    tutorial, or you might have [launched your own
    cluster](launching-a-bdas-cluster-on-ec2.html) and made a note of it then. You should
