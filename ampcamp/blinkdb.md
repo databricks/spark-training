@@ -22,7 +22,8 @@ BlinkDB is in its alpha stage of development, and you may notice some of its lim
 
    <pre class="prettyprint lang-sql">
    blinkdb> create external table wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    Time taken: 0.232 seconds</span></pre>
 
    **FAQ:** If you see the following errors, don’t worry. Things are still working under the hood.
@@ -41,7 +42,8 @@ BlinkDB is in its alpha stage of development, and you may notice some of its lim
 
    <pre class="prettyprint lang-sql">
    blinkdb> create table wikistats_cached as select * from wikistats;
-   <span class="nocode">Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_cached
+   <span class="nocode">
+   Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_cached
    OK
    Time taken: 56.664 seconds</span></pre>
 
@@ -49,7 +51,8 @@ BlinkDB is in its alpha stage of development, and you may notice some of its lim
 
    <pre class="prettyprint lang-sql">
    blinkdb> select count(1) from wikistats_cached;
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    329641466
    Time taken: 27.889 seconds</span></pre>
 
@@ -58,15 +61,16 @@ BlinkDB is in its alpha stage of development, and you may notice some of its lim
    <pre class="prettyprint lang-sql">
    blinkdb> create table wikistats_sample_cached as select * from wikistats_cached samplewith 0.01;
    <span class="nocode">
-Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_sample_cached
-OK
-Time taken: 22.703 seconds</span></pre>
+   Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_sample_cached
+   OK
+   Time taken: 22.703 seconds</span></pre>
 
    In the Alpha release, we need to tell BlinkDB the size of the sample and of the original table.  First, check the sample's size.  Since the sample size is random, you may get a slightly different answer than the one listed here.  It should be close to 1% of the original table's size.
 
    <pre class="prettyprint lang-sql">
    blinkdb> select count(1) from wikistats_sample_cached;
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    3294551
    Time taken: 3.011 seconds
    </span></pre>
@@ -86,7 +90,8 @@ Time taken: 22.703 seconds</span></pre>
 
    <pre class="prettyprint lang-sql">
    blinkdb> select count(1) from wikistats_cached where project_code = "en";
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    122352588
    Time taken: 21.632 seconds</span></pre>
 
@@ -94,7 +99,8 @@ Time taken: 22.703 seconds</span></pre>
 
    <pre class="prettyprint lang-sql">
    blinkdb> select approx_count(1) from wikistats_sample_cached where project_code = "en";
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    122340466 +/- 225926.0 (99% Confidence)
    Time taken: 2.993 seconds</span></pre>
 
@@ -106,7 +112,8 @@ Time taken: 22.703 seconds</span></pre>
 
    <pre class="prettyprint lang-sql">
    blinkdb> select approx_avg(page_views) from wikistats_sample_cached where lcase(page_name) like "%san_francisco%";
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    3.053745928338762 +/- 0.9373634631550505 (99% Confidence)
    Time taken: 12.09 seconds</span></pre>
 
@@ -114,7 +121,8 @@ Time taken: 22.703 seconds</span></pre>
 
    <pre class="prettyprint lang-sql">
    blinkdb> select avg(page_views) from wikistats_cached where lcase(page_name) like "%san_francisco%";
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    3.0695254665165628
    Time taken: 56.802 seconds</span></pre>
 
@@ -122,7 +130,8 @@ Time taken: 22.703 seconds</span></pre>
 
    <pre class="prettyprint lang-sql">
    blinkdb> select dt, approx_sum(page_views) as views from wikistats_sample_cached group by dt order by views;
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    20090505-050000	1.0132954790026326E7 +/- 140528.0 (99% Confidence)
    20090505-060000	1.0566967190060902E7 +/- 143176.0 (99% Confidence)
    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -138,7 +147,8 @@ Time taken: 22.703 seconds</span></pre>
   	<pre class="prettyprint lang-sql">
    blinkdb> select project_code, approx_sum(page_views) as views from wikistats_sample_cached where
    dt="20090506-120000" group by project_code;
-   <span class="nocode">OK
+   <span class="nocode">
+   OK
    vi.d	10197.941673238138 +/- 2724.0 (99% Confidence)
    sr	10297.921493564003 +/- 2984.0 (99% Confidence)
    . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -152,7 +162,8 @@ Time taken: 22.703 seconds</span></pre>
     <pre class="prettyprint lang-sql">
     blinkdb> select project_code, approx_count(1) as num_pages, approx_sum(page_views) as views from
     wikistats_sample_cached where dt="20090506-160000" group by project_code;
-    <span class="nocode">OK
+    <span class="nocode">
+    OK
 	fr	315836 +/- 14463.0 (99% Confidence)  1003897.3758920014 +/- 45994.0 (99% Confidence)
     de.b	5798 +/- 1961.0 (99% Confidence) 	10397.901313889866 +/- 3516.0 (99% Confidence)
     . . . . . . . . . . . . . . . . . . . . . . . . . .. . . . . . . . . . . . . . . . . . . .
@@ -165,7 +176,8 @@ Time taken: 22.703 seconds</span></pre>
 
     <pre class="prettyprint lang-sql">
     blinkdb> select approx_avg(page_views) from wikistats_sample_cached;
-    <span class="nocode">OK
+    <span class="nocode">
+    OK
     3.6420454545454546 +/- 1.7610655103860877 (99% Confidence)
     Time taken: 3.407 seconds</span></pre>
 
@@ -176,7 +188,8 @@ Time taken: 22.703 seconds</span></pre>
     <pre class="prettyprint lang-sql">
     blinkdb> select percentile_approx(page_views, array(0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999))
     as page_views_percentiles  from wikistats_cached;
-    <span class="nocode">OK
+    <span class="nocode">
+    OK
     [1.0,1.0,1.0,1.0,1.9999999999999998,4.867578875914043,35.00000000000001,151.9735162220546]
     Time taken: 31.241 seconds</span></pre>
 
@@ -220,7 +233,8 @@ Time taken: 22.703 seconds</span></pre>
 
       <pre class="prettyprint lang-sql">
       blinkdb> select approx_sum(page_views) from wikistats_sample_cached where dt="20090507-070000";
-      <span class="nocode">OK
+      <span class="nocode">
+      OK
       1.1811077507224506E7 +/- 147736.0 (99% Confidence)
       Time taken: 0.649 seconds</span></pre>
 
@@ -228,7 +242,8 @@ Time taken: 22.703 seconds</span></pre>
 
        <pre class="prettyprint lang-sql">
        blinkdb> select sum(page_views) from wikistats where dt="20090507-070000";
-       <span class="nocode">OK
+       <span class="nocode">
+        OK
    	13098805
    	Time taken: 19.465 seconds</span></pre>
 -->

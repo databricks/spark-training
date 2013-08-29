@@ -253,9 +253,9 @@
         </div><!--topbar-->
         <div class="container" id="content">
             
-            <p>BlinkDB is a large-scale data warehouse system like Shark that adds the ability to create and use smaller samples of large datasets to make queries even faster.  Today you’re going to get a sneak peek at an Alpha release of BlinkDB.  We’ll set up BlinkDB and use it to run some SQL queries against the English Wikipedia.  If you’ve already done the Shark exercises, you might notice that some of the exercises are similar.  Don’t worry if you haven’t seen Shark, though - we haven’t assumed that you have.</p>
+            <p>BlinkDB is a large-scale data warehouse system like Shark that adds the ability to create and use smaller samples of large datasets to make queries even faster.  Today you&#8217;re going to get a sneak peek at an Alpha release of BlinkDB.  We&#8217;ll set up BlinkDB and use it to run some SQL queries against the English Wikipedia.  If you&#8217;ve already done the Shark exercises, you might notice that some of the exercises are similar.  Don&#8217;t worry if you haven&#8217;t seen Shark, though - we haven&#8217;t assumed that you have.</p>
 
-<p>BlinkDB is in its alpha stage of developement, and you may notice some of its limitations.  We’ll mention them as they come up in the tutorial.</p>
+<p>BlinkDB is in its alpha stage of development, and you may notice some of its limitations.  We&#8217;ll mention them as they come up in the tutorial.</p>
 
 <ol>
   <li>
@@ -270,7 +270,8 @@ Before you do any querying, you will need to tell BlinkDB where the data is and 
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; create external table wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';
-<span class="nocode">OK
+<span class="nocode">
+OK
 Time taken: 0.232 seconds</span></pre>
 
     <p><strong>FAQ:</strong> If you see the following errors, don’t worry. Things are still working under the hood.</p>
@@ -286,25 +287,27 @@ Time taken: 0.232 seconds</span></pre>
 FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'</pre>
   </li>
   <li>
-    <p>Like Shark, BlinkDB allows tables to be cached in the cluster’s memory for faster access.  Any table having a name with the suffix “_cached” is automatically cached.  We’ll take advantage of caching to speed up queries on the <code>wikistats</code> table.  Create a cached version of it:</p>
+    <p>Like Shark, BlinkDB allows tables to be cached in the cluster&#8217;s memory for faster access.  Any table having a name with the suffix &#8220;_cached&#8221; is automatically cached.  We&#8217;ll take advantage of caching to speed up queries on the <code>wikistats</code> table.  Create a cached version of it:</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; create table wikistats_cached as select * from wikistats;
-<span class="nocode">Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_cached
+<span class="nocode">
+Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_cached
 OK
 Time taken: 56.664 seconds</span></pre>
   </li>
   <li>
-    <p>First, check the number of records in the table.  (If you have some familiarity with databases, note that we use the “<code>count(1)</code>” syntax here since in earlier versions of Hive, the more popular “<code>count(*)</code>” operation was not supported. BlinkDB supports most of Hive’s flavor of SQL.  Hive SQL syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.)</p>
+    <p>First, check the number of records in the table.  (If you have some familiarity with databases, note that we use the &#8220;<code>count(1)</code>&#8221; syntax here since in earlier versions of Hive, the more popular &#8220;<code>count(*)</code>&#8221; operation was not supported. BlinkDB supports most of Hive&#8217;s flavor of SQL.  Hive SQL syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.)</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select count(1) from wikistats_cached;
-<span class="nocode">OK
+<span class="nocode">
+OK
 329641466
 Time taken: 27.889 seconds</span></pre>
   </li>
   <li>
-    <p>Now let’s create a random sample of this table using BlinkDB’s <code>samplewith</code> operator and cache it in the cluster’s memory.  We’ll use a sample that’s about 1% of the original Wikipedia dataset in size.  This sample will be used to compute <em>approximations</em> to various queries on <code>wikistats_cached</code>.</p>
+    <p>Now let&#8217;s create a random sample of this table using BlinkDB&#8217;s <code>samplewith</code> operator and cache it in the cluster&#8217;s memory.  We&#8217;ll use a sample that&#8217;s about 1% of the original Wikipedia dataset in size.  This sample will be used to compute <em>approximations</em> to various queries on <code>wikistats_cached</code>.</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; create table wikistats_sample_cached as select * from wikistats_cached samplewith 0.01;
@@ -313,11 +316,12 @@ Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/wa
 OK
 Time taken: 22.703 seconds</span></pre>
 
-    <p>In the Alpha release, we need to tell BlinkDB the size of the sample and of the original table.  First, check the sample’s size.  Since the sample size is random, you may get a slightly different answer than the one listed here.  It should be close to 1% of the original table’s size.</p>
+    <p>In the Alpha release, we need to tell BlinkDB the size of the sample and of the original table.  First, check the sample&#8217;s size.  Since the sample size is random, you may get a slightly different answer than the one listed here.  It should be close to 1% of the original table&#8217;s size.</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select count(1) from wikistats_sample_cached;
-<span class="nocode">OK
+<span class="nocode">
+OK
 3294551
 Time taken: 3.011 seconds
 </span></pre>
@@ -325,55 +329,64 @@ Time taken: 3.011 seconds
     <p>Now declare the sample size.  Replace the number here with the result of the <code>count</code> query you just ran.</p>
 
     <pre class="prettyprint lang-sql">
-set blinkdb.sample.size=3294551; -- &lt;-- Replace this with the result of your query. </pre>
+set blinkdb.sample.size=3294551; -- (Replace this with the result of your query.)
+</pre>
 
-    <p>Finally, declare the original table’s size.</p>
+    <p>Finally, declare the original table&#8217;s size.</p>
 
     <pre class="prettyprint lang-sql">
 set blinkdb.dataset.size=329641466;</pre>
   </li>
   <li>
-    <p>Our first real task is to compute a simple count of the number of English records (i.e., those with “<code>project_code="en"</code>”).  We’re not using our sample yet.</p>
+    <p>Our first real task is to compute a simple count of the number of English records (i.e., those with &#8220;<code>project_code="en"</code>&#8221;).  We&#8217;re not using our sample yet.</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select count(1) from wikistats_cached where project_code = "en";
-<span class="nocode">122352588
+<span class="nocode">
+OK
+122352588
 Time taken: 21.632 seconds</span></pre>
   </li>
   <li>
-    <p>Now approximate the same count using the sampled table.  In the Alpha release, you need to tell BlinkDB to compute an approximation by prepending “<code>approx_</code>” to your aggregation function.  (Also, only queries that compute <code>count</code>, <code>sum</code>, or <code>average</code> can be approximated.  In the future many more functions, including UDFs, will be approximable.)</p>
+    <p>Now approximate the same count using the sampled table.  In the Alpha release, you need to tell BlinkDB to compute an approximation by prepending &#8220;<code>approx_</code>&#8221; to your aggregation function.  (Also, only queries that compute <code>count</code>, <code>sum</code>, or <code>average</code> can be approximated.  In the future many more functions, including UDFs, will be approximable.)</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select approx_count(1) from wikistats_sample_cached where project_code = "en";
-<span class="nocode">OK
+<span class="nocode">
+OK
 122340466 +/- 225926.0 (99% Confidence)
 Time taken: 2.993 seconds</span></pre>
 
-    <p>Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes some additional text, which tells us how close BlinkDB thinks it is to the true answer. In this case, BlinkDB says that the interval [122114540, 122566392] is a .99 confidence interval for the true count. Confidence intervals come with the guarantee that, if you were to repeatedly create new samples using the <code>samplewith</code> operator and then perform this query on each sample, the confidence interval reported by BlinkDB would contain the true answer (122352588) 99% of the time. A simpler (though not entirely correct) interpretation is that there is a 99% chance that the true count is inside the confidence interval.</p>
+    <p>Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes some additional text, which tells us how close BlinkDB thinks it is to the true answer. In this case, BlinkDB reports that the interval [122114540, 122566392] (this is just subtracting or adding 225926.0 to 122340466) probably contains the true count.</p>
+
+    <p>Technically, this interval is a .99 confidence interval.  Confidence intervals come with the guarantee that, if you were to repeatedly create new samples using the <code>samplewith</code> operator and then perform this query on each sample, the confidence interval reported by BlinkDB would contain the true answer (122352588) 99% of the time. A simpler (though not entirely correct) interpretation is that there is a 99% chance that the true count is inside the confidence interval.</p>
   </li>
   <li>
-    <p>Now we would like to find out the average number of hits on pages with “San Francisco” in the title throughout the entire period:</p>
+    <p>Now we would like to find out the average number of hits on pages with &#8220;San Francisco&#8221; in the title throughout the entire period:</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select approx_avg(page_views) from wikistats_sample_cached where lcase(page_name) like "%san_francisco%";
-<span class="nocode">OK
+<span class="nocode">
+OK
 3.053745928338762 +/- 0.9373634631550505 (99% Confidence)
 Time taken: 12.09 seconds</span></pre>
 
-    <p>You can also compute an exact answer by running the same query on the table <code>wikistats_cached</code>, replacing “<code>approx_avg</code>” with “<code>avg</code>”:</p>
+    <p>You can also compute an exact answer by running the same query on the table <code>wikistats_cached</code>, replacing &#8220;<code>approx_avg</code>&#8221; with &#8220;<code>avg</code>&#8221;:</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select avg(page_views) from wikistats_cached where lcase(page_name) like "%san_francisco%";
-<span class="nocode">OK
+<span class="nocode">
+OK
 3.0695254665165628
 Time taken: 56.802 seconds</span></pre>
   </li>
   <li>
-    <p>Let’s dive a little further into traffic patterns on Wikipedia.  First, check which time intervals had the most traffic:</p>
+    <p>Let&#8217;s dive a little further into traffic patterns on Wikipedia.  First, check which time intervals had the most traffic:</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select dt, approx_sum(page_views) as views from wikistats_sample_cached group by dt order by views;
-<span class="nocode">OK
+<span class="nocode">
+OK
 20090505-050000	1.0132954790026326E7 +/- 140528.0 (99% Confidence)
 20090505-060000	1.0566967190060902E7 +/- 143176.0 (99% Confidence)
 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -385,14 +398,15 @@ Time taken: 1.195 seconds</span></pre>
     <p><b>NOTE:</b> Currently BlinkDB alpha-0.1.0 only supports lexographic ordering using the <code>orderby</code> operator. We will introduce numerical ordering in alpha-0.2.0.</p>
   </li>
   <li>
-    <p>The hour <code>"20090506-120000"</code> seems to be at or near the top.  Now let’s see which project codes (roughly, which languages) contributed to this:</p>
+    <p>The hour <code>"20090506-120000"</code> seems to be at or near the top.  Now let&#8217;s see which project codes (roughly, which languages) contributed to this:</p>
   </li>
 </ol>
 
   	&lt;pre class="prettyprint lang-sql"&gt;
 <p>blinkdb&gt; select project_code, approx_sum(page_views) as views from wikistats_sample_cached where
-   dt=”20090506-120000” group by project_code;
-   <span class="nocode">OK
+   dt=&#8221;20090506-120000&#8221; group by project_code;
+   <span class="nocode">
+   OK
    vi.d	10197.941673238138 +/- 2724.0 (99% Confidence)
    sr	10297.921493564003 +/- 2984.0 (99% Confidence)
    . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -408,7 +422,8 @@ Time taken: 1.195 seconds</span></pre>
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select project_code, approx_count(1) as num_pages, approx_sum(page_views) as views from
 wikistats_sample_cached where dt="20090506-160000" group by project_code;
-<span class="nocode">OK
+<span class="nocode">
+OK
 fr	315836 +/- 14463.0 (99% Confidence)  1003897.3758920014 +/- 45994.0 (99% Confidence)
 de.b	5798 +/- 1961.0 (99% Confidence) 	10397.901313889866 +/- 3516.0 (99% Confidence)
 . . . . . . . . . . . . . . . . . . . . . . . . . .. . . . . . . . . . . . . . . . . . . .
@@ -418,47 +433,34 @@ kk	699 +/- 682.0 (99% Confidence) 	999.798203258641 +/- 974.0 (99% Confidence)
 Time taken: 0.907 seconds</span></pre>
   </li>
   <li>
-    <p>However, we should remember that random sampling doesn’t always work well. For instance, try computing the average number of hits on all pages:</p>
+    <p>However, the random sampling used by BlinkDB doesn&#8217;t always work well. For instance, try computing the average number of hits on all pages:</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select approx_avg(page_views) from wikistats_sample_cached;
-<span class="nocode">OK
+<span class="nocode">
+OK
 3.6420454545454546 +/- 1.7610655103860877 (99% Confidence)
 Time taken: 3.407 seconds</span></pre>
 
-    <p>Also try computing the true average on the original table.  You’ll probably notice that the 99% confidence interval provided by BlinkDB doesn’t cover the true answer.</p>
+    <p>Also try computing the true average on the original table.  You&#8217;ll probably notice that the 99% confidence interval provided by BlinkDB doesn&#8217;t cover the true answer.</p>
   </li>
   <li>
-    <p>Let’s investigate this a bit further.  The kind of sampling supported in the Alpha release (simple random sampling) typically works poorly on data that contains large, important outliers.  Let’s check what the raw distribution of <code>page_views</code> looks like.  (You can also try this on <code>wikistats_sample_cached</code>; percentiles on samples are not officially supported yet, but they work quite well!)</p>
+    <p>Let&#8217;s investigate this a bit further.  The kind of sampling supported in the Alpha release (simple random sampling) typically works poorly on data that contains large, important outliers.  Let&#8217;s check what the raw distribution of <code>page_views</code> looks like.  (You can also try this on <code>wikistats_sample_cached</code>; percentiles on samples are not officially supported yet, but they work quite well!)</p>
 
     <pre class="prettyprint lang-sql">
 blinkdb&gt; select percentile_approx(page_views, array(0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999))
 as page_views_percentiles  from wikistats_cached;
-<span class="nocode">OK
+<span class="nocode">
+OK
 [1.0,1.0,1.0,1.0,1.9999999999999998,4.867578875914043,35.00000000000001,151.9735162220546]
 Time taken: 31.241 seconds</span></pre>
 
-    <p>Note that <code>percentile_approx</code> is not a BlinkDB approximation operator; it is a Hive operator that computes approximate percentiles on a given column. </p>
+    <p>Note that <code>percentile_approx</code> is not one of the BlinkDB approximation operators (which are <em>prefixed</em> by &#8220;<code>approx_</code>&#8221;).  It is a normal Hive SQL operator that computes approximate percentiles on a given column.</p>
 
     <p>Most pages have only a few views, but there are some pages with a very large number of views.  If a sample misses one of these outliers, it will look very different from the original table, and accuracy of both approximations and confidence intervals will suffer.</p>
   </li>
   <li>
-    <p>Sometimes it is acceptable to remove outliers from your data, or at least reduce their impact on query answers.  In this case, we could try taking the natural logarithm of <code>page_views</code>.</p>
-
-    <pre class="prettyprint lang-sql">
-blinkdb&gt; select approx_avg(log(page_views)) from wikistats_sample_cached;
-<span class="nocode">OK
-0.4915571985283967 +/- 0.001178986199704763 (99% Confidence)
-Time taken: 1.847 seconds
-</span>
-blinkdb&gt; select avg(log(page_views)) from wikistats_cached;
-<span class="nocode">OK
-0.49144147329877896
-Time taken: 9.157 seconds
-</span></pre>
-  </li>
-  <li>
-    <p>To exit BlinkDB, type the following at the BlinkDB command line (and don’t forget the semicolon!).</p>
+    <p>To exit BlinkDB, type the following at the BlinkDB command line (and don&#8217;t forget the semicolon!).</p>
 
     <pre class="prettyprint lang-bsh">
 blinkdb&gt; exit;</pre>
@@ -495,7 +497,8 @@ blinkdb&gt; exit;</pre>
 
       <pre class="prettyprint lang-sql">
       blinkdb> select approx_sum(page_views) from wikistats_sample_cached where dt="20090507-070000";
-      <span class="nocode">OK
+      <span class="nocode">
+      OK
       1.1811077507224506E7 +/- 147736.0 (99% Confidence)
       Time taken: 0.649 seconds</span></pre>
 
@@ -503,7 +506,8 @@ blinkdb&gt; exit;</pre>
 
        <pre class="prettyprint lang-sql">
        blinkdb> select sum(page_views) from wikistats where dt="20090507-070000";
-       <span class="nocode">OK
+       <span class="nocode">
+        OK
    	13098805
    	Time taken: 19.465 seconds</span></pre>
 -->
