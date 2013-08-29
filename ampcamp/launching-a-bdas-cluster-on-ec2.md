@@ -103,11 +103,37 @@ __Answer:__ Run the next two commands.
 <div class="accordion-group">
 <div class="accordion-heading">
   <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q2" data-parent="#q-accordion">
-    I get the following error when running this command: <code>Your requested instance type (m1.xlarge) is not supported...</code>
+    I get the following error when running this command: <code>Could not read http://s3.amazonaws.com/ampcamp-amis/latest-ampcamp3</code>
   </a>
 </div><!--accordion-heading-->
 
 <div id="collapse-q2" class="accordion-body collapse">
+<div class="accordion-inner" markdown="1">
+
+__Question: I got the following error when I ran the above command. Help!__
+
+<pre class="nocode">
+Searching for existing cluster amplab-training...
+Could not read http://s3.amazonaws.com/ampcamp-amis/latest-ampcamp3
+</pre>
+
+__Answer:__ The lookup for the AMP Camp AMI failed. You can manually specificy the AMI to use by adding the '-a' flag to the script.
+For example to use the AMP Camp 3 AMI, you can try the following command
+
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> -a ami-452f622c --copy launch amplab-training
+
+</div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
+    I get the following error when running this command: <code>Your requested instance type (m1.xlarge) is not supported...</code>
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q3" class="accordion-body collapse">
 <div class="accordion-inner" markdown="1">
 
 __Question: I got the following permission error when I ran the above command. Help!__
@@ -128,12 +154,12 @@ It may randomly pick an availability zone that doesn't support this instance siz
 
 <div class="accordion-group">
 <div class="accordion-heading">
-  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
     The commands hangs at: <code>Copying AMP Camp Wikipedia pagecount data...</code>
   </a>
 </div><!--accordion-heading-->
 
-<div id="collapse-q3" class="accordion-body collapse">
+<div id="collapse-q4" class="accordion-body collapse">
 <div class="accordion-inner" markdown="1">
 
 __Question: The above command is stuck at the following line. Help!__
@@ -170,12 +196,12 @@ __Answer:__ The data copy from EBS to your HDFS cluster is running and can take 
 
 <div class="accordion-group">
 <div class="accordion-heading">
-  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q5" data-parent="#q-accordion">
         Can I specify the instances types while creating the cluster?
   </a>
 </div><!--accordion-heading-->
 
-<div id="collapse-q4" class="accordion-body collapse">
+<div id="collapse-q5" class="accordion-body collapse">
 <div class="accordion-inner" markdown="1">
 
 __Question: Can I specify the instances types while creating the cluster?__
@@ -204,7 +230,7 @@ However, you should ensure two things:
    Then run
 
    ~~~
-   /root/mesos-ec2/copy-dir /root/spark/conf/ .
+   /root/spark-ec2/copy-dir /root/spark/conf/ .
    ~~~
 
    to copy the configuration directory to all slaves.
@@ -212,6 +238,29 @@ However, you should ensure two things:
 __Information:__ Sometimes the EC2 instances don't initialize within the standard waiting time of 120 seconds.
 If that happens you, will ssh errors (or check in the Amazon web console).
 In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
+
+</div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q6" data-parent="#q-accordion">
+        Can I use another EC2 region to launch the cluster?
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q6" class="accordion-body collapse">
+<div class="accordion-inner" markdown="1">
+
+__Question: Can I use a EC2 region other than us-east-1 while creating the cluster?__
+
+__Answer:__ These exercises have been created and tested on the us-east-1 region. However we have also copied the AMI to the us-west-1 region as well.
+To use the us-west-1 region, you can run the following command:
+
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> -r us-west-1 -a ami-6ac4ee2f --copy launch amplab-training
+
+We do not support running the AMI in any other EC2 regions. In case you need to do so, feel free to contact us for more help.
 
 </div><!--accordion-inner-->
 </div><!--accordion-body-->
