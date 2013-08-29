@@ -13,7 +13,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 1. First, launch the Shark console:
 
    <pre class="prettyprint lang-bsh">
-   /root/shark-0.2/bin/shark-withinfo
+   /root/shark/bin/shark-withinfo
    </pre>
 
 1. Similar to Apache Hive, Shark can query external tables (i.e., tables that are not created in Shark).
