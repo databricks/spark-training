@@ -17,7 +17,7 @@ and many other applications on a dynamically shared pool of resources
 Mesos itself is a distributed system made up of _masters_ and
 _slaves_. You should have been given `master_node_hostname` at the
 beginning of this training, or you might have [launched your own
-cluster](launching-a-spark-shark-cluster-on-ec2.html) and made a note
+cluster](launching-a-bdas-cluster-on-ec2.html) and made a note
 of it then.
 
 Let's start by logging into `master_node_hostname`:

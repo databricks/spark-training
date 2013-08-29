@@ -123,7 +123,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
 
    You should have been given `master_node_hostname` at the beginning of the
    tutorial, or you might have [launched your own
-   cluster](launching-a-cluster.html) and made a note of it then. You should
+   cluster](launching-a-bdas-cluster-on-ec2.html) and made a note of it then. You should
    see the Spark application status web interface, similar to the following:
 
    ![Spark Application Status Web UI](img/application-webui640.png)
