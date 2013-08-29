@@ -402,9 +402,9 @@ Time taken: 1.195 seconds</span></pre>
   </li>
 </ol>
 
-  	&lt;pre class="prettyprint lang-sql"&gt;
-<p>blinkdb&gt; select project_code, approx_sum(page_views) as views from wikistats_sample_cached where
-   dt=&#8221;20090506-120000&#8221; group by project_code;
+<pre class="prettyprint lang-sql">
+   blinkdb&gt; select project_code, approx_sum(page_views) as views from wikistats_sample_cached where
+   dt="20090506-120000" group by project_code;
    <span class="nocode">
    OK
    vi.d	10197.941673238138 +/- 2724.0 (99% Confidence)
@@ -413,7 +413,7 @@ Time taken: 1.195 seconds</span></pre>
    . . . . . . . . . . . . . . . . . . . . . . . . . .
    io.d	999.798203258641 +/- 859.0 (99% Confidence)
    nds	999.798203258641 +/- 974.0 (99% Confidence)
-   Time taken: 1.407 seconds</span>&lt;/pre&gt;</p>
+   Time taken: 1.407 seconds</span></pre>
 
 <ol>
   <li>

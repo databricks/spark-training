@@ -144,7 +144,7 @@ BlinkDB is in its alpha stage of development, and you may notice some of its lim
 
 10. The hour `"20090506-120000"` seems to be at or near the top.  Now let's see which project codes (roughly, which languages) contributed to this:
 
-  	<pre class="prettyprint lang-sql">
+   <pre class="prettyprint lang-sql">
    blinkdb> select project_code, approx_sum(page_views) as views from wikistats_sample_cached where
    dt="20090506-120000" group by project_code;
    <span class="nocode">
