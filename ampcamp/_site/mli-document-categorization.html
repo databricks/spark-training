@@ -282,14 +282,13 @@ and create an <code>MLContext</code>, which is similar to a <code>SparkContext</
 <div data-lang="scala">
     <p>At the bash shell prompt, run</p>
 
-    <pre><code>export SPARK_CLASSPATH=/root/MLI/target/MLI-assembly-1.0.jar
+    <pre><code>export ADD_JARS=/root/MLI/target/MLI-assembly-1.0.jar
 /root/spark/spark-shell
 </code></pre>
 
     <p>In the Spark shell, run</p>
 
-    <pre><code>sc.addJar("/root/MLI/target/MLI-assembly-1.0.jar")
-import mli.interface._
+    <pre><code>import mli.interface._
 val mc = new MLContext(sc)
 </code></pre>
 
@@ -499,17 +498,17 @@ To do this, we test for equality between the two elements of each MLRow, and cou
 
 <p>What does this mean? It means that if we give the model the same points that it was trained with, it will classify <code>trainError</code> percent of them incorrectly.</p>
 
-<p>Define the following function at your scala prompt - it will be used to evaluate models later:</p>
+<p>Define the following function at your scala prompt &#8212; it will be used to evaluate models later:</p>
 
 <div class="codetabs">
 <div data-lang="scala">
     <pre><code>def evalModel(model: SVMModel, testData: MLTable) = {
-	val trainData = model.trainingData
-	val trainVsPred = trainData.map(r =&gt; MLRow(r(0), model.predict(r.tail)))
-	val trainErr = trainVsPred.filter(r =&gt; r(0).toNumber != r(1).toNumber).numRows.toDouble / trainData.numRows
-	val testVsPred = testData.map(r =&gt; MLRow(r(0), model.predict(r.tail)))
-	val testErr = testVsPred.filter(r =&gt; r(0).toNumber != r(1).toNumber).numRows.toDouble / testData.numRows
-	(trainErr, testErr)
+    val trainData = model.trainingData
+    val trainVsPred = trainData.map(r =&gt; MLRow(r(0), model.predict(r.tail)))
+    val trainErr = trainVsPred.filter(r =&gt; r(0).toNumber != r(1).toNumber).numRows.toDouble / trainData.numRows
+    val testVsPred = testData.map(r =&gt; MLRow(r(0), model.predict(r.tail)))
+    val testErr = testVsPred.filter(r =&gt; r(0).toNumber != r(1).toNumber).numRows.toDouble / testData.numRows
+    (trainErr, testErr)
 }
 </code></pre>
   </div>
@@ -557,16 +556,16 @@ val bestModel = models(modelErrors.map(_._2).zipWithIndex.min._2)
   </div>
 </div>
 
-<p>If we look at &#8220;sortedParams&#8221;, we can see that the models are very sensitive to learning rate - and indeed need a learning rate of &#8220;1.0&#8221; for this number of iterations. To evaluate the performance of &#8220;bestModel&#8221; we can simply run the following:
-&lt;div class="codetabs"&gt;
-&lt;div data-lang="scala" markdown="1"&gt;
-~~~
-evalModel(bestModel, testData)
-~~~
-&lt;/div&gt;
-&lt;/div&gt;</p>
+<p>If we look at <code>sortedParams</code>, we can see that the models are very sensitive to learning rate and indeed need a learning rate of &#8220;1.0&#8221; for this number of iterations. To evaluate the performance of <code>bestModel</code> we can simply run the following:</p>
 
-<p>This indicates that this model has a 25.5% training error, and a 24.7% test error - usually test error is worse than training error, but in this case the test error is a little bit better.</p>
+<div class="codetabs">
+<div data-lang="scala">
+    <pre><code>evalModel(bestModel, testData)
+</code></pre>
+  </div>
+</div>
+
+<p>This indicates that this model has a 25.5% training error, and a 24.7% test error &#8212; usually test error is worse than training error, but in this case the test error is a little bit better.</p>
 
 <h2 id="test-the-model-on-new-data">Test the model on new data</h2>
 <p>Now that we&#8217;re pretty sure we&#8217;ve built a good model, let&#8217;s see how well it classifies new text that it wasn&#8217;t trained on.</p>
@@ -575,7 +574,7 @@ evalModel(bestModel, testData)
 
 <div class="codetabs">
 <div data-lang="scala">
-    <pre><code>// you should still have your featurizer from the initial featurization process!
+    <pre><code>// You should still have your featurizer from the initial featurization process!
 import mli.ml._
 val textModel = new TextModel(bestModel, (s: MLString) =&gt; featurizer(MLRow(1.0, s)).tail)
 
@@ -583,7 +582,6 @@ val textModel = new TextModel(bestModel, (s: MLString) =&gt; featurizer(MLRow(1.
 textModel.predict(MLString(Some(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Got_Live_If_You_Want_It!_(album)").mkString)))
 
 textModel.predict(MLString(Some(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Death").mkString)))
-
 </code></pre>
   </div>
 </div>
