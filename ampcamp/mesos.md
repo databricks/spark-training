@@ -204,10 +204,10 @@ To start a slave that uses ZooKeeper to determine the leading master
 use the `--master` option:
 
 <pre>
---master=VALUE                             May be one of:
-                                             zk://host1:port1,host2:port2,.../path
-                                             zk://username:password@host1:port1,host2:port2,.../path
-                                             file://path/to/file (where file contains one of the above)</pre>
+--master=VALUE                  May be one of:
+                                  zk://host1:port1,host2:port2,.../path
+                                  zk://username:password@host1:port1,host2:port2,.../path
+                                  file://path/to/file (where file contains one of the above)</pre>
 
 **NOTE:** _Use_ `file://` _when you want to use authentication (i.e.,_
 `username:password`_) but don't want to reveal any secrets on the
