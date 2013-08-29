@@ -37,14 +37,13 @@ and create an `MLContext`, which is similar to a `SparkContext`.
 At the bash shell prompt, run
 
 ~~~
-export SPARK_CLASSPATH=/root/MLI/target/MLI-assembly-1.0.jar
+export ADD_JARS=/root/MLI/target/MLI-assembly-1.0.jar
 /root/spark/spark-shell
 ~~~
 
 In the Spark shell, run
 
 ~~~
-sc.addJar("/root/MLI/target/MLI-assembly-1.0.jar")
 import mli.interface._
 val mc = new MLContext(sc)
 ~~~
@@ -267,18 +266,18 @@ val trainError = trainVsPred.filter(r => r(0) != r(1)).numRows.toDouble/trainDat
 
 What does this mean? It means that if we give the model the same points that it was trained with, it will classify `trainError` percent of them incorrectly.
 
-Define the following function at your scala prompt - it will be used to evaluate models later:
+Define the following function at your scala prompt --- it will be used to evaluate models later:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
 def evalModel(model: SVMModel, testData: MLTable) = {
-	val trainData = model.trainingData
-	val trainVsPred = trainData.map(r => MLRow(r(0), model.predict(r.tail)))
-	val trainErr = trainVsPred.filter(r => r(0).toNumber != r(1).toNumber).numRows.toDouble / trainData.numRows
-	val testVsPred = testData.map(r => MLRow(r(0), model.predict(r.tail)))
-	val testErr = testVsPred.filter(r => r(0).toNumber != r(1).toNumber).numRows.toDouble / testData.numRows
-	(trainErr, testErr)
+    val trainData = model.trainingData
+    val trainVsPred = trainData.map(r => MLRow(r(0), model.predict(r.tail)))
+    val trainErr = trainVsPred.filter(r => r(0).toNumber != r(1).toNumber).numRows.toDouble / trainData.numRows
+    val testVsPred = testData.map(r => MLRow(r(0), model.predict(r.tail)))
+    val testErr = testVsPred.filter(r => r(0).toNumber != r(1).toNumber).numRows.toDouble / testData.numRows
+    (trainErr, testErr)
 }
 ~~~
 </div>
@@ -329,7 +328,8 @@ val bestModel = models(modelErrors.map(_._2).zipWithIndex.min._2)
 </div>
 </div>
 
-If we look at "sortedParams", we can see that the models are very sensitive to learning rate - and indeed need a learning rate of "1.0" for this number of iterations. To evaluate the performance of "bestModel" we can simply run the following:
+If we look at `sortedParams`, we can see that the models are very sensitive to learning rate and indeed need a learning rate of "1.0" for this number of iterations. To evaluate the performance of `bestModel` we can simply run the following:
+
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
@@ -338,7 +338,7 @@ evalModel(bestModel, testData)
 </div>
 </div>
 
-This indicates that this model has a 25.5% training error, and a 24.7% test error - usually test error is worse than training error, but in this case the test error is a little bit better.
+This indicates that this model has a 25.5% training error, and a 24.7% test error --- usually test error is worse than training error, but in this case the test error is a little bit better.
 
 
 ## Test the model on new data
@@ -349,7 +349,7 @@ Let's create a new `TextModel`, which expects a model and a featurizer and uses 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-// you should still have your featurizer from the initial featurization process!
+// You should still have your featurizer from the initial featurization process!
 import mli.ml._
 val textModel = new TextModel(bestModel, (s: MLString) => featurizer(MLRow(1.0, s)).tail)
 
@@ -357,7 +357,6 @@ val textModel = new TextModel(bestModel, (s: MLString) => featurizer(MLRow(1.0, 
 textModel.predict(MLString(Some(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Got_Live_If_You_Want_It!_(album)").mkString)))
 
 textModel.predict(MLString(Some(scala.io.Source.fromURL("http://en.wikipedia.org/wiki/Death").mkString)))
-
 ~~~
 </div>
 </div>
