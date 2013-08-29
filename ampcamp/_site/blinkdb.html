@@ -285,6 +285,15 @@ Time taken: 0.232 seconds</span></pre>
 
     <pre>13/02/05 21:22:16 INFO parse.ParseDriver: Parsing command: CR
 FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'</pre>
+
+    <p><strong>FAQ:</strong> If you partially complete the exercises and then restart them later, <em>or</em> if you previously tried out the Shark exercises, your tables will stick around.  You will see errors like this if you try to create them again:</p>
+
+    <pre>FAILED: Error in metadata: AlreadyExistsException(message:Table wikistats already exists)
+FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask</pre>
+
+    <p>To fix this, drop the table (<code>wikistats</code> or, introduced shortly, <code>wikistats_cached</code> or <code>wikistats_sample_cached</code>), then create it again using the same command described above.  You can drop a table with:</p>
+
+    <pre>drop table wikistats;</pre>
   </li>
   <li>
     <p>Like Shark, BlinkDB allows tables to be cached in the cluster&#8217;s memory for faster access.  Any table having a name with the suffix &#8220;_cached&#8221; is automatically cached.  We&#8217;ll take advantage of caching to speed up queries on the <code>wikistats</code> table.  Create a cached version of it:</p>

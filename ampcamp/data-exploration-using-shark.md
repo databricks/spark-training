@@ -38,6 +38,15 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
    <pre>13/02/05 21:22:16 INFO parse.ParseDriver: Parsing command: CR
    FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'</pre>
 
+   <b>FAQ:</b> If you partially complete the exercises and then restart them later, your tables will stick around.  You will see errors like this if you try to create them again:
+
+   <pre>FAILED: Error in metadata: AlreadyExistsException(message:Table wikistats already exists)
+   FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask</pre>
+
+   To fix this, drop the table (`wikistats` or, introduced shortly, `wikistats_cached`), then create it again using the same command described above.  You can drop a table with:
+   
+   <pre>drop table wikistats;</pre>
+
 1. Let's create a table containing all English records and cache it in the cluster's memory.
 
    <pre class="prettyprint lang-sql">
