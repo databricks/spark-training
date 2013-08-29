@@ -253,14 +253,14 @@
         </div><!--topbar-->
         <div class="container" id="content">
             
-            <p>Now that we&#8217;ve had fun with Spark, let&#8217;s try out Shark. Remember Shark is a large-scale data warehouse system that runs on top of Spark and provides a SQL like interface (that is fully compatible with Apache Hive).</p>
+            <p>Now that we’ve had fun with Spark, let’s try out Shark. Remember Shark is a large-scale data warehouse system that runs on top of Spark and provides a SQL like interface (that is fully compatible with Apache Hive).</p>
 
 <ol>
   <li>
     <p>First, launch the Shark console:</p>
 
     <pre class="prettyprint lang-bsh">
-/root/shark-0.2/bin/shark-withinfo
+/root/shark/bin/shark-withinfo
 </pre>
   </li>
   <li>
@@ -287,7 +287,7 @@ Time taken: 0.232 seconds
 FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'</pre>
   </li>
   <li>
-    <p>Let&#8217;s create a table containing all English records and cache it in the cluster&#8217;s memory.</p>
+    <p>Let’s create a table containing all English records and cache it in the cluster’s memory.</p>
 
     <pre class="prettyprint lang-sql">
 shark&gt; create table wikistats_cached as select * from wikistats where project_code="en";
@@ -297,7 +297,7 @@ Time taken: 127.5 seconds
 13/02/05 21:57:34 INFO CliDriver: Time taken: 127.5 seconds</span></pre>
   </li>
   <li>
-    <p>Do a simple count to get the number of English records. If you have some familiarity working with databases, note that we us the &#8220;<code>count(1)</code>&#8221; syntax here since in earlier versions of Hive, the more popular &#8220;<code>count(*)</code>&#8221; operation was not supported. The Hive syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.</p>
+    <p>Do a simple count to get the number of English records. If you have some familiarity working with databases, note that we us the “<code>count(1)</code>” syntax here since in earlier versions of Hive, the more popular “<code>count(*)</code>” operation was not supported. The Hive syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.</p>
 
     <pre class="prettyprint lang-sql">
 shark&gt; select count(1) from wikistats_cached;
@@ -384,7 +384,7 @@ Time taken: 68.693 seconds
   </li>
 </ul>
 
-<p>To exit Shark, type the following at the Shark command line (and don&#8217;t forget the semicolon!).</p>
+<p>To exit Shark, type the following at the Shark command line (and don’t forget the semicolon!).</p>
 
 <pre class="prettyprint lang-sql">
    shark&gt; exit;</pre>

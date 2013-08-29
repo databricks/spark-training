@@ -291,7 +291,7 @@
 </div>
   </li>
   <li>
-    <p>Next, for every line of data, we collect a tuple with elements described next. The first element is what we will call the &#8220;full document title&#8221;, a concatenation of the project code and page title. The second element is a key-value pair whose key is the hour from the <code>&lt;date-time&gt;</code> field and whose value is the number of views that occurred in this hour.</p>
+    <p>Next, for every line of data, we collect a tuple with elements described next. The first element is what we will call the “full document title”, a concatenation of the project code and page title. The second element is a key-value pair whose key is the hour from the <code>&lt;date-time&gt;</code> field and whose value is the number of views that occurred in this hour.</p>
 
     <p>There are a few new points to note about the code below. First, <code>data.map</code> takes each line of data in the RDD data and applies the function passed to it. The first step splits the line of data into the five data fields we discussed in the Spark exercises above. The second step extracts the hour information from the <code>&lt;date-time&gt;</code> string and we then form the output tuple.</p>
 

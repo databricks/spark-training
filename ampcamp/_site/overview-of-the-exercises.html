@@ -258,7 +258,7 @@
             <p>The exercises in this mini course are divided into sections designed to give a hands-on experience with various software components of the Berkeley Data Analytics Stack (BDAS).
 For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python.
 For Shark, you will be using SQL in the Shark console to interactively explore the same data.
-For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter&#8217;s sample stream of tweets.
+For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter’s sample stream of tweets.
 Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark.</p>
 
 <h2 id="cluster-details">Cluster Details</h2>
@@ -266,9 +266,9 @@ Finally, you will have to complete a complex machine learning exercise which wil
 One of these 6 nodes is the master node, responsible for scheduling tasks as well as maintaining the HDFS metadata (a.k.a. HDFS name node).
 The other 5 are the slave nodes on which tasks are actually executed.
 You will mainly interact with the master node.
-If you haven&#8217;t already, let&#8217;s ssh onto the master node (see instructions above).</p>
+If you haven’t already, let’s ssh onto the master node (see instructions above).</p>
 
-<p>Once you&#8217;ve used SSH to log into the master, run the <code>ls</code> command and you will see a number of directories.
+<p>Once you’ve used SSH to log into the master, run the <code>ls</code> command and you will see a number of directories.
 Some of the more important ones are listed below:</p>
 
 <ul>
@@ -322,7 +322,7 @@ ephemeral-hdfs/bin/hadoop fs -ls /wiki/pagecounts
 
 <p>The data are partitioned by date and time.
 Each file contains traffic statistics for all pages in a specific hour.
-Let&#8217;s take a look at the file:</p>
+Let’s take a look at the file:</p>
 
 <pre class="prettyprint lang-bsh">
 ephemeral-hdfs/bin/hadoop fs -cat /wiki/pagecounts/part-00148 | less
@@ -345,7 +345,7 @@ The schema is:</p>
 <p>The <code>&lt;date_time&gt;</code> field specifies a date in the YYYYMMDD format (year, month, day) followed by a hyphen and then the hour in the HHmmSS format (hour, minute, second).
 There is no information in mmSS.
 The <code>&lt;project_code&gt;</code> field contains information about the language of the pages.
-For example, project code &#8220;en&#8221; indicates an English page.
+For example, project code “en” indicates an English page.
 The <code>&lt;page_title&gt;</code> field gives the title of the Wikipedia page.
 The <code>&lt;num_hits&gt;</code> field gives the number of page views in the hour-long time slot starting at <code>&lt;data_time&gt;</code>.
 The <code>&lt;page_size&gt;</code> field gives the size in bytes of the Wikipedia page.</p>

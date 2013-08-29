@@ -256,7 +256,7 @@
 
 <p>To apply most machine learning algorithms, we must first preprocess and featurize the data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of a unique Wikipedia article identifier (i.e., a unique combination of Wikipedia project code and page title) and associated traffic statistics.  We will generate 24-dimensional feature vectors, with each feature vector entry summarizing the page view counts for the corresponding hour of the day.</p>
 
-<p>Recall that each record in our dataset consists of a string with the format &#8220;<code>&lt;date_time&gt; &lt;project_code&gt; &lt;page_title&gt; &lt;num_hits&gt; &lt;page_size&gt;</code>&#8221;.  The format of the date-time field is YYYYMMDD-HHmmSS (where &#8216;M&#8217; denotes month, and &#8216;m&#8217; denotes minute).</p>
+<p>Recall that each record in our dataset consists of a string with the format “<code>&lt;date_time&gt; &lt;project_code&gt; &lt;page_title&gt; &lt;num_hits&gt; &lt;page_size&gt;</code>”.  The format of the date-time field is YYYYMMDD-HHmmSS (where ‘M’ denotes month, and ‘m’ denotes minute).</p>
 
 <p>Given our time constraints, in order to focus on the machine learning algorithms themselves, we have pre-processed the data to create the featurized dataset that we will use to implement K-means clustering. If you are interested in doing featurization on your own, you can follow <a href="featurization.html">these instructions</a>.</p>
 
@@ -430,7 +430,7 @@ if __name__ == "__main__":
   </div>
 </div>
 
-<p>Let&#8217;s first take a closer look at our template code in a text editor on the cluster itself, then we&#8217;ll start adding code to the template. Locate the <code>WikipediaKMeans</code> class and open it with a text editor.</p>
+<p>Let’s first take a closer look at our template code in a text editor on the cluster itself, then we’ll start adding code to the template. Locate the <code>WikipediaKMeans</code> class and open it with a text editor.</p>
 
 <div class="codetabs">
 <div data-lang="scala">
@@ -455,7 +455,7 @@ vim WikipediaKMeans.py  # If you don't know Vim, you can use emacs or nano
 
 <p>The cluster machines have vim, emacs, and nano installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content into vim, emacs, or nano before running it.</p>
 
-<p>For any Spark computation, we first create a Spark context object. For Scala or Java programs, we do that by providing the Spark cluster URL, the Spark home directory, and the JAR file that will be generated when we compile our program. For Python programs, we only need to provide the Spark cluster URL. Finally, we also name our program &#8220;WikipediaKMeans&#8221; to identify it in Spark&#8217;s web UI.</p>
+<p>For any Spark computation, we first create a Spark context object. For Scala or Java programs, we do that by providing the Spark cluster URL, the Spark home directory, and the JAR file that will be generated when we compile our program. For Python programs, we only need to provide the Spark cluster URL. Finally, we also name our program “WikipediaKMeans” to identify it in Spark’s web UI.</p>
 
 <p>This is what it looks like in our template code:</p>
 
@@ -515,7 +515,7 @@ vim WikipediaKMeans.py  # If you don't know Vim, you can use emacs or nano
   </div>
 </div>
 
-<p>Now, let&#8217;s make our first edit to the file and add code to count the number of records in our dataset by running <code>data.count()</code> and print the value. Find the comment that says &#8220;Your code goes here&#8221; and replace it with:</p>
+<p>Now, let’s make our first edit to the file and add code to count the number of records in our dataset by running <code>data.count()</code> and print the value. Find the comment that says “Your code goes here” and replace it with:</p>
 
 <div class="codetabs">
 <div data-lang="scala">
@@ -573,7 +573,7 @@ Number of records 802450
 </pre>
 
 <h2 id="k-means-algorithm">K-Means algorithm</h2>
-<p>We are now set to start implementing the K-means algorithm, so remove or comment out the lines we just added to print the record count and let&#8217;s get started.</p>
+<p>We are now set to start implementing the K-means algorithm, so remove or comment out the lines we just added to print the record count and let’s get started.</p>
 
 <ol>
   <li>

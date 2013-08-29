@@ -258,7 +258,7 @@ Then, we will give a brief introduction to writing standalone Spark programs. Re
 
 <h2 id="interactive-analysis">Interactive Analysis</h2>
 
-<p>Let&#8217;s now use Spark to do some order statistics on the data set.
+<p>Let’s now use Spark to do some order statistics on the data set.
 First, launch the Spark shell:</p>
 
 <div class="codetabs">
@@ -301,7 +301,7 @@ pagecounts: spark.RDD[String] = MappedRDD[1] at textFile at &lt;console&gt;:12
 </div>
   </li>
   <li>
-    <p>Let&#8217;s take a peek at the data. You can use the take operation of an RDD to get the first K records. Here, K = 10.</p>
+    <p>Let’s take a peek at the data. You can use the take operation of an RDD to get the first K records. Here, K = 10.</p>
 
     <div class="codetabs">
 <div data-lang="scala">
@@ -356,7 +356,7 @@ We can make it prettier by traversing the array to print each record on its own 
 </div>
   </li>
   <li>
-    <p>Let&#8217;s see how many records in total are in this data set (this command will take a while, so read ahead while it is running).</p>
+    <p>Let’s see how many records in total are in this data set (this command will take a while, so read ahead while it is running).</p>
 
     <div class="codetabs">
 <div data-lang="scala">
@@ -373,7 +373,7 @@ We can make it prettier by traversing the array to print each record on its own 
 If you look closely at the terminal, the console log is pretty chatty and tells you the progress of the tasks.
 Because we are reading 20G of data from HDFS, this task is I/O bound and can take a while to scan through all the data (2 - 3 mins).</p>
 
-    <p>While it&#8217;s running, you can open the Spark web console to see the progress.
+    <p>While it’s running, you can open the Spark web console to see the progress.
 To do this, open your favorite browser, and type in the following URL.</p>
 
     <p><code>http://&lt;master_node_hostname&gt;:3030</code></p>
@@ -385,7 +385,7 @@ see the Spark application status web interface, similar to the following:</p>
 
     <p><img src="img/application-webui640.png" alt="Spark Application Status Web UI" /></p>
 
-    <p>The links in this interface allow you to track the job&#8217;s progress and
+    <p>The links in this interface allow you to track the job’s progress and
 various metrics about its execution, including task durations and cache
 statistics.</p>
 
@@ -405,11 +405,11 @@ browse to</p>
 </code></pre>
   </li>
   <li>
-    <p>Recall from above when we described the format of the data set, that the second field is the &#8220;project code&#8221; and contains information about the language of the pages.
-For example, the project code &#8220;en&#8221; indicates an English page.
-Let&#8217;s derive an RDD containing only English pages from <code>pagecounts</code>.
+    <p>Recall from above when we described the format of the data set, that the second field is the “project code” and contains information about the language of the pages.
+For example, the project code “en” indicates an English page.
+Let’s derive an RDD containing only English pages from <code>pagecounts</code>.
 This can be done by applying a filter function to <code>pagecounts</code>.
-For each record, we can split it by the field delimiter (i.e. a space) and get the second field-– and then compare it with the string &#8220;en&#8221;.</p>
+For each record, we can split it by the field delimiter (i.e. a space) and get the second field-– and then compare it with the string “en”.</p>
 
     <p>To avoid reading from disks each time we perform any operations on the RDD, we also <strong>cache the RDD into memory</strong>.
  This is where Spark really starts to to shine.</p>
@@ -448,7 +448,7 @@ res: Long = 122352588
 </div>
 
     <p>The first time this command is run, similar to the last count we did, it will take 2 - 3 minutes while Spark scans through the entire data set on disk.
-<strong>But since enPages was marked as &#8220;cached&#8221; in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster</strong>.</p>
+<strong>But since enPages was marked as “cached” in the previous step, if you run count on the same RDD again, it should return an order of magnitude faster</strong>.</p>
 
     <p>If you examine the console log closely, you will see lines like this, indicating some data was added to the cache:</p>
 
@@ -456,9 +456,9 @@ res: Long = 122352588
 </code></pre>
   </li>
   <li>
-    <p>Let&#8217;s try something fancier.
+    <p>Let’s try something fancier.
 Generate a histogram of total page views on Wikipedia English pages for the date range represented in our dataset (May 5 to May 7, 2009).
-The high level idea of what we&#8217;ll be doing is as follows.
+The high level idea of what we’ll be doing is as follows.
 First, we generate a key value pair for each line; the key is the date (the first eight characters of the first field), and the value is the number of pageviews for that date (the fourth field).</p>
 
     <div class="codetabs">
@@ -482,7 +482,7 @@ Finally we sum up the values for each key.
 There is a convenient method called <code>reduceByKey</code> in Spark for exactly this pattern.
 Note that the second argument to <code>reduceByKey</code> determines the number of reducers to use.
 By default, Spark assumes that the reduce function is commutative and associative and applies combiners on the mapper side.
-Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let&#8217;s use only one reducer.</p>
+Since we know there is a very limited number of keys in this case (because there are only 3 unique dates in our data set), let’s use only one reducer.</p>
 
     <div class="codetabs">
 <div data-lang="scala">
@@ -492,7 +492,7 @@ res: Array[(java.lang.String, Int)] = Array((20090506,204190442), (20090507,2026
 </code></pre>
 
         <p>The <code>collect</code> method at the end converts the result from an RDD to an array.
-  Note that when we don&#8217;t specify a name for the result of a command (e.g. <code>val enTuples</code> above), a variable with name <code>res</code><i>N</i> is automatically created.</p>
+  Note that when we don’t specify a name for the result of a command (e.g. <code>val enTuples</code> above), a variable with name <code>res</code><i>N</i> is automatically created.</p>
       </div>
 <div data-lang="python">
         <pre><code>&gt;&gt;&gt; enKeyValuePairs.reduceByKey(lambda x, y: x + y, 1).collect()
@@ -577,11 +577,11 @@ build up intuition over time by experimenting with different values.</p>
 <p>Because of time constraints, in this tutorial we focus on ad-hoc style analytics using the Spark shell.
 However, for many tasks, it makes more sense to write a standalone Spark program.
 We will return to this in the section on Spark Streaming below, where you will actually write a standalone Spark Streaming job.
-We aren&#8217;t going to cover how to structure, build, and run standalone Spark jobs here, but before we move on, we list here a few resources about standalone Spark jobs for you to come back and explore later.</p>
+We aren’t going to cover how to structure, build, and run standalone Spark jobs here, but before we move on, we list here a few resources about standalone Spark jobs for you to come back and explore later.</p>
 
-<p>First, on the AMI for this tutorial we have included &#8220;template&#8221; projects for Scala and Java standalone programs for both Spark and Spark streaming.
+<p>First, on the AMI for this tutorial we have included “template” projects for Scala and Java standalone programs for both Spark and Spark streaming.
 The Spark ones can be found in the <code>/root/scala-app-template</code> and <code>/root/java-app-template</code> directories (we will discuss the Streaming ones later).
-Feel free to browse through the contents of those directories. You can also find examples of building and running Spark standalone jobs <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-java">in Java</a> and <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-scala">in Scala</a> as part of the Spark Quick Start Guide. For even more details, see Matei Zaharia&#8217;s <a href="http://ampcamp.berkeley.edu/wp-content/uploads/2012/06/matei-zaharia-part-2-amp-camp-2012-standalone-programs.pdf" target="_blank">slides</a> and <a href="http://www.youtube.com/watch?v=7k4yDKBYOcw&amp;t=59m37s" target="_blank">talk video</a> about Standalone Spark jobs at the <a href="http://ampcamp.berkeley.edu/agenda-2012" target="blank">first AMP Camp</a>.</p>
+Feel free to browse through the contents of those directories. You can also find examples of building and running Spark standalone jobs <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-java">in Java</a> and <a href="http://www.spark-project.org/docs/latest/quick-start.html#a-standalone-job-in-scala">in Scala</a> as part of the Spark Quick Start Guide. For even more details, see Matei Zaharia’s <a href="http://ampcamp.berkeley.edu/wp-content/uploads/2012/06/matei-zaharia-part-2-amp-camp-2012-standalone-programs.pdf" target="_blank">slides</a> and <a href="http://www.youtube.com/watch?v=7k4yDKBYOcw&amp;t=59m37s" target="_blank">talk video</a> about Standalone Spark jobs at the <a href="http://ampcamp.berkeley.edu/agenda-2012" target="blank">first AMP Camp</a>.</p>
 
         </div> <!-- /container -->
 

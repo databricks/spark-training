@@ -255,10 +255,10 @@
             
             <div id="chapter-toc" class="chapter-toc"></div>
             
-            <p>In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter&#8217;s real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the <a href="introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a> section to learn some basics.</p>
+            <p>In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter’s real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the <a href="introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a> section to learn some basics.</p>
 
 <h2 id="setup">Setup</h2>
-<p>This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing Twitter&#8217;s real time sample stream.</p>
+<p>This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing Twitter’s real time sample stream.</p>
 
 <h3 id="system-setup">System Setup</h3>
 
@@ -359,12 +359,12 @@ public class Tutorial {
 
 <ul>
   <li><code>getSparkUrl()</code> is a helper function that fetches the Spark cluster URL from the file <code>/root/spark-ec2/cluster-url</code>.</li>
-  <li><code>configureTwitterCredential()</code> is another helper function that configures Twitter&#8217;s authentication detail using the file <code>/root/streaming/twitter.txt</code>. This is explained further in the next section.</li>
+  <li><code>configureTwitterCredential()</code> is another helper function that configures Twitter’s authentication detail using the file <code>/root/streaming/twitter.txt</code>. This is explained further in the next section.</li>
 </ul>
 
 <h3 id="twitter-credential-setup">Twitter Credential Setup</h3>
 
-<p>Since all of the exercises are based on Twitter&#8217;s sample tweet stream, it is necessary to configure OAuth authentication with a Twitter account. To do this, you will need to setup a consumer key+secret pair and an access token+secret pair using a Twitter account. Please follow the instructions below to setup these temporary access keys with your Twitter account. These instructions will not require you to provide your Twitter username/password. You will only be required to provide the consumer key and access token pairs that you will generate, which you can easily destroy once you have finished the tutorial. So, your Twitter account will not be compromised in any way.</p>
+<p>Since all of the exercises are based on Twitter’s sample tweet stream, it is necessary to configure OAuth authentication with a Twitter account. To do this, you will need to setup a consumer key+secret pair and an access token+secret pair using a Twitter account. Please follow the instructions below to setup these temporary access keys with your Twitter account. These instructions will not require you to provide your Twitter username/password. You will only be required to provide the consumer key and access token pairs that you will generate, which you can easily destroy once you have finished the tutorial. So, your Twitter account will not be compromised in any way.</p>
 
 <ol>
   <li>
@@ -372,16 +372,16 @@ public class Tutorial {
 This page lists the set of Twitter-based applications that you own and have
 already created consumer keys and access tokens for.  This list will be
 empty if you have never created any applications. For this tutorial, create
-a new temporary application. To do this, click on the blue &#8220;Create a new
-application&#8221; button. The new application page should look the page shown
+a new temporary application. To do this, click on the blue “Create a new
+application” button. The new application page should look the page shown
 below. Provide the required fields. The <strong>Name</strong> of the application must be
 globally unique, so using your Twitter username as a prefix to the name
 should ensure that. For example, set it as [your-twitter-handle]-test. For
 the <strong>Description</strong> , anything is fine. For the <strong>Website</strong> , similarly, any
 website is fine, but ensure that it is a fully-formed URL with the prefix
-http:// . Then, click on the &#8220;Yes, I agree&#8221; checkbox below the <strong>Developer
+http:// . Then, click on the “Yes, I agree” checkbox below the <strong>Developer
 Rules of the Road</strong> . Finally, fill in the CAPTCHA and click on the blue
-&#8220;Create your Twitter application&#8221; button.</p>
+“Create your Twitter application” button.</p>
 
     <p><img src="img/oauth-2.png" alt="Setting up new application" /></p>
   </li>
@@ -390,7 +390,7 @@ Rules of the Road</strong> . Finally, fill in the CAPTCHA and click on the blue
 a confirmation page similar to the one shown below. You should be able to
 see the consumer key and the consumer secret that have been generated. To
 generate the access token and the access token secret, click on the blue
-&#8220;Create my access token&#8221; button at the bottom of the page (lower green arrow
+“Create my access token” button at the bottom of the page (lower green arrow
 in the figure below). Note that there will be a small green confirmation at
 the top of the page saying that the token has been generated.</p>
 
@@ -437,7 +437,7 @@ accessTokenSecret = 479920148 ...
 </ol>
 
 <h2 id="first-spark-streaming-program">First Spark Streaming program</h2>
-<p>Let&#8217;s try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the
+<p>Let’s try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the
 <code>Tutorial</code> class and open it with a text editor.</p>
 
 <div class="codetabs">
@@ -472,7 +472,7 @@ This object serves as the main entry point for all Spark Streaming functionality
   </div>
 </div>
 
-<p>Here, we create a StreamingContext object by providing the Spark cluster URL, the batch duration we&#8217;d like to use for streams, the Spark home directory, and the list of JAR files that are necessary to run the program. &#8220;Tutorial&#8221; is a unique name given to this application to identify it the Spark&#8217;s web UI. We elect for a batch duration of 1 second. Next, we use this context to create a stream of tweets:</p>
+<p>Here, we create a StreamingContext object by providing the Spark cluster URL, the batch duration we’d like to use for streams, the Spark home directory, and the list of JAR files that are necessary to run the program. “Tutorial” is a unique name given to this application to identify it the Spark’s web UI. We elect for a batch duration of 1 second. Next, we use this context to create a stream of tweets:</p>
 
 <div class="codetabs">
 <div data-lang="scala">
@@ -485,7 +485,7 @@ This object serves as the main entry point for all Spark Streaming functionality
   </div>
 </div>
 
-<p>The object <code>tweets</code> is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type <a href="http://twitter4j.org/javadoc/twitter4j/Status.html">twitter4j.Status</a>. As a very simple processing step, let&#8217;s try to print the status text of the some of the tweets.</p>
+<p>The object <code>tweets</code> is a DStream of tweet statuses. More specifically, it is continuous stream of RDDs containing objects of type <a href="http://twitter4j.org/javadoc/twitter4j/Status.html">twitter4j.Status</a>. As a very simple processing step, let’s try to print the status text of the some of the tweets.</p>
 
 <div class="codetabs">
 <div data-lang="scala">
@@ -506,7 +506,7 @@ This object serves as the main entry point for all Spark Streaming functionality
 
 <p>Similar to RDD transformation in the earlier Spark exercises, the <code>map</code>
 operation on <code>tweets</code> maps each Status object to its text to create a new
-&#8216;transformed&#8217; DStream named <code>statuses</code>. The <code>print</code> output operation tells the
+‘transformed’ DStream named <code>statuses</code>. The <code>print</code> output operation tells the
 context to print first 10 records in each RDD in a DStream, which in this case
 are 1 second batches of received status texts.</p>
 
@@ -582,7 +582,16 @@ Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
 
 <p>To stop the application, use <code>Ctrl + c</code> .</p>
 
-<p><strong>FAQ</strong>: If you see the following message, it means that the authentication with Twitter failed.</p>
+<p><strong>FAQ</strong>: If you see an exception that looks like the following, it means that one of the token / keys were not specified in the configuration file twitter.txt. Please verify that you have set them appropriately as instructed earlier.</p>
+
+<pre class="nocode">
+[error] (run-main) java.lang.Exception: Error parsing configuration file - incorrectly formatted line [consumerKey =]
+java.lang.Exception: Error parsing configuration file - incorrectly formatted line [consumerKey =]
+at TutorialHelper$$anonfun$2.apply(TutorialHelper.scala:24)
+at TutorialHelper$$anonfun$2.apply(TutorialHelper.scala:21)
+</pre>
+
+<p><strong>FAQ</strong>: If you see the following message, it means that the authentication with Twitter failed. Please verify whether the Twitter consumer key+secret and access token+secret has been set correctly in the configuration file <code>twitter.txt</code> as instructed earlier. </p>
 
 <pre class="nocode">
 13/02/04 23:41:57 INFO streaming.NetworkInputTracker: De-registered receiver for network stream 0 with message 401:Authentication credentials (https://dev.twitter.com/pages/auth) were missing or incorrect. Ensure that you have set valid consumer key/secret, access token/secret, and the system clock is in sync.
@@ -603,20 +612,18 @@ Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
 
 
 Relevant discussions can be found on the Internet at:
-	http://www.google.co.jp/search?q=d0031b0b or
-	http://www.google.co.jp/search?q=1db75513
+    http://www.google.co.jp/search?q=d0031b0b or
+    http://www.google.co.jp/search?q=1db75513
 TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
 </pre>
 
-<p><strong>Answer:</strong> Please verify whether the Twitter consumer key+secret and access token+secret has been set correctly in the file <code>twitter.txt</code> as instructed earlier.</p>
-
 <h2 id="further-exercises">Further exercises</h2>
-<p>Next, let&#8217;s try something more interesting, say, try printing the 10 most popular hashtags in the last 5 minutes. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before <code>ssc.start()</code>. After every step, you can see the contents of new DStream you created by using the <code>print()</code> operation and running Tutorial in the same way as explained earlier (that is, <code>sbt/sbt package run</code>).</p>
+<p>Next, let’s try something more interesting, say, try printing the 10 most popular hashtags in the last 5 minutes. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before <code>ssc.start()</code>. After every step, you can see the contents of new DStream you created by using the <code>print()</code> operation and running Tutorial in the same way as explained earlier (that is, <code>sbt/sbt package run</code>).</p>
 
 <ol>
   <li>
     <p><strong>Get the stream of hashtags from the stream of tweets</strong>:
-To get the hashtags from the status string, we need to identify only those words in the message that start with &#8220;#&#8221;. This can be done as follows:</p>
+To get the hashtags from the status string, we need to identify only those words in the message that start with “#”. This can be done as follows:</p>
 
     <div class="codetabs">
 <div data-lang="scala">
@@ -664,10 +671,10 @@ Time: 1359886521000 ms
 </pre>
   </li>
   <li>
-    <p><strong>Count the hashtags over a 5 minute window</strong>: Next, we&#8217;d like to count these hashtags over a 5 minute moving window.
-A simple way to do this would be to gather together the last 5 minutes of data and process it in the usual map-reduce way &#8212; map each tag to a (tag, 1) key-value pair and
+    <p><strong>Count the hashtags over a 5 minute window</strong>: Next, we’d like to count these hashtags over a 5 minute moving window.
+A simple way to do this would be to gather together the last 5 minutes of data and process it in the usual map-reduce way — map each tag to a (tag, 1) key-value pair and
 then reduce by adding the counts. However, in this case, counting over a sliding window can be done more intelligently. As the window moves, the counts of the new data can
-be added to the previous window&#8217;s counts, and the counts of the old data that falls out of the window can be &#8216;subtracted&#8217; from the previous window&#8217;s counts. This can be
+be added to the previous window’s counts, and the counts of the old data that falls out of the window can be ‘subtracted’ from the previous window’s counts. This can be
 done using DStreams as follows:</p>
 
     <div class="codetabs">
@@ -709,7 +716,7 @@ specifies the window size and <code>new Duration(1 * 1000)</code> specifies the 
       </div>
 </div>
 
-    <p>Note that only &#8216;invertible&#8217; reduce operations that have &#8216;inverse&#8217; functions (like how subtraction is the inverse of addition)
+    <p>Note that only ‘invertible’ reduce operations that have ‘inverse’ functions (like how subtraction is the inverse of addition)
 can be optimized in this manner. The generated <code>counts</code> DStream will have records that are (hashtag, count) tuples.
 If you <code>print</code> counts and run this program, you should see something like this:</p>
 
@@ -779,7 +786,7 @@ then sort the hashtags. Finally, we need to get the top 10 hashtags and print th
 </div>
 
     <p>The <code>transform</code> operation allows any arbitrary RDD-to-RDD operation to be applied to each RDD of a DStream to generate a new DStream.
-The resulting &#8216;sortedCounts&#8217; DStream is a stream of RDDs having sorted hashtags.
+The resulting ‘sortedCounts’ DStream is a stream of RDDs having sorted hashtags.
 The <code>foreach</code> operation applies a given function on each RDD in a DStream, that is, on each batch of data. In this case,
 <code>foreach</code> is used to get the first 10 hashtags from each RDD in <code>sortedCounts</code> and print them, every second.
 If you run this program, you should see something like this:</p>
@@ -804,7 +811,10 @@ collect them together at the driver and then find the top 10 hashtags among them
 We leave this as an exercise for the reader to try.</p>
   </li>
   <li>
-    <p><strong>API Reference</strong>: You can explore the full streaming API by referencing the <a href="http://www.cs.berkeley.edu/~pwendell/strataconf/api/streaming/index.html#spark.streaming.DStream">Java/Scala</a> API docs.</p>
+    <p><strong>Further Reference</strong>: </p>
+
+    <p>For a more detailed explanations of the streaming API, checkout the <a href="http://spark.incubator.apache.org/docs/latest/streaming-programming-guide.html">Streaming Programming Guide</a>. 
+ For the full streaming API, checkout the <a href="http://spark.incubator.apache.org/docs/latest/api/streaming/index.html#spark.streaming.DStream">Java/Scala</a> API docs.</p>
   </li>
 </ol>
 

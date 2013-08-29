@@ -265,7 +265,7 @@ beginning of this training, or you might have <a href="launching-a-bdas-cluster-
 cluster</a> and made a note
 of it then.</p>
 
-<p>Let&#8217;s start by logging into <code>master_node_hostname</code>:</p>
+<p>Let’s start by logging into <code>master_node_hostname</code>:</p>
 
 <pre class="prettyprint lang-bsh">
 $ ssh -i /path/to/ampcamp3-all.pem root@master_node_hostname</pre>
@@ -431,8 +431,8 @@ connected slaves. Click <code>Slaves</code> in the top navigation bar:</p>
   </li>
 </ol>
 
-<p><strong>NOTE:</strong> <em>The web interface updates automagically so don&#8217;t bother
-refreshing it or closing the window as we&#8217;ll use it throughout this
+<p><strong>NOTE:</strong> <em>The web interface updates automagically so don’t bother
+refreshing it or closing the window as we’ll use it throughout this
 training.</em></p>
 
 <hr />
@@ -463,11 +463,11 @@ use the <code>--master</code> option:</p>
                                   file://path/to/file (where file contains one of the above)</pre>
 
 <p><strong>NOTE:</strong> <em>Use</em> <code>file://</code> <em>when you want to use authentication (i.e.,</em>
-<code>username:password</code><em>) but don&#8217;t want to reveal any secrets on the
+<code>username:password</code><em>) but don’t want to reveal any secrets on the
 command line (or in the environment)!</em></p>
 
-<p>We&#8217;ve already launched a ZooKeeper cluster for you and started the
-slaves with ZooKeeper. But let&#8217;s simulate a master failover!</p>
+<p>We’ve already launched a ZooKeeper cluster for you and started the
+slaves with ZooKeeper. But let’s simulate a master failover!</p>
 
 <ol>
   <li>
@@ -476,7 +476,7 @@ slaves with ZooKeeper. But let&#8217;s simulate a master failover!</p>
     <pre class="prettyprint lang-bsh">
 $ killall mesos-master</pre>
 
-    <p>If you didn&#8217;t close your browser window, switch to it now:</p>
+    <p>If you didn’t close your browser window, switch to it now:</p>
 
     <div class="solution">
       <p><img src="img/mesos-webui-not-connected640.png" alt="Mesos Web UI Not Connected" /></p>
@@ -509,7 +509,7 @@ additionally log to the filesystem by setting the <code>--log_dir</code> option:
 
 <ol>
   <li>
-    <p>Browse back to the &#8220;home&#8221; page (hit back or click <code>Mesos</code> in the
+    <p>Browse back to the “home” page (hit back or click <code>Mesos</code> in the
 upper left corner) the to your browser and click on the <code>LOG</code> link in
 the left hand column:</p>
 
@@ -517,7 +517,7 @@ the left hand column:</p>
       <p><img src="img/mesos-webui-no-log640.png" alt="Mesos Web UI No Log" /></p>
     </div>
 
-    <p>Ah ha! Close the popup window and let&#8217;s restart the master using
+    <p>Ah ha! Close the popup window and let’s restart the master using
 the <code>--log_dir</code> option:</p>
 
     <pre class="prettyprint lang-bsh">
@@ -541,7 +541,7 @@ $ nohup mesos-master --zk=zk://master_node_hostname:2181/mesos --log_dir=/mnt/me
 <h3 id="rest-interface">REST Interface</h3>
 
 <p>The Mesos masters and slaves provide a handful of REST endpoints that
-can be useful for users and operators. A collection of &#8220;help&#8221; pages
+can be useful for users and operators. A collection of “help” pages
 are available for some of them (our version of <code>man</code> for REST).</p>
 
 <ol>
@@ -569,7 +569,7 @@ clicking on one; click on <code>/logging</code>:</p>
     </div>
   </li>
   <li>
-    <p>Let&#8217;s toggle the verbosity level of the master:</p>
+    <p>Let’s toggle the verbosity level of the master:</p>
 
     <pre class="prettyprint lang-bsh">
 $ curl 'http://master_node_hostname:5050/logging/toggle?level=3&amp;duration=1mins'</pre>
@@ -579,7 +579,7 @@ a lot more output now (but only for another minute!).</p>
   </li>
   <li>
     <p>The web interface uses the REST endpoints exclusively; for example,
-to get the current &#8220;state&#8221; of a Mesos cluster (in JSON):</p>
+to get the current “state” of a Mesos cluster (in JSON):</p>
 
     <pre class="prettyprint lang-bsh">
 $ curl `http://master_node_hostname:5050/master/state.json` | python -mjson.tool</pre>
@@ -688,12 +688,12 @@ $ curl `http://master_node_hostname:5050/master/state.json` | python -mjson.tool
 
 <h3 id="frameworks">Frameworks</h3>
 
-<p>Mesos isn&#8217;t very useful unless you run some frameworks! We&#8217;ll now walk
+<p>Mesos isn’t very useful unless you run some frameworks! We’ll now walk
 through launching Hadoop and Spark on Mesos.</p>
 
-<p>For now, it&#8217;s expected that you run framework schedulers independently
+<p>For now, it’s expected that you run framework schedulers independently
 of Mesos itself. You can often reuse your master machine(s) for this
-purpose (which is what we&#8217;ll do here).</p>
+purpose (which is what we’ll do here).</p>
 
 <h4 id="hadoop">Hadoop</h4>
 
@@ -706,7 +706,7 @@ Mesos.</p>
 <p>You <strong>DO NOT</strong> need to install Hadoop on every machine in your cluster
 in order to run Hadoop on Mesos! Instead, you can upload your Hadoop
 distribution to <code>HDFS</code> and configure the <code>JobTracker</code>
-appropriately. We&#8217;ve already uploaded our distribution to <code>HDFS</code> as
+appropriately. We’ve already uploaded our distribution to <code>HDFS</code> as
 well as configured the <code>JobTracker</code>. Take a look at
 <code>/root/ephemeral-hdfs/conf/mapred-site.xml</code> for more details.</p>
 
@@ -759,8 +759,8 @@ $ hadoop jar /root/ephemeral-hdfs/hadoop-examples-1.0.4.jar pi 4 1000</pre>
 
 <h4 id="spark">Spark</h4>
 
-<p>Like Hadoop, you need to upload a Spark &#8220;distribution&#8221; to
-<code>HDFS</code>. We&#8217;ve already done this for you, but we&#8217;ll walk through the
+<p>Like Hadoop, you need to upload a Spark “distribution” to
+<code>HDFS</code>. We’ve already done this for you, but we’ll walk through the
 steps here for completeness:</p>
 
 <pre class="prettyprint lang-bsh">
@@ -770,9 +770,9 @@ $ mv dist spark-x.y.z
 $ tar czf spark-x.y.z.tar.gz spark-x.y.z
 $ hadoop fs -put spark-x.y.z.tar.gz /path/to/spark-x.y.z.tar.gz</pre>
 
-<p>You&#8217;ll need to set the configuration property <code>spark.executor.uri</code> or
+<p>You’ll need to set the configuration property <code>spark.executor.uri</code> or
 the environment variable <code>SPARK_EXECUTOR_URI</code> to
-<code>/path/to/spark-x.y.z.tar.gz</code> in <code>HDFS</code>. We&#8217;ve set the environment
+<code>/path/to/spark-x.y.z.tar.gz</code> in <code>HDFS</code>. We’ve set the environment
 variable for you in <code>/root/spark/conf/spark-env.sh</code>.</p>
 
 <ol>
@@ -790,8 +790,8 @@ Frameworks</code>:</p>
     </div>
   </li>
   <li>
-    <p>Let&#8217;s simulate an error that might occur if we forgot to upload the
-Spark distribution (or forgot to set <code>SPARK_EXECUTOR_URI</code>). We&#8217;ll
+    <p>Let’s simulate an error that might occur if we forgot to upload the
+Spark distribution (or forgot to set <code>SPARK_EXECUTOR_URI</code>). We’ll
 do this by renaming the Spark distribution in <code>HDFS</code>:</p>
 
     <pre class="prettyprint lang-bsh">
@@ -843,7 +843,7 @@ on <code>stderr</code>:</p>
     </div>
 
     <p>Ah ha! The slave failed to fetch the executor. Okay, exit the Spark
-shell and let&#8217;s revert our rename of the Spark distribution:</p>
+shell and let’s revert our rename of the Spark distribution:</p>
 
     <pre class="prettyprint lang-bsh">
 $ hadoop fs -mv /_spark.tar.gz /spark.tar.gz</pre>
@@ -862,7 +862,7 @@ $ hadoop fs -mv /_spark.tar.gz /spark.tar.gz</pre>
 <p>All done! Hopefully this training gave you some basic knowledge of
 using Mesos and some places to look for help. Please see the
 <a href="http://github.com/apache/mesos/docs">github.com/apache/mesos/docs</a>
-for more documentation. And don&#8217;t hesitate to email
+for more documentation. And don’t hesitate to email
 user@mesos.apache.org with questions!</p>
 
         </div> <!-- /container -->

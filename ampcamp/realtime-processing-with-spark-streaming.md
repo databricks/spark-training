@@ -325,7 +325,19 @@ Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
 
 To stop the application, use `Ctrl + c` .
 
-__FAQ__: If you see the following message, it means that the authentication with Twitter failed.
+__FAQ__: If you see an exception that looks like the following, it means that one of the token / keys were not specified in the configuration file twitter.txt. Please verify that you have set them appropriately as instructed earlier.
+
+<pre class="nocode">
+[error] (run-main) java.lang.Exception: Error parsing configuration file - incorrectly formatted line [consumerKey =]
+java.lang.Exception: Error parsing configuration file - incorrectly formatted line [consumerKey =]
+at TutorialHelper$$anonfun$2.apply(TutorialHelper.scala:24)
+at TutorialHelper$$anonfun$2.apply(TutorialHelper.scala:21)
+</pre>
+
+
+
+
+__FAQ__: If you see the following message, it means that the authentication with Twitter failed. Please verify whether the Twitter consumer key+secret and access token+secret has been set correctly in the configuration file `twitter.txt` as instructed earlier. 
 
 <pre class="nocode">
 13/02/04 23:41:57 INFO streaming.NetworkInputTracker: De-registered receiver for network stream 0 with message 401:Authentication credentials (https://dev.twitter.com/pages/auth) were missing or incorrect. Ensure that you have set valid consumer key/secret, access token/secret, and the system clock is in sync.
@@ -346,12 +358,11 @@ __FAQ__: If you see the following message, it means that the authentication with
 
 
 Relevant discussions can be found on the Internet at:
-	http://www.google.co.jp/search?q=d0031b0b or
-	http://www.google.co.jp/search?q=1db75513
+    http://www.google.co.jp/search?q=d0031b0b or
+    http://www.google.co.jp/search?q=1db75513
 TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
 </pre>
 
-__Answer:__ Please verify whether the Twitter consumer key+secret and access token+secret has been set correctly in the file `twitter.txt` as instructed earlier.
 
 
 ## Further exercises
@@ -551,4 +562,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    collect them together at the driver and then find the top 10 hashtags among them.
    We leave this as an exercise for the reader to try.
 
-4. __API Reference__: You can explore the full streaming API by referencing the [Java/Scala](http://www.cs.berkeley.edu/~pwendell/strataconf/api/streaming/index.html#spark.streaming.DStream) API docs.
+4. __Further Reference__: 
+
+    For a more detailed explanations of the streaming API, checkout the [Streaming Programming Guide](http://spark.incubator.apache.org/docs/latest/streaming-programming-guide.html). 
+    For the full streaming API, checkout the [Java/Scala](http://spark.incubator.apache.org/docs/latest/api/streaming/index.html#spark.streaming.DStream) API docs.
