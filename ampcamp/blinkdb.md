@@ -10,7 +10,7 @@ skip-chapter-toc: true
 
 BlinkDB is a large-scale data warehouse system like Shark that adds the ability to create and use smaller samples of large datasets to make queries even faster.  Today you're going to get a sneak peek at an Alpha release of BlinkDB.  We'll set up BlinkDB and use it to run some SQL queries against the English Wikipedia.  If you've already done the Shark exercises, you might notice that some of the exercises are similar.  Don't worry if you haven't seen Shark, though - we haven't assumed that you have.
 
-BlinkDB is in its alpha stage of developement, and hence you may notice some of its limitations.  We'll mention them as they come up in the tutorial.
+BlinkDB is in its alpha stage of developement, and you may notice some of its limitations.  We'll mention them as they come up in the tutorial.
 
 1. First, launch the BlinkDB console:
 
@@ -114,7 +114,7 @@ Time taken: 22.703 seconds</span></pre>
    3.0695254665165628
    Time taken: 56.802 seconds</span></pre>
 
-9. Let's dive a little further into traffic patterns on Wikipedia.  First, let's check which time intervals had the most traffic:
+9. Let's dive a little further into traffic patterns on Wikipedia.  First, check which time intervals had the most traffic:
 
    <pre class="prettyprint lang-sql">
    blinkdb> select dt, approx_sum(page_views) as views from wikistats_sample_cached group by dt order by views;
@@ -129,7 +129,7 @@ Time taken: 22.703 seconds</span></pre>
 
    <b>NOTE:</b> Currently BlinkDB alpha-0.1.0 only supports lexographic ordering using the `orderby` operator. We will introduce numerical ordering in alpha-0.2.0.
 
-10. The hour `"20090506-120000"` seems to have a lot of traffic.  Now let's see which project codes (roughly, which languages) contributed to this:
+10. The hour `"20090506-120000"` seems to be at or near the top.  Now let's see which project codes (roughly, which languages) contributed to this:
 
   	<pre class="prettyprint lang-sql">
    blinkdb> select project_code, approx_sum(page_views) as views from wikistats_sample_cached where
@@ -165,9 +165,9 @@ Time taken: 22.703 seconds</span></pre>
     3.6420454545454546 +/- 1.7610655103860877 (99% Confidence)
     Time taken: 3.407 seconds</span></pre>
 
-    Also try computing the true average on the original table.  You'll probably notice that the 99% confidence interval provided   by BlinkDB doesn't cover the true answer.
+    Also try computing the true average on the original table.  You'll probably notice that the 99% confidence interval provided by BlinkDB doesn't cover the true answer.
 
-13. Let's investigate this a bit further.  The kind of sampling supported in the Alpha release (simple random sampling) typically works poorly on data that contain large, important outliers.  Let's check what the raw distribution of `page_views` looks like.  (You can also try this on `wikistats_sample_cached`; percentiles on samples are not officially supported yet, but they work quite well!)
+13. Let's investigate this a bit further.  The kind of sampling supported in the Alpha release (simple random sampling) typically works poorly on data that contains large, important outliers.  Let's check what the raw distribution of `page_views` looks like.  (You can also try this on `wikistats_sample_cached`; percentiles on samples are not officially supported yet, but they work quite well!)
 
     <pre class="prettyprint lang-sql">
     blinkdb> select percentile_approx(page_views, array(0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999))
@@ -176,7 +176,9 @@ Time taken: 22.703 seconds</span></pre>
     [1.0,1.0,1.0,1.0,1.9999999999999998,4.867578875914043,35.00000000000001,151.9735162220546]
     Time taken: 31.241 seconds</span></pre>
 
-    Note that `percentile_approx` is not a BlinkDB approximation operator; it is a Hive operator that computes approximate percentiles on a given column. Most pages have only a few views, but there are some pages with a very large number of views.  If a sample misses one of these outliers, it will look very different from the original table, and accuracy of both approximations and confidence intervals will suffer.
+    Note that `percentile_approx` is not a BlinkDB approximation operator; it is a Hive operator that computes approximate percentiles on a given column. 
+
+    Most pages have only a few views, but there are some pages with a very large number of views.  If a sample misses one of these outliers, it will look very different from the original table, and accuracy of both approximations and confidence intervals will suffer.
 
 14. Sometimes it is acceptable to remove outliers from your data, or at least reduce their impact on query answers.  In this case, we could try taking the natural logarithm of `page_views`.
 
@@ -190,7 +192,7 @@ Time taken: 22.703 seconds</span></pre>
     <span class="nocode">OK
     0.49144147329877896
     Time taken: 9.157 seconds
-    </span></pre></pre>
+    </span></pre>
 
 16. To exit BlinkDB, type the following at the BlinkDB command line (and don't forget the semicolon!).
 
