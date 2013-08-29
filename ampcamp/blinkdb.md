@@ -10,7 +10,7 @@ skip-chapter-toc: true
 
 BlinkDB is a large-scale data warehouse system like Shark that adds the ability to create and use smaller samples of large datasets to make queries even faster.  Today you're going to get a sneak peek at an Alpha release of BlinkDB.  We'll set up BlinkDB and use it to run some SQL queries against the English Wikipedia.  If you've already done the Shark exercises, you might notice that some of the exercises are similar.  Don't worry if you haven't seen Shark, though - we haven't assumed that you have.
 
-BlinkDB is in its alpha stage of developement, and you may notice some of its limitations.  We'll mention them as they come up in the tutorial.
+BlinkDB is in its alpha stage of development, and you may notice some of its limitations.  We'll mention them as they come up in the tutorial.
 
 1. First, launch the BlinkDB console:
 
@@ -74,7 +74,8 @@ Time taken: 22.703 seconds</span></pre>
    Now declare the sample size.  Replace the number here with the result of the `count` query you just ran.
 
    <pre class="prettyprint lang-sql">
-   set blinkdb.sample.size=3294551; -- <-- Replace this with the result of your query. </pre>
+   set blinkdb.sample.size=3294551; -- (Replace this with the result of your query.)
+   </pre>
 
    Finally, declare the original table's size.
 
@@ -85,7 +86,8 @@ Time taken: 22.703 seconds</span></pre>
 
    <pre class="prettyprint lang-sql">
    blinkdb> select count(1) from wikistats_cached where project_code = "en";
-   <span class="nocode">122352588
+   <span class="nocode">OK
+   122352588
    Time taken: 21.632 seconds</span></pre>
 
 7. Now approximate the same count using the sampled table.  In the Alpha release, you need to tell BlinkDB to compute an approximation by prepending "`approx_`" to your aggregation function.  (Also, only queries that compute `count`, `sum`, or `average` can be approximated.  In the future many more functions, including UDFs, will be approximable.)
@@ -96,8 +98,10 @@ Time taken: 22.703 seconds</span></pre>
    122340466 +/- 225926.0 (99% Confidence)
    Time taken: 2.993 seconds</span></pre>
 
-   Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes some additional text, which tells us how close BlinkDB thinks it is to the true answer. In this case, BlinkDB says that the interval [122114540, 122566392] is a .99 confidence interval for the true count. Confidence intervals come with the guarantee that, if you were to repeatedly create new samples using the `samplewith` operator and then perform this query on each sample, the confidence interval reported by BlinkDB would contain the true answer (122352588) 99% of the time. A simpler (though not entirely correct) interpretation is that there is a 99% chance that the true count is inside the confidence interval.
-
+   Notice that our sampled query produces a slightly incorrect answer, but it runs faster.  Also, the query result now includes some additional text, which tells us how close BlinkDB thinks it is to the true answer. In this case, BlinkDB reports that the interval [122114540, 122566392] (this is just subtracting or adding 225926.0 to 122340466) probably contains the true count.
+   
+   Technically, this interval is a .99 confidence interval.  Confidence intervals come with the guarantee that, if you were to repeatedly create new samples using the `samplewith` operator and then perform this query on each sample, the confidence interval reported by BlinkDB would contain the true answer (122352588) 99% of the time. A simpler (though not entirely correct) interpretation is that there is a 99% chance that the true count is inside the confidence interval.
+   
 8. Now we would like to find out the average number of hits on pages with "San Francisco" in the title throughout the entire period:
 
    <pre class="prettyprint lang-sql">
@@ -157,7 +161,7 @@ Time taken: 22.703 seconds</span></pre>
     kk	699 +/- 682.0 (99% Confidence) 	999.798203258641 +/- 974.0 (99% Confidence)
     Time taken: 0.907 seconds</span></pre>
 
-12. However, we should remember that random sampling doesn't always work well. For instance, try computing the average number of hits on all pages:
+12. However, the random sampling used by BlinkDB doesn't always work well. For instance, try computing the average number of hits on all pages:
 
     <pre class="prettyprint lang-sql">
     blinkdb> select approx_avg(page_views) from wikistats_sample_cached;
@@ -176,23 +180,9 @@ Time taken: 22.703 seconds</span></pre>
     [1.0,1.0,1.0,1.0,1.9999999999999998,4.867578875914043,35.00000000000001,151.9735162220546]
     Time taken: 31.241 seconds</span></pre>
 
-    Note that `percentile_approx` is not a BlinkDB approximation operator; it is a Hive operator that computes approximate percentiles on a given column. 
+    Note that `percentile_approx` is not one of the BlinkDB approximation operators (which are _prefixed_ by "`approx_`").  It is a normal Hive SQL operator that computes approximate percentiles on a given column.
 
     Most pages have only a few views, but there are some pages with a very large number of views.  If a sample misses one of these outliers, it will look very different from the original table, and accuracy of both approximations and confidence intervals will suffer.
-
-14. Sometimes it is acceptable to remove outliers from your data, or at least reduce their impact on query answers.  In this case, we could try taking the natural logarithm of `page_views`.
-
-    <pre class="prettyprint lang-sql">
-    blinkdb> select approx_avg(log(page_views)) from wikistats_sample_cached;
-    <span class="nocode">OK
-    0.4915571985283967 +/- 0.001178986199704763 (99% Confidence)
-    Time taken: 1.847 seconds
-    </span>
-    blinkdb> select avg(log(page_views)) from wikistats_cached;
-    <span class="nocode">OK
-    0.49144147329877896
-    Time taken: 9.157 seconds
-    </span></pre>
 
 16. To exit BlinkDB, type the following at the BlinkDB command line (and don't forget the semicolon!).
 
