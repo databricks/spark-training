@@ -7,7 +7,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Introduction</title>
+        <title>Feedback for Day 1</title>
         <meta name="description" content="">
 
         <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">-->
@@ -52,6 +52,27 @@
         <div class="bar topbar">
             
   
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
     
   
   
@@ -68,37 +89,44 @@
   
   
 
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
 
 
 
 
-
-<a class="btn page-nav" disabled="disable" style="float:left">
+<a class="btn page-nav" style="float:left" a href="realtime-processing-with-spark-streaming.html">
 
   <i class="icon-arrow-left icon-2x"></i>
 </a>
 
             
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
   
     
       
@@ -122,39 +150,11 @@
     
   
 
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
 
 
 
 
-
-<a class="btn page-nav" style="float:right" href="logging-into-the-cluster.html">
+<a class="btn page-nav" style="float:right" href="blinkdb.html">
 
   <i class="icon-arrow-right icon-2x"></i>
 </a>
@@ -165,7 +165,7 @@
                 <div class="site-title">Hands-on Exercises</div>
                 <div class="btn-group">
                     <div class="btn btn-med dropdown-toggle pull-right" data-toggle="dropdown">
-                        Introduction &nbsp; <i class="icon-list-ul icon"></i>
+                        Feedback for Day 1 &nbsp; <i class="icon-list-ul icon"></i>
                     </div>
                   <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                     
@@ -267,91 +267,34 @@
         </div><!--topbar-->
         <div class="container" id="content">
             
-            <div id="chapter-toc" class="chapter-toc"></div>
-            
-            <h1 id="welcome">Welcome</h1>
-<p>Welcome to the AMP Camp 3 hands-on exercises. These exercises will have you working directly with components of our open-source software stack,
-called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack
-(BDAS)</a>.</p>
-
-<p>The components we will cover over the two days of AMP Camp 3 are:</p>
-
-<h2 id="day-1">Day 1</h2>
-
-<ul>
-  <li><a href="http://spark.incubator.apache.org">Spark</a> - a fast cluster compute engine.</li>
-  <li><a href="http://shark.cs.berkeley.edu">Shark</a> - a SQL layer on top of Spark.</li>
-  <li><a href="http://spark-project.org/docs/latest/streaming-programming-guide.html">Spark Streaming</a> - A stream processing layer on top of Spark.</li>
-</ul>
-
-<h2 id="day-2">Day 2</h2>
-<ul>
-  <li><a href="http://blinkdb.org">BlinkDB</a> - A SQL processing system providing approximate results and bounded time and errors.</li>
-  <li><a href="http://mlbase.org">MLbase</a> - A machine learning system including a library of ML algorithms and tools to make ML easy to use.</li>
-  <li><a href="http://mesos.apache.org">Mesos</a> - A fault tolerant cluster-level operating system for managing cluster resources and frameworks.</li>
-</ul>
-
-<h1 id="course-prerequisites">Course Prerequisites</h1>
-<p>Several components support multiple languages. For the sections about Spark and Spark Streaming, you can choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this mini course supports for each section. You are welcome to mix and match languages depending on your preferences and interests.</p>
-
-<center>
-<style type="text/css">
-table td, table th {
-  padding: 5px;
-}
-</style>
-<table class="bordered">
-<thead>
-<tr>
-  <th>Section</th>
-    <th><img src="img/scala-sm.png" /></th>
-    <th><img src="img/java-sm.png" /></th>
-    <th><img src="img/python-sm.png" />
-  </th>
-</tr>
-</thead><tbody>
-<tr>
-  <td>Spark Interactive</td>
-  <td class="yes">yes</td>
-  <td class="no">no</td>
-  <td class="yes">yes</td>
-</tr><tr>
-  <td>Shark Interactive</td>
-  <td colspan="3" class="yes">All SQL</td>
-</tr><tr>
-  <td>Spark Streaming</td>
-  <td class="yes">yes</td>
-  <td class="yes">yes</td>
-  <td class="no">no</td>
-</tr><tr>
-  <td>BlinkDB</td>
-  <td colspan="3" class="yes">All SQL</td>
-</tr><tr>
-  <td>MLbase</td>
-  <td class="yes">yes</td>
-  <td class="no">no</td>
-  <td class="no">no</td>
-</tr><tr>
-  <td>Mesos</td>
-  <td colspan="3" class="yes">Command Line and WebUI</td>
-</tr>
-</tbody>
-</table>
-</center>
-
-<h1 id="providing-feedback">Providing feedback</h1>
-<p>We are using the cutting edge versions (i.e., the master branches) of most of our software components, which means you may run into a few issues. If you do, please call over a TA and explain what’s going on. To report a problem, please create a new issue at the <a href="https://github.com/amplab/training/issues">training docs Github issue Tracker</a> (there is also a link to this in the footer on all pages of the exercises).</p>
-
-<h1 id="getting-started">Getting Started</h1>
-
-<p>Ok, If you are attending AMP Camp in-person, we have probably given you a hostname and instructions for downloading the private key you will need in the next section to access your cluster.
-If you are participating in the exercises from a remote location, you will want to <a href="launching-a-bdas-cluster-on-ec2.html">launch a BDAS cluster on Amazon EC2</a> for yourself.</p>
+            <iframe src="https://docs.google.com/forms/d/1-e7BTBJmV0dmvMjrloBSuw1RM-sM9hgAlVl6LRO2ado/viewform?embedded=true" width="100%" height="800" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
 
         </div> <!-- /container -->
 
 
         <div class="bar bottombar">
             
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
   
     
   
@@ -369,37 +312,44 @@ If you are participating in the exercises from a remote location, you will want 
   
   
 
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
 
 
 
 
-
-<a class="btn page-nav" style="float:left" a href="where-to-go-from-here.html">
+<a class="btn page-nav" style="float:left" a href="realtime-processing-with-spark-streaming.html">
 
   <i class="icon-arrow-left icon-2x"></i>
 </a>
 
             
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
   
     
       
@@ -423,39 +373,11 @@ If you are participating in the exercises from a remote location, you will want 
     
   
 
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
 
 
 
 
-
-<a class="btn page-nav" style="float:right" href="logging-into-the-cluster.html">
+<a class="btn page-nav" style="float:right" href="blinkdb.html">
 
   <i class="icon-arrow-right icon-2x"></i>
 </a>
@@ -468,7 +390,7 @@ If you are participating in the exercises from a remote location, you will want 
           </div>
             <div class="btn-group dropup">
                 <div class="btn btn-med dropdown-toggle" data-toggle="dropdown">
-                    Introduction &nbsp; <i class="icon-list-ul icon"></i>
+                    Feedback for Day 1 &nbsp; <i class="icon-list-ul icon"></i>
                 </div>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                     

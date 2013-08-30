@@ -86,6 +86,9 @@
   
   
 
+  
+  
+
 
 
 
@@ -124,6 +127,10 @@
 
   
     
+    
+  
+
+  
     
   
 
@@ -218,6 +225,13 @@
   <li>
     
       
+    
+    <a href="day-one-feedback.html">Feedback for Day 1</a>
+  </li>
+
+  <li>
+    
+      
       
     
     <a href="blinkdb.html">  4. Data Exploration Using BlinkDB</a>
@@ -253,7 +267,7 @@
         </div><!--topbar-->
         <div class="container" id="content">
             
-            <p>Now that we&#8217;ve had fun with Spark, let&#8217;s try out Shark. Remember Shark is a large-scale data warehouse system that runs on top of Spark and provides a SQL like interface (that is fully compatible with Apache Hive).</p>
+            <p>Now that we’ve had fun with Spark, let’s try out Shark. Remember Shark is a large-scale data warehouse system that runs on top of Spark and provides a SQL like interface (that is fully compatible with Apache Hive).</p>
 
 <ol>
   <li>
@@ -296,7 +310,7 @@ FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTa
     <pre>drop table wikistats;</pre>
   </li>
   <li>
-    <p>Let&#8217;s create a table containing all English records and cache it in the cluster&#8217;s memory. Shark automatically caches any table having a name with the suffix &#8220;<code>_cached</code>&#8221;.</p>
+    <p>Let’s create a table containing all English records and cache it in the cluster’s memory. Shark automatically caches any table having a name with the suffix “<code>_cached</code>”.</p>
 
     <pre class="prettyprint lang-sql">
 shark&gt; create table wikistats_cached as select * from wikistats where project_code="en";
@@ -306,7 +320,7 @@ Time taken: 127.5 seconds
 13/02/05 21:57:34 INFO CliDriver: Time taken: 127.5 seconds</span></pre>
   </li>
   <li>
-    <p>Do a simple count to get the number of English records. If you have some familiarity working with databases, note that we us the &#8220;<code>count(1)</code>&#8221; syntax here since in earlier versions of Hive, the more popular &#8220;<code>count(*)</code>&#8221; operation was not supported. The Hive syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.</p>
+    <p>Do a simple count to get the number of English records. If you have some familiarity working with databases, note that we us the “<code>count(1)</code>” syntax here since in earlier versions of Hive, the more popular “<code>count(*)</code>” operation was not supported. The Hive syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.</p>
 
     <pre class="prettyprint lang-sql">
 shark&gt; select count(1) from wikistats_cached;
@@ -393,7 +407,7 @@ Time taken: 68.693 seconds
   </li>
 </ul>
 
-<p>To exit Shark, type the following at the Shark command line (and don&#8217;t forget the semicolon!).</p>
+<p>To exit Shark, type the following at the Shark command line (and don’t forget the semicolon!).</p>
 
 <pre class="prettyprint lang-sql">
    shark&gt; exit;</pre>
@@ -420,6 +434,9 @@ Time taken: 68.693 seconds
 
   
     
+  
+  
+
   
   
 
@@ -476,6 +493,10 @@ Time taken: 68.693 seconds
 
   
     
+    
+  
+
+  
     
   
 
@@ -567,6 +588,13 @@ Time taken: 68.693 seconds
       
     
     <a href="realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="day-one-feedback.html">Feedback for Day 1</a>
   </li>
 
   <li>
