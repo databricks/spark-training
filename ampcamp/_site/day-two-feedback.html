@@ -7,7 +7,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Data Exploration Using Shark</title>
+        <title>Feedback for Day 2</title>
         <meta name="description" content="">
 
         <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">-->
@@ -67,6 +67,24 @@
   
 
   
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
     
   
   
@@ -74,34 +92,40 @@
   
   
 
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
 
 
 
 
-
-<a class="btn page-nav" style="float:left" a href="data-exploration-using-spark.html">
+<a class="btn page-nav" style="float:left" a href="mesos.html">
 
   <i class="icon-arrow-left icon-2x"></i>
 </a>
 
             
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
   
     
   
@@ -133,35 +157,11 @@
     
   
 
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
 
 
 
 
-
-<a class="btn page-nav" style="float:right" href="realtime-processing-with-spark-streaming.html">
+<a class="btn page-nav" style="float:right" href="where-to-go-from-here.html">
 
   <i class="icon-arrow-right icon-2x"></i>
 </a>
@@ -172,7 +172,7 @@
                 <div class="site-title">Hands-on Exercises</div>
                 <div class="btn-group">
                     <div class="btn btn-med dropdown-toggle pull-right" data-toggle="dropdown">
-                        Data Exploration Using Shark &nbsp; <i class="icon-list-ul icon"></i>
+                        Feedback for Day 2 &nbsp; <i class="icon-list-ul icon"></i>
                     </div>
                   <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                     
@@ -281,156 +281,31 @@
         </div><!--topbar-->
         <div class="container" id="content">
             
-            <p>Now that we’ve had fun with Spark, let’s try out Shark. Remember Shark is a large-scale data warehouse system that runs on top of Spark and provides a SQL like interface (that is fully compatible with Apache Hive).</p>
-
-<ol>
-  <li>
-    <p>First, launch the Shark console:</p>
-
-    <pre class="prettyprint lang-bsh">
-/root/shark/bin/shark-withinfo
-</pre>
-  </li>
-  <li>
-    <p>Similar to Apache Hive, Shark can query external tables (i.e., tables that are not created in Shark).
-Before you do any querying, you will need to tell Shark where the data is and define its schema.</p>
-
-    <pre class="prettyprint lang-sql">
-shark&gt; create external table wikistats (dt string, project_code string, page_name string, page_views int, bytes int) row format delimited fields terminated by ' ' location '/wiki/pagecounts';
-<span class="nocode">
-...
-Time taken: 0.232 seconds
-13/02/05 21:31:25 INFO CliDriver: Time taken: 0.232 seconds</span></pre>
-
-    <p><b>FAQ:</b> If you see the following errors, don’t worry. Things are still working under the hood.</p>
-
-    <pre class="nocode">
-12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.core.resources" but it cannot be resolved.
-12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.core.runtime" but it cannot be resolved.
-12/08/18 21:07:34 ERROR DataNucleus.Plugin: Bundle "org.eclipse.jdt.core" requires "org.eclipse.text" but it cannot be resolved.</pre>
-
-    <p><b>FAQ:</b> If you see errors like these, you might have copied and pasted a line break, and should be able to remove it to get rid of the errors.</p>
-
-    <pre>13/02/05 21:22:16 INFO parse.ParseDriver: Parsing command: CR
-FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'</pre>
-
-    <p><b>FAQ:</b> If you partially complete the exercises and then restart them later, your tables will stick around.  You will see errors like this if you try to create them again:</p>
-
-    <pre>FAILED: Error in metadata: AlreadyExistsException(message:Table wikistats already exists)
-FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask</pre>
-
-    <p>To fix this, drop the table (<code>wikistats</code> or, introduced shortly, <code>wikistats_cached</code>), then create it again using the same command described above.  You can drop a table with:</p>
-
-    <pre>drop table wikistats;</pre>
-  </li>
-  <li>
-    <p>Let’s create a table containing all English records and cache it in the cluster’s memory. Shark automatically caches any table having a name with the suffix “<code>_cached</code>”.</p>
-
-    <pre class="prettyprint lang-sql">
-shark&gt; create table wikistats_cached as select * from wikistats where project_code="en";
-<span class="nocode">
-...
-Time taken: 127.5 seconds
-13/02/05 21:57:34 INFO CliDriver: Time taken: 127.5 seconds</span></pre>
-  </li>
-  <li>
-    <p>Do a simple count to get the number of English records. If you have some familiarity working with databases, note that we us the “<code>count(1)</code>” syntax here since in earlier versions of Hive, the more popular “<code>count(*)</code>” operation was not supported. The Hive syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.</p>
-
-    <pre class="prettyprint lang-sql">
-shark&gt; select count(1) from wikistats_cached;
-<span class="nocode">
-...
-122352588
-Time taken: 7.632 seconds
-12/08/18 21:23:13 INFO CliDriver: Time taken: 7.632 seconds</span></pre>
-  </li>
-  <li>
-    <p>Output the total traffic to Wikipedia English pages for each hour between May 7 and May 9, with one line per hour.</p>
-
-    <pre class="prettyprint lang-sql">
-shark&gt; select dt, sum(page_views) from wikistats_cached group by dt;
-<span class="nocode">
-...
-20090507-070000	6292754
-20090505-120000	7304485
-20090506-110000	6609124
-Time taken: 12.614 seconds
-13/02/05 22:05:18 INFO CliDriver: Time taken: 12.614 seconds</span></pre>
-  </li>
-  <li>
-    <p>In the Spark section, we ran a very expensive query to compute pages that were viewed more than 200,000 times. It is fairly simple to do the same thing in SQL.</p>
-
-    <p>To make the query run faster, we increase the number of reducers used in this query to 50 in the first command. Note that the default number of reducers, which we have been using so far in this section, is 1.</p>
-
-    <pre class="prettyprint lang-sql">
-shark&gt; set mapred.reduce.tasks=50;
-shark&gt; select page_name, sum(page_views) as views from wikistats_cached group by page_name having views &gt; 200000;
-<span class="nocode">
-...
-index.html      310642
-Swine_influenza 534253
-404_error/      43822489
-YouTube 203378
-X-Men_Origins:_Wolverine        204604
-Dom_DeLuise     396776
-Special:Watchlist       311465
-The_Beatles     317708
-Special:Search  17657352
-Special:Random  5816953
-Special:Export  248624
-Scrubs_(TV_series)      234855
-Cinco_de_Mayo   695817
-2009_swine_flu_outbreak 237677
-Deadpool_(comics)       382510
-Wiki    464935
-Special:Randompage      3521336
-Main_Page       18730347
-Time taken: 68.693 seconds
-13/02/26 08:12:42 INFO CliDriver: Time taken: 68.693 seconds</span></pre>
-  </li>
-  <li>
-    <p>With all the warm up, now it is your turn to write queries. Write Hive QL queries to answer the following questions:</p>
-  </li>
-</ol>
-
-<ul>
-  <li>
-    <p>Count the number of distinct date/times for English pages</p>
-
-    <div class="solution">
-      <pre class="prettyprint lang-sql">
- select count(distinct dt) from wikistats_cached;</pre>
-    </div>
-  </li>
-  <li>
-    <p>How many hits are there on pages with Berkeley in the title throughout the entire period?</p>
-
-    <div class="solution">
-      <pre class="prettyprint lang-sql">
- select sum(page_views) from wikistats_cached where page_name like "%berkeley%";
- /* "%" in SQL is a wildcard matching all characters. */</pre>
-    </div>
-  </li>
-  <li>
-    <p>Generate a histogram for the number of hits for each hour on May 6, 2009; sort the output by date/time. Based on the output, which hour is Wikipedia most popular?</p>
-
-    <div class="solution">
-      <pre class="prettyprint lang-sql">
- select dt, sum(page_views) from wikistats_cached where dt like "20090506%" group by dt order by dt;</pre>
-    </div>
-  </li>
-</ul>
-
-<p>To exit Shark, type the following at the Shark command line (and don’t forget the semicolon!).</p>
-
-<pre class="prettyprint lang-sql">
-   shark&gt; exit;</pre>
+            <iframe src="https://docs.google.com/forms/d/1UZpTa_BX1lS8TxtRlIrfm4TJHkwtI7NGyZiQllQ6_H4/viewform?embedded=true" width="100%" height="800" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
 
         </div> <!-- /container -->
 
 
         <div class="bar bottombar">
             
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
   
   
 
@@ -454,34 +329,40 @@ Time taken: 68.693 seconds
   
   
 
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
-
-  
-  
 
 
 
 
-
-<a class="btn page-nav" style="float:left" a href="data-exploration-using-spark.html">
+<a class="btn page-nav" style="float:left" a href="mesos.html">
 
   <i class="icon-arrow-left icon-2x"></i>
 </a>
 
             
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
   
     
   
@@ -513,35 +394,11 @@ Time taken: 68.693 seconds
     
   
 
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
-
-  
-    
-  
 
 
 
 
-
-<a class="btn page-nav" style="float:right" href="realtime-processing-with-spark-streaming.html">
+<a class="btn page-nav" style="float:right" href="where-to-go-from-here.html">
 
   <i class="icon-arrow-right icon-2x"></i>
 </a>
@@ -554,7 +411,7 @@ Time taken: 68.693 seconds
           </div>
             <div class="btn-group dropup">
                 <div class="btn btn-med dropdown-toggle" data-toggle="dropdown">
-                    Data Exploration Using Shark &nbsp; <i class="icon-list-ul icon"></i>
+                    Feedback for Day 2 &nbsp; <i class="icon-list-ul icon"></i>
                 </div>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                     
