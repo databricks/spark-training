@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" xmlns="http://www.w3.org/1999/html"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Command Line Preprocessing and Featurization</title>
+        <meta name="description" content="">
+
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.css">
+        <meta name="viewport" content="width=device-width">
+        <!--<link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.min.css">-->
+        <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap-responsive.css">
+        <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
+        <!--[if IE 7]>
+        <link rel="stylesheet" href="assets/css/vendorfont-awesome-ie7.min.css">
+        <![endif]-->
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+         <!-- prettify js and CSS, used for code highlighting -->
+        <link rel="stylesheet" href="css/vendor/prettify/prettify.css" type="text/css" />
+        <script src="js/vendor/prettify/prettify.js" type="text/javascript"></script>
+        <script src="js/vendor/prettify/lang-scala.js" type="text/javascript"></script>
+        <script src="js/vendor/prettify/lang-sql.js" type="text/javascript"></script>
+        <script type="text/javascript">
+
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-33205054-1']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+
+        </script>
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+
+        <div class="bar topbar">
+            
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+  
+
+
+
+<a class="btn page-nav" style="float:left" a href="machine-learning-with-spark.html">
+
+  <i class="icon-arrow-left icon-2x"></i>
+</a>
+
+            
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+
+
+  
+
+
+
+<a class="btn page-nav" style="float:right" href="machine-learning-with-spark.html">
+
+  <i class="icon-arrow-right icon-2x"></i>
+</a>
+
+            <div href="index.html" id="ampcamp-logo"></div>
+            <!--<img src="img/amplab-small.png" alt="AMP Camp Logo" width="150" id="amplab-logo"/>-->
+            <div id="topbar-middle">
+                <div class="site-title">Hands-on Exercises</div>
+                <div class="btn-group">
+                    <div class="btn btn-med dropdown-toggle pull-right" data-toggle="dropdown">
+                        Command Line Preprocessing and Featurization &nbsp; <i class="icon-list-ul icon"></i>
+                    </div>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    
+
+  <li>
+    
+      
+    
+    <a href="index.html">Introduction</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="logging-into-the-cluster.html">Logging into the Cluster</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="overview-of-the-exercises.html">Overview Of The Exercises</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="data-exploration-using-spark.html">  1. Data Exploration Using Spark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="data-exploration-using-shark.html">  2. Data Exploration Using Shark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="day-one-feedback.html">Feedback for Day 1</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="blinkdb.html">  4. Data Exploration Using BlinkDB</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="mli-document-categorization.html">  5. Machine Learning With MLI</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="mesos.html">  6. Mesos - Cluster & Framework Mgmt</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="day-two-feedback.html">Feedback for Day 2</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="where-to-go-from-here.html">Where to Go From Here</a>
+  </li>
+
+
+                  </ul>
+                </div>
+            </div>
+        </div><!--topbar-->
+        <div class="container" id="content">
+            
+            <div id="chapter-toc" class="chapter-toc"></div>
+            
+            <p>In this chapter, we will walk you through the steps to preprocess and featurize the Wikipedia dataset.</p>
+
+<h2 id="command-line-walkthrough">Command Line Walkthrough</h2>
+
+<ul>
+  <li>
+    <p>We will start by entering the shell and loading the data.</p>
+
+    <div class="codetabs">
+<div data-lang="scala">
+        <pre><code>  cd /root/
+  /root/spark/spark-shell
+</code></pre>
+      </div>
+<div data-lang="python">
+        <pre><code>  cd /root/
+  /root/spark/pyspark
+  import numpy as np
+</code></pre>
+      </div>
+</div>
+  </li>
+  <li>
+    <p>Next, load the data.</p>
+
+    <div class="codetabs">
+<div data-lang="scala">
+        <pre><code>  val data = sc.textFile("/wikistats_20090505-07_restricted")
+</code></pre>
+      </div>
+<div data-lang="python">
+        <pre><code>  data = sc.textFile("/wikistats_20090505-07_restricted")
+</code></pre>
+      </div>
+</div>
+  </li>
+  <li>
+    <p>Next, for every line of data, we collect a tuple with elements described next. The first element is what we will call the “full document title”, a concatenation of the project code and page title. The second element is a key-value pair whose key is the hour from the <code>&lt;date-time&gt;</code> field and whose value is the number of views that occurred in this hour.</p>
+
+    <p>There are a few new points to note about the code below. First, <code>data.map</code> takes each line of data in the RDD data and applies the function passed to it. The first step splits the line of data into the five data fields we discussed in the Spark exercises above. The second step extracts the hour information from the <code>&lt;date-time&gt;</code> string and we then form the output tuple.</p>
+
+    <div class="codetabs">
+<div data-lang="scala">
+        <pre><code>val featureMap = data.map(line =&gt; {
+  val Array(dateTime, projectCode, pageTitle, numViews, numBytes) = line.trim.split("\\s+")
+  val hour = dateTime.substring(9, 11).toInt
+  (projectCode+" "+pageTitle, hour -&gt; numViews.toInt)
+})
+</code></pre>
+      </div>
+<div data-lang="python">
+        <pre><code>featureMap = data.map(lambda x: x.strip().split(" ")).map(lambda x: (x[1]+" "+x[2], (int(x[0][9:11]), int(x[3]))))
+</code></pre>
+      </div>
+</div>
+
+    <p>Now we want to find the average hourly views for each article (average for the same hour across different days).</p>
+
+    <p>In the code below, we first take our tuples in the RDD <code>featureMap</code> and, treating the first elements (i.e., article name) as keys and the second elements (i.e., hoursViewed) as values, group all the values for a single key (i.e., a single article) together using <code>groupByKey</code>.  We put the article name in a variable called <code>article</code> and the multiple tuples of hours and pageviews associated with the current <code>article</code> in a variable called <code>hoursViews</code>. The for loop then collects the number of days for which we have a particular hour of data in <code>counts[hour]</code> and the total pageviews at hour across all these days in <code>sums[hour]</code>. Finally, we use the syntax <code>sums zip counts</code> to make an array of tuples with parallel elements from the sums and counts arrays and use this to calculate the average pageviews at particular hours across days in the data set.</p>
+
+    <div class="codetabs">
+<div data-lang="scala">
+        <pre><code>val featureGroup = featureMap.groupByKey.map(grouped =&gt; {
+  val (article, hoursViews) = grouped
+  val sums = Array.fill[Int](24)(0)
+  val counts = Array.fill[Int](24)(0)
+  for((hour, numViews) &lt;- hoursViews) {
+    counts(hour) += 1
+    sums(hour) += numViews
+  }
+  val avgs: Array[Double] =
+    for((sum, count) &lt;- sums zip counts) yield
+      if(count &gt; 0) sum/count.toDouble else 0.0
+  article -&gt; avgs
+})
+</code></pre>
+      </div>
+<div data-lang="python">
+        <pre><code>def groupFeatures(articles, hoursView):
+  sums = np.zeros(24)
+  counts = np.zeros(24)
+  for (hour, numViews) in hoursView:
+    counts[hour] += 1
+    sums[hour] += numViews
+  avgs = np.zeros(24)
+  avgs = np.array(map(lambda (x,y): float(x)/float(y) if y != 0 else 0, zip(sums, counts)))
+  return (articles, avgs)
+
+featureGroup = featureMap.groupByKey(16).map(lambda (x,y): groupFeatures(x,y))
+</code></pre>
+      </div>
+</div>
+  </li>
+  <li>
+    <p>Now suppose we’re only interested in those articles that were viewed at least once in each hour during the data collection time.</p>
+
+    <p>To do this, we filter to find those articles with an average number of views (the second tuple element in an article tuple) greater than zero in every hour.</p>
+
+    <div class="codetabs">
+<div data-lang="scala">
+        <pre><code>val featureGroupFiltered = featureGroup.filter(t =&gt; t._2.forall(_ &gt; 0))
+</code></pre>
+      </div>
+<div data-lang="python">
+        <pre><code>featureGroupFiltered = featureGroup.filter(lambda (x,y): np.count_nonzero(y) == len(y))
+</code></pre>
+      </div>
+</div>
+  </li>
+  <li>
+    <p>So far article popularity is still implicitly in our feature vector (the sum of the average views per hour is the average views per day if the number of days of data is constant across hours).  Since we are interested only in which times are more popular viewing times for each article, we next divide out by this sum.</p>
+
+    <div class="codetabs">
+<div data-lang="scala">
+        <pre><code>val featurizedRDD = featureGroupFiltered.map(t =&gt; {
+  val avgsTotal = t._2.sum
+  t._1 -&gt; t._2.map(_ /avgsTotal)
+})
+</code></pre>
+      </div>
+<div data-lang="python">
+        <pre><code>featurizedRDD = featureGroupFiltered.map(lambda (x,y): (x, y/y.sum()))
+</code></pre>
+      </div>
+</div>
+  </li>
+  <li>
+    <p>Now we can cache and save the RDD to a file for later use. To save our features to a file, we first create a string of comma-separated values for each data point and then save it in HDFS as file named <code>wikistats_featurized</code>.</p>
+
+    <div class="codetabs">
+<div data-lang="scala">
+        <pre><code>featurizedRDD.cache.map(t =&gt; t._1 + "#" + t._2.mkString(",")).saveAsTextFile("/wikistats_featurized")
+</code></pre>
+      </div>
+<div data-lang="python">
+        <pre><code>featurizedRDD.cache().map(lambda (x,y): (x + '#' + ','.join(map(str, y)))).saveAsTextFile("/wikistats_featurized")
+</code></pre>
+      </div>
+</div>
+  </li>
+</ul>
+
+<h2 id="exercises">Exercises</h2>
+<ol>
+  <li>
+    <p>In this exercise, we examine the preprocessed data.</p>
+
+    <ul>
+      <li>
+        <p>Count the number of records in the preprocessed data.  Recall that we potentially threw away some data when we filtered out records with zero views in a given hour.</p>
+
+        <div class="codetabs">
+<div data-lang="scala">
+            <pre><code>featurizedRDD.count()
+</code></pre>
+          </div>
+<div data-lang="python">
+            <pre><code>featurizedRDD.count()
+</code></pre>
+          </div>
+</div>
+
+        <div class="solution">
+          <p>Number of records in the preprocessed data: 802450</p>
+        </div>
+      </li>
+      <li>
+        <p>Print the feature vectors for the Wikipedia articles with project code “en” and the following titles: Computer_science, Machine_learning.</p>
+
+        <div class="codetabs">
+<div data-lang="scala">
+            <pre><code>val featuresCSML = featurizedRDD.filter(t =&gt; t._1 == "en Computer_science" || t._1 == "en Machine_learning").collect
+featuresCSML.foreach(x =&gt; println(x._1 + "," + x._2.mkString(" ")))
+</code></pre>
+          </div>
+<div data-lang="python">
+            <pre><code>featuresCSML = featurizedRDD.filter(lambda (x,y): x == "en Computer_science" || x == "en Machine_learning").collect() 
+for (name, features) in featuresCSML:
+  print name + "," + ','.join(map(str, features))
+</code></pre>
+          </div>
+</div>
+
+        <div class="solution">
+<textarea rows="12" style="width: 100%" readonly="">
+(en Machine_learning, [0.03708182184602984,0.027811366384522376,0.031035872632003234,0.033454252317613876,0.033051189036678766,0.023780733575171308,0.03224506247480856,0.029826682789197912,0.04997984683595326,0.04433696090286176,0.04997984683595326,0.04474002418379687,0.04272470777912134,0.054816606207174545,0.054816606207174545,0.04474002418379687,0.054010479645304324,0.049173720274083045,0.049173720274083045,0.05038291011688836,0.04594921402660219,0.04957678355501815,0.03667875856509473,0.030632809351068126])
+(en Computer_science, [0.03265137425087828,0.057656540607563554,0.03306468278569953,0.033374664186815464,0.03709444100020666,0.03947096507542881,0.03502789832610044,0.03637115106426948,0.036577805331680105,0.0421574705517669,0.04267410622029345,0.03885100227319695,0.03885100227319695,0.046083901632568716,0.04691051870221121,0.050320314114486474,0.05259351105600331,0.04649721016738996,0.04732382723703245,0.048357098574085565,0.04236412481917752,0.043190741888820015,0.03626782393056417,0.03626782393056417])
+</textarea>
+</div>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="standalone-spark-program">Standalone Spark program</h2>
+<p>Finally, if you wish to create a standalone Spark program to perform featurization, you can just copy and paste all of the code from our solution below.</p>
+
+<div class="codetabs">
+  <div data-lang="scala">
+    <div class="solution">
+
+      <p>Place the following code within a Scala <code>object</code> and call the <code>featurization</code> function from a <code>main</code> function:</p>
+
+      <pre><code>import scala.io.Source
+import spark.SparkContext
+import SparkContext._
+lazy val hostname = Source.fromFile("/root/mesos-ec2/masters").mkString.trim
+def featurization(sc: SparkContext) {
+  val featurizedRdd = sc.textFile("hdfs://"+hostname+":9000/wikistats_20090505-07_restricted").map{line =&gt; {
+    val Array(dateTime, projectCode, pageTitle, numViews, numBytes) = line.trim.split("\\s+")
+    val hour = dateTime.substring(dateTime.indexOf("-")+1, dateTime.indexOf("-")+3).toInt
+    (projectCode+" "+pageTitle, hour -&gt; numViews.toInt)
+  }}.groupByKey.map{ grouped =&gt; {
+    val (article, hoursViews) = grouped
+    val sums = Array.fill[Int](24)(0)
+    val counts = Array.fill[Int](24)(0)
+    for((hour, numViews) &lt;- hoursViews) {
+      sums(hour) += numViews
+      counts(hour) += 1
+    }
+    val avgs: Array[Double] =
+      for((sum, count) &lt;- sums zip counts) yield
+        if(count &gt; 0) sum/count.toDouble else 0.0
+    article -&gt; avgs
+  }}.filter{ t =&gt; {
+    t._2.forall(_ &gt; 0)
+  }}.map{ t =&gt; {
+    val avgsTotal = t._2.sum
+    t._1 -&gt; t._2.map(_ / avgsTotal)
+  }}
+  featurizedRdd.cache()
+  println("Number of records in featurized dataset: " + featurizedRdd.count)
+  println("Selected feature vectors:")
+  featurizedRdd.filter{ t =&gt; {
+    t._1 == "en Computer_science" || t._1 == "en Machine_learning"
+  }}.collect.map{t =&gt; t._1 -&gt; t._2.mkString("[",",","]")}.foreach(println)
+  featurizedRDD.cache.map(t =&gt; t._1 + "#" + t._2.mkString(",")).saveAsTextFile(
+      "hdfs://"+hostname+":9000/wikistats_featurized")
+}
+</code></pre>
+
+    </div>
+  </div>
+  <div data-lang="python">
+    <div class="solution">
+
+      <pre><code>import sys
+
+import numpy as np
+from pyspark import SparkContext
+
+def groupFeatures(articles, hoursView):
+  sums = np.zeros(24)
+  counts = np.zeros(24)
+  for (hour, numViews) in hoursView:
+    counts[hour] += 1
+    sums[hour] += numViews
+  avgs = np.zeros(24)
+  avgs = np.array(map(lambda (x,y): float(x)/float(y) if y != 0 else 0, zip(sums, counts)))
+  return (articles, avgs)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) &lt; 3:
+        print &gt;&gt; sys.stderr, \
+            "Usage: FeaturizeWikipedia &lt;master&gt; &lt;file&gt;"
+        exit(-1)
+    sc = SparkContext(sys.argv[1], "FeaturizeWikipedia")
+
+    data = sc.textFile(sys.argv[2])
+    featureMap = data.map(lambda x: x.strip().split(" ")).map(
+        lambda x: (x[1]+" "+x[2], (int(x[0][9:11]), int(x[3]))))
+    featureGroup = featureMap.groupByKey(16).map(
+        lambda (x,y): groupFeatures(x,y))
+
+    featureGroupFiltered = featureGroup.filter(
+        lambda (x,y): np.count_nonzero(y) == len(y))
+    featurizedRDD = featureGroupFiltered.map(
+        lambda (x,y): (x, y/y.sum()))
+
+    featurizedRDD.cache().map(
+        lambda (x,y): (x + '#' + ','.join(map(str, y)))).saveAsTextFile("/wikistats_featurized")
+</code></pre>
+    </div>
+  </div>
+</div>
+
+        </div> <!-- /container -->
+
+
+        <div class="bar bottombar">
+            
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+  
+
+
+
+<a class="btn page-nav" style="float:left" a href="machine-learning-with-spark.html">
+
+  <i class="icon-arrow-left icon-2x"></i>
+</a>
+
+            
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+
+
+  
+
+
+
+<a class="btn page-nav" style="float:right" href="machine-learning-with-spark.html">
+
+  <i class="icon-arrow-right icon-2x"></i>
+</a>
+
+          <div class="btn-group dropup">
+            <a class="btn btn-med" target="_blank" href="https://github.com/amplab/training/issues">
+              <i class="icon-exclamation-sign"> </i>
+              Submit an issue on GitHub
+            </a>
+          </div>
+            <div class="btn-group dropup">
+                <div class="btn btn-med dropdown-toggle" data-toggle="dropdown">
+                    Command Line Preprocessing and Featurization &nbsp; <i class="icon-list-ul icon"></i>
+                </div>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    
+
+  <li>
+    
+      
+    
+    <a href="index.html">Introduction</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="logging-into-the-cluster.html">Logging into the Cluster</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="overview-of-the-exercises.html">Overview Of The Exercises</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="data-exploration-using-spark.html">  1. Data Exploration Using Spark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="data-exploration-using-shark.html">  2. Data Exploration Using Shark</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="realtime-processing-with-spark-streaming.html">  3. Stream Processing w/ Spark Streaming</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="day-one-feedback.html">Feedback for Day 1</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="blinkdb.html">  4. Data Exploration Using BlinkDB</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="mli-document-categorization.html">  5. Machine Learning With MLI</a>
+  </li>
+
+  <li>
+    
+      
+      
+    
+    <a href="mesos.html">  6. Mesos - Cluster & Framework Mgmt</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="day-two-feedback.html">Feedback for Day 2</a>
+  </li>
+
+  <li>
+    
+      
+    
+    <a href="where-to-go-from-here.html">Where to Go From Here</a>
+  </li>
+
+
+                </ul>
+            </div>
+            <div class="site-title">Hands-on Exercises</div>
+        </div>
+
+        <script src="js/vendor/jquery-1.8.3.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <!-- Table of contents plugin -->
+        <script src="js/vendor/toc.js" type="text/javascript"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>

@@ -2,7 +2,8 @@
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" xmlns="http://www.w3.org/1999/html"> <!--<![endif]-->
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -47,22 +48,21 @@
             <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
         <![endif]-->
 
-        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
         <div class="bar topbar">
             {% include left-page-nav-button.html %}
             {% include right-page-nav-button.html %}
-            <a href="http://ampcamp.berkeley.edu/ampcamp3-exercises/" id="ampcamp-logo"></a>
+            <div href="index.html" id="ampcamp-logo"></div>
             <!--<img src="img/amplab-small.png" alt="AMP Camp Logo" width="150" id="amplab-logo"/>-->
             <div id="topbar-middle">
                 <div class="site-title">{{ site.title }}</div>
                 <div class="btn-group">
-                    <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                    <div class="btn btn-med dropdown-toggle pull-right" data-toggle="dropdown">
                         {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
                     </div>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                      {% include chapter-list.html %}
-                    </ul>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    {% include chapter-list.html %}
+                  </ul>
                 </div>
             </div>
         </div><!--topbar-->
@@ -72,22 +72,24 @@
             {% endunless %}
             {{ content }}
         </div> <!-- /container -->
+
+
         <div class="bar bottombar">
             {% include left-page-nav-button.html %}
             {% include right-page-nav-button.html %}
+          <div class="btn-group dropup">
+            <a class="btn btn-med" target="_blank" href="https://github.com/amplab/training/issues">
+              <i class="icon-exclamation-sign"> </i>
+              Submit an issue on GitHub
+            </a>
+          </div>
             <div class="btn-group dropup">
-                <div class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                <div class="btn btn-med dropdown-toggle" data-toggle="dropdown">
                     {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
                 </div>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                     {% include chapter-list.html %}
                 </ul>
-            </div>
-            <div class="btn-group dropup">
-              <a class="btn btn-large" target="_blank" href="https://github.com/amplab/training/issues">
-                <i class="icon-exclamation-sign"> </i>
-                Submit an issue on GitHub
-              </a>
             </div>
             <div class="site-title">{{ site.title }}</div>
         </div>

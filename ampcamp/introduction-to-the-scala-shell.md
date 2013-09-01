@@ -1,8 +1,9 @@
 ---
 layout: global
 title: Introduction to the Scala Shell
-prev: overview-of-the-exercises.html 
-next: data-exploration-using-spark.html
+navigation:
+  weight: 40
+  show: true
 skip-chapter-toc: true
 ---
 

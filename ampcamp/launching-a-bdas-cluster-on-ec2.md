@@ -1,8 +1,8 @@
 ---
 layout: global
-title: Launching a Spark/Shark Cluster on EC2
 prev: index.html
 next: logging-into-the-cluster.html
+title: Launching a Spark/Shark Cluster on EC2
 ---
 
 This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this [intro to AMIs](https://aws.amazon.com/amis/)).
@@ -45,13 +45,13 @@ Check out the launch scripts by cloning the github repository.
 
     git clone git://github.com/amplab/training-scripts.git
 
-You can also obtain them by downloading the zip file at `https://github.com/amplab/training-scripts/archive/master.zip`
+You can also obtain them by downloading the zip file at `https://github.com/amplab/training-scripts/archive/ampcamp3.zip`
 
 ## Launching the cluster
 Launch the cluster by running the following command.
 This script will launch a cluster, create a HDFS cluster and configure Mesos, Spark, and Shark.
-Finally, it will copy the datasets used in the exercises from S3 to the HDFS cluster.
-_This can take around 15-20 mins._
+Finally, it will copy the datasets used in the exercises from EBS to the HDFS cluster.
+_This can take around 20-30 mins._
 
     cd training-scripts
     ./spark-ec2 -i <key_file> -k <name_of_key_pair> --copy launch amplab-training
@@ -62,7 +62,7 @@ For example, if you created a key pair named `ampcamp-key` and the private key (
 
     ./spark-ec2 -i ~/ampcamp.pem -k ampcamp-key --copy launch amplab-training
 
-This command may take a 30-40 minutes or longer and should produce a bunch of output as it first spins up the nodes for your cluster, sets up <a href="http://amplab.cs.berkeley.edu/bdas">BDAS</a> on them, and performs a large distributed file copy of the wikipedia files we'll use in these training documents from S3 to your instance of HDFS.
+This command may take a 30-40 minutes or longer and should produce a bunch of output as it first spins up the nodes for your cluster, sets up <a href="http://amplab.cs.berkeley.edu/bdas">BDAS</a> on them, and performs a large distributed file copy of the wikipedia files we'll use in these training documents from EBS to your instance of HDFS.
 
 The following are some errors that you may encounter, and other frequently asked questions:
 
@@ -103,11 +103,37 @@ __Answer:__ Run the next two commands.
 <div class="accordion-group">
 <div class="accordion-heading">
   <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q2" data-parent="#q-accordion">
-    I get the following error when running this command: <code>Your requested instance type (m1.xlarge) is not supported...</code>
+    I get the following error when running this command: <code>Could not read http://s3.amazonaws.com/ampcamp-amis/latest-ampcamp3</code>
   </a>
 </div><!--accordion-heading-->
 
 <div id="collapse-q2" class="accordion-body collapse">
+<div class="accordion-inner" markdown="1">
+
+__Question: I got the following error when I ran the above command. Help!__
+
+<pre class="nocode">
+Searching for existing cluster amplab-training...
+Could not read http://s3.amazonaws.com/ampcamp-amis/latest-ampcamp3
+</pre>
+
+__Answer:__ The lookup for the AMP Camp AMI failed. You can manually specificy the AMI to use by adding the '-a' flag to the script.
+For example to use the AMP Camp 3 AMI, you can try the following command
+
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> -a ami-452f622c --copy launch amplab-training
+
+</div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
+    I get the following error when running this command: <code>Your requested instance type (m1.xlarge) is not supported...</code>
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q3" class="accordion-body collapse">
 <div class="accordion-inner" markdown="1">
 
 __Question: I got the following permission error when I ran the above command. Help!__
@@ -128,47 +154,37 @@ It may randomly pick an availability zone that doesn't support this instance siz
 
 <div class="accordion-group">
 <div class="accordion-heading">
-  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q3" data-parent="#q-accordion">
-    I get the following error when running this command: <code>java.lang.IllegalArgumentException: Invalid hostname in URI...</code>
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
+    The commands hangs at: <code>Copying AMP Camp Wikipedia pagecount data...</code>
   </a>
 </div><!--accordion-heading-->
 
-<div id="collapse-q3" class="accordion-body collapse">
+<div id="collapse-q4" class="accordion-body collapse">
 <div class="accordion-inner" markdown="1">
 
-__Question: I got the following error when I ran the above command. Help!__
+__Question: The above command is stuck at the following line. Help!__
 
 <pre class="nocode">
-12/08/21 16:50:45 INFO tools.DistCp: destPath=hdfs://ip-10-42-151-150.ec2.internal:9000/wiki/pagecounts
-java.lang.IllegalArgumentException: Invalid hostname in URI
-s3n://AKIAJIFGXUZ4MDJNYCGQ:COWo3AxVhjyu43Ug5kDvTnO/V3wQloBRIEOYEQgG@ampcamp-data/wikistats_20090505-07
+Copying AMP Camp Wikipedia pagecount data...
 </pre>
 
-__Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the following steps:
+__Answer:__ The data copy from EBS to your HDFS cluster is running and can take up to 30-40 minutes. If it has been longer and if you want to retry the data copy, use the following steps:
 
-1. Login to the master node by running
+1. Stop the current process using `Ctrl + C`
+
+2. Login to the master node by running
 
    ~~~
    ./spark-ec2 -i <key_file> -k <key_pair> login amplab-training
    ~~~
 
-2. Open the HDFS config file at `/root/ephemeral-hdfs/conf/core-site.xml` and
-   copy your AWS access key and secret key into the respective fields.
-
-3. Restart HDFS
-
-   ~~~
-   /root/ephemeral-hdfs/bin/stop-dfs.sh
-   /root/ephemeral-hdfs/bin/start-dfs.sh
-   ~~~
-
-4. Delete the directory the data was supposed to be copied to
+3. Delete the directory the data was supposed to be copied to
 
    ~~~
    /root/ephemeral-hdfs/bin/hadoop fs -rmr /wiki
    ~~~
 
-5. Logout and run the following command to retry copying data from S3
+4. Logout and run the following command to retry copying data from EBS
 
    ~~~
    ./spark-ec2 -i <key_file> -k <key_pair> copy-data amplab-training
@@ -180,12 +196,12 @@ __Answer:__ The data copy from S3 to your EC2 cluster has failed. Do the followi
 
 <div class="accordion-group">
 <div class="accordion-heading">
-  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q4" data-parent="#q-accordion">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q5" data-parent="#q-accordion">
         Can I specify the instances types while creating the cluster?
   </a>
 </div><!--accordion-heading-->
 
-<div id="collapse-q4" class="accordion-body collapse">
+<div id="collapse-q5" class="accordion-body collapse">
 <div class="accordion-inner" markdown="1">
 
 __Question: Can I specify the instances types while creating the cluster?__
@@ -214,7 +230,7 @@ However, you should ensure two things:
    Then run
 
    ~~~
-   /root/mesos-ec2/copy-dir /root/spark/conf/ .
+   /root/spark-ec2/copy-dir /root/spark/conf/ .
    ~~~
 
    to copy the configuration directory to all slaves.
@@ -222,6 +238,29 @@ However, you should ensure two things:
 __Information:__ Sometimes the EC2 instances don't initialize within the standard waiting time of 120 seconds.
 If that happens you, will ssh errors (or check in the Amazon web console).
 In this case, try increasing the waiting to 4 minutes using the `-w 240` option.
+
+</div><!--accordion-inner-->
+</div><!--accordion-body-->
+</div><!--accordion-group-->
+
+<div class="accordion-group">
+<div class="accordion-heading">
+  <a class="accordion-toggle" data-toggle="collapse" href="#collapse-q6" data-parent="#q-accordion">
+        Can I use another EC2 region to launch the cluster?
+  </a>
+</div><!--accordion-heading-->
+
+<div id="collapse-q6" class="accordion-body collapse">
+<div class="accordion-inner" markdown="1">
+
+__Question: Can I use a EC2 region other than us-east-1 while creating the cluster?__
+
+__Answer:__ These exercises have been created and tested on the us-east-1 region. However we have also copied the AMI to the us-west-1 region as well.
+To use the us-west-1 region, you can run the following command:
+
+    ./spark-ec2 -i <key_file> -k <name_of_key_pair> -r us-west-1 -a ami-6ac4ee2f --copy launch amplab-training
+
+We do not support running the AMI in any other EC2 regions. In case you need to do so, feel free to contact us for more help.
 
 </div><!--accordion-inner-->
 </div><!--accordion-body-->
@@ -242,8 +281,10 @@ You can find the master hostname (`<master_node_hostname>` in the instructions b
 At this point, it would be helpful to open a text file and copy `<master_node_hostname>` there.
 In a later exercise, you will want to have `<master_node_hostname>` ready at hand without having to scroll through your terminal history.
 
-## Terminating the cluster (Not yet, only after you do the rest of the exercises!)
-__After you are done with your exercises__, you can terminate the cluster by running
+<h2>Terminating the cluster <span>(Not yet, only after you do the rest of the exercises!)</span></h2>
+__After you are done with your exercises (and only then)__, you can terminate the cluster by running
 
     ./spark-ec2 -i <key_file> -k <key_pair> destroy amplab-training
 
+## Log into your cluster
+Move onto the next section for instructions that walk you through logging into your shiney new BDAS cluster.

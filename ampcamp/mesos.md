@@ -1,21 +1,23 @@
 ---
 layout: global
-title: Mesos - Cluster Management and Framework Management
-prev: blinkdb.html
-next: mli-document-categorization.html
+title: Mesos - Cluster & Framework Mgmt
+categories: [module]
+navigation:
+  weight: 100
+  show: true
 skip-chapter-toc: true
 ---
 
 Apache Mesos is a cluster manager that makes building and running
 distributed systems, or _frameworks_, easy and efficient. Using Mesos
-you can simultaneously run Apache Hadoop, Apache Spark, Apache Storm,
+you can simultaneously run Apache Hadoop, Apache Spark, Apache Storm,k
 and many other applications on a dynamically shared pool of resources
 (machines).
 
 Mesos itself is a distributed system made up of _masters_ and
 _slaves_. You should have been given `master_node_hostname` at the
 beginning of this training, or you might have [launched your own
-cluster](launching-a-spark-shark-cluster-on-ec2.html) and made a note
+cluster](launching-a-bdas-cluster-on-ec2.html) and made a note
 of it then.
 
 Let's start by logging into `master_node_hostname`:
@@ -202,10 +204,10 @@ To start a slave that uses ZooKeeper to determine the leading master
 use the `--master` option:
 
 <pre>
---master=VALUE                             May be one of:
-                                             zk://host1:port1,host2:port2,.../path
-                                             zk://username:password@host1:port1,host2:port2,.../path
-                                             file://path/to/file (where file contains one of the above)</pre>
+--master=VALUE                  May be one of:
+                                  zk://host1:port1,host2:port2,.../path
+                                  zk://username:password@host1:port1,host2:port2,.../path
+                                  file://path/to/file (where file contains one of the above)</pre>
 
 **NOTE:** _Use_ `file://` _when you want to use authentication (i.e.,_
 `username:password`_) but don't want to reveal any secrets on the
@@ -316,98 +318,98 @@ to get the current "state" of a Mesos cluster (in JSON):
    $ curl `http://master_node_hostname:5050/master/state.json` | python -mjson.tool</pre>
 
    <div class="solution" markdown="1">
-   <pre>
+   <pre class="prettyprint lang-js">
    {
-       "activated_slaves": 5, 
-       "build_date": "2013-08-26 06:41:22", 
-       "build_time": 1377499282, 
-       "build_user": "root", 
-       "completed_frameworks": [], 
-       "deactivated_slaves": 0, 
-       "failed_tasks": 0, 
-       "finished_tasks": 0, 
-       "frameworks": [], 
-       "id": "201308280103-3340478474-5050-8366", 
-       "killed_tasks": 0, 
-       "leader": "master@10.168.27.199:5050", 
-       "log_dir": "/mnt/mesos-logs", 
-       "lost_tasks": 0, 
-       "pid": "master@10.168.27.199:5050", 
+       "activated_slaves": 5,
+       "build_date": "2013-08-26 06:41:22",
+       "build_time": 1377499282,
+       "build_user": "root",
+       "completed_frameworks": [],
+       "deactivated_slaves": 0,
+       "failed_tasks": 0,
+       "finished_tasks": 0,
+       "frameworks": [],
+       "id": "201308280103-3340478474-5050-8366",
+       "killed_tasks": 0,
+       "leader": "master@10.168.27.199:5050",
+       "log_dir": "/mnt/mesos-logs",
+       "lost_tasks": 0,
+       "pid": "master@10.168.27.199:5050",
        "slaves": [
            {
-               "attributes": {}, 
-               "hostname": "ec2-54-226-160-180.compute-1.amazonaws.com", 
-               "id": "201308270519-3340478474-5050-5886-2", 
-               "pid": "slave(1)@10.235.1.38:5051", 
-               "registered_time": 1377651804.00701, 
-               "reregistered_time": 1377651804.00703, 
+               "attributes": {},
+               "hostname": "ec2-54-226-160-180.compute-1.amazonaws.com",
+               "id": "201308270519-3340478474-5050-5886-2",
+               "pid": "slave(1)@10.235.1.38:5051",
+               "registered_time": 1377651804.00701,
+               "reregistered_time": 1377651804.00703,
                "resources": {
-                   "cpus": 4, 
-                   "disk": 418176, 
-                   "mem": 13960, 
+                   "cpus": 4,
+                   "disk": 418176,
+                   "mem": 13960,
                    "ports": "[31000-32000]"
                }
-           }, 
+           },
            {
-               "attributes": {}, 
-               "hostname": "ec2-107-21-68-44.compute-1.amazonaws.com", 
-               "id": "201308270519-3340478474-5050-5886-0", 
-               "pid": "slave(1)@10.182.129.12:5051", 
-               "registered_time": 1377651804.00682, 
-               "reregistered_time": 1377651804.00682, 
+               "attributes": {},
+               "hostname": "ec2-107-21-68-44.compute-1.amazonaws.com",
+               "id": "201308270519-3340478474-5050-5886-0",
+               "pid": "slave(1)@10.182.129.12:5051",
+               "registered_time": 1377651804.00682,
+               "reregistered_time": 1377651804.00682,
                "resources": {
-                   "cpus": 4, 
-                   "disk": 418176, 
-                   "mem": 13960, 
+                   "cpus": 4,
+                   "disk": 418176,
+                   "mem": 13960,
                    "ports": "[31000-32000]"
                }
-           }, 
+           },
            {
-               "attributes": {}, 
-               "hostname": "ec2-54-227-64-244.compute-1.amazonaws.com", 
-               "id": "201308270519-3340478474-5050-5886-4", 
-               "pid": "slave(1)@10.235.48.134:5051", 
-               "registered_time": 1377651804.0065899, 
-               "reregistered_time": 1377651804.0065999, 
+               "attributes": {},
+               "hostname": "ec2-54-227-64-244.compute-1.amazonaws.com",
+               "id": "201308270519-3340478474-5050-5886-4",
+               "pid": "slave(1)@10.235.48.134:5051",
+               "registered_time": 1377651804.0065899,
+               "reregistered_time": 1377651804.0065999,
                "resources": {
-                   "cpus": 4, 
-                   "disk": 418176, 
-                   "mem": 13960, 
+                   "cpus": 4,
+                   "disk": 418176,
+                   "mem": 13960,
                    "ports": "[31000-32000]"
                }
-           }, 
+           },
            {
-               "attributes": {}, 
-               "hostname": "ec2-54-211-57-184.compute-1.amazonaws.com", 
-               "id": "201308270519-3340478474-5050-5886-1", 
-               "pid": "slave(1)@10.181.139.99:5051", 
-               "registered_time": 1377651804.00635, 
-               "reregistered_time": 1377651804.0063601, 
+               "attributes": {},
+               "hostname": "ec2-54-211-57-184.compute-1.amazonaws.com",
+               "id": "201308270519-3340478474-5050-5886-1",
+               "pid": "slave(1)@10.181.139.99:5051",
+               "registered_time": 1377651804.00635,
+               "reregistered_time": 1377651804.0063601,
                "resources": {
-                   "cpus": 4, 
-                   "disk": 418176, 
-                   "mem": 13960, 
+                   "cpus": 4,
+                   "disk": 418176,
+                   "mem": 13960,
                    "ports": "[31000-32000]"
                }
-           }, 
+           },
            {
-               "attributes": {}, 
-               "hostname": "ec2-54-221-25-64.compute-1.amazonaws.com", 
-               "id": "201308270519-3340478474-5050-5886-3", 
-               "pid": "slave(1)@10.181.142.211:5051", 
-               "registered_time": 1377651804.0058999, 
-               "reregistered_time": 1377651804.0059199, 
+               "attributes": {},
+               "hostname": "ec2-54-221-25-64.compute-1.amazonaws.com",
+               "id": "201308270519-3340478474-5050-5886-3",
+               "pid": "slave(1)@10.181.142.211:5051",
+               "registered_time": 1377651804.0058999,
+               "reregistered_time": 1377651804.0059199,
                "resources": {
-                   "cpus": 4, 
-                   "disk": 418176, 
-                   "mem": 13960, 
+                   "cpus": 4,
+                   "disk": 418176,
+                   "mem": 13960,
                    "ports": "[31000-32000]"
                }
            }
-       ], 
-       "staged_tasks": 0, 
-       "start_time": 1377651801.08849, 
-       "started_tasks": 0, 
+       ],
+       "staged_tasks": 0,
+       "start_time": 1377651801.08849,
+       "started_tasks": 0,
        "version": "0.15.0"
    }
    </pre>

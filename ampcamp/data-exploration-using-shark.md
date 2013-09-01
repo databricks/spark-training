@@ -1,8 +1,10 @@
 ---
 layout: global
 title: Data Exploration Using Shark
-prev: data-exploration-using-spark.html
-next: processing-live-data-streams-with-spark-streaming.html
+categories: [module]
+navigation:
+  weight: 60
+  show: true
 skip-chapter-toc: true
 ---
 
@@ -11,7 +13,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 1. First, launch the Shark console:
 
    <pre class="prettyprint lang-bsh">
-   /root/shark-0.2/bin/shark-withinfo
+   /root/shark/bin/shark-withinfo
    </pre>
 
 1. Similar to Apache Hive, Shark can query external tables (i.e., tables that are not created in Shark).
@@ -36,7 +38,16 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
    <pre>13/02/05 21:22:16 INFO parse.ParseDriver: Parsing command: CR
    FAILED: Parse Error: line 1:0 cannot recognize input near 'CR' '&lt;EOF&gt;' '&lt;EOF&gt;'</pre>
 
-1. Let's create a table containing all English records and cache it in the cluster's memory.
+   <b>FAQ:</b> If you partially complete the exercises and then restart them later, your tables will stick around.  You will see errors like this if you try to create them again:
+
+   <pre>FAILED: Error in metadata: AlreadyExistsException(message:Table wikistats already exists)
+   FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask</pre>
+
+   To fix this, drop the table (`wikistats` or, introduced shortly, `wikistats_cached`), then create it again using the same command described above.  You can drop a table with:
+   
+   <pre>drop table wikistats;</pre>
+
+1. Let's create a table containing all English records and cache it in the cluster's memory. Shark automatically caches any table having a name with the suffix "`_cached`".
 
    <pre class="prettyprint lang-sql">
    shark> create table wikistats_cached as select * from wikistats where project_code="en";
@@ -111,7 +122,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select count(page_views) from wikistats_cached where page_name like "%berkeley%";
+   select sum(page_views) from wikistats_cached where page_name like "%berkeley%";
    /* "%" in SQL is a wildcard matching all characters. */</pre>
    </div>
 

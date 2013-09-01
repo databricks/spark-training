@@ -1,11 +1,12 @@
-  <li><a href="index.html">Introduction</a></li>
-  <li><a href="logging-into-the-cluster.html">Logging Into the Cluster</a></li>
-  <li><a href="overview-of-the-exercises.html">Overview Of The Exercises</a></li>
-  <li><a href="introduction-to-the-scala-shell.html">Introduction to the Scala Shell</a></li>
-  <li><a href="data-exploration-using-spark.html">1. Data Exploration Using Spark</a></li>
-  <li><a href="data-exploration-using-shark.html">2. Explore Data with Shark</a></li>
-  <li><a href="processing-live-data-streams-with-spark-streaming.html">3. Processing Live Data Streams with Spark Streaming</a></li>
-  <li><a href="blinkdb.html">4. BlinkDB - Queries with Bounded Errors and Bounded Response Times</a></li>
-  <li><a href="mesos.html">5. Mesos - Cluster Management and Framework Management</a></li>
-  <li><a href="mli-document-categorization.html">6. Machine Learning With MLI</a></li>
-  <li><a href="where-to-go-from-here---more-resources-and-further-reading.html">Where to Go From Here - More Resources and Further Reading</a></li>
+{% assign module_num = 0 %}
+{% for p in site.navigation %}
+  <li>
+    {% if p.categories contains "module" %}
+      {% capture module_num %} {{ module_num | plus:1 }}{% endcapture %}
+      {% capture module_tag %} {{module_num}}. {% endcapture %}
+    {% else %}
+      {% capture module_tag %}{% endcapture %}
+    {% endif %}
+    <a href="{{p.url | remove_first: '/'}}">{{module_tag}}{{p.title}}</a>
+  </li>
+{% endfor %}

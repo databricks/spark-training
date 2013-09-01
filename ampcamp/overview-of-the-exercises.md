@@ -1,11 +1,12 @@
 ---
 layout: global
 title: Overview Of The Exercises
-prev: logging-into-the-cluster.html
-next: introduction-to-the-scala-shell.html
+navigation:
+  weight: 30
+  show: true
 ---
 
-The exercises in this mini course are divided into sections designed to give a hands-on experience with Spark, Shark and Spark Streaming.
+The exercises in this mini course are divided into sections designed to give a hands-on experience with various software components of the Berkeley Data Analytics Stack (BDAS).
 For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python.
 For Shark, you will be using SQL in the Shark console to interactively explore the same data.
 For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter's sample stream of tweets.
