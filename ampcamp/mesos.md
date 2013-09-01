@@ -315,7 +315,7 @@ clicking on one; click on `/logging`:
 to get the current "state" of a Mesos cluster (in JSON):
 
    <pre class="prettyprint lang-bsh">
-   $ curl `http://master_node_hostname:5050/master/state.json` | python -mjson.tool</pre>
+   $ curl 'http://master_node_hostname:5050/master/state.json' | python -mjson.tool</pre>
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-js">
