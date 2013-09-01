@@ -12,6 +12,9 @@ called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Anal
 (BDAS)</a>.
 
 
+You can navigate around the exercises by looking in the page header or footer and clicking on the arrows or the dropdown button that shows the current page title (as shown in the figure below).
+<img src="img/header-nav-dropdown-button.png" class="shadow" style="height:150px; width:498px"/>
+
 The components we will cover over the two days of AMP Camp 3 are:
 
 ## Day 1
