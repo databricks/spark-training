@@ -10,7 +10,7 @@ skip-chapter-toc: true
 
 Apache Mesos is a cluster manager that makes building and running
 distributed systems, or _frameworks_, easy and efficient. Using Mesos
-you can simultaneously run Apache Hadoop, Apache Spark, Apache Storm,k
+you can simultaneously run Apache Hadoop, Apache Spark, Storm,
 and many other applications on a dynamically shared pool of resources
 (machines).
 
