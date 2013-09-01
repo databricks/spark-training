@@ -58,7 +58,9 @@
                 <div class="site-title">{{ site.title }}</div>
                 <div class="btn-group">
                     <div class="btn btn-med dropdown-toggle pull-right" data-toggle="dropdown">
-                        {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
+                      <i class="icon-list-ul icon"></i>
+                      {{page.title}}
+                      <span class="caret"></span>
                     </div>
                   <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                     {% include chapter-list.html %}
@@ -85,7 +87,9 @@
           </div>
             <div class="btn-group dropup">
                 <div class="btn btn-med dropdown-toggle" data-toggle="dropdown">
-                    {{page.title}} &nbsp; <i class="icon-list-ul icon"></i>
+                  <i class="icon-list-ul icon"></i>
+                  {{page.title}}
+                  <span class="caret"></span>
                 </div>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                     {% include chapter-list.html %}
