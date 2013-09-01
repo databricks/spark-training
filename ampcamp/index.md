@@ -13,18 +13,19 @@ called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Anal
 
 
 You can navigate around the exercises by looking in the page header or footer and clicking on the arrows or the dropdown button that shows the current page title (as shown in the figure below).
-<img src="img/header-nav-dropdown-button.png" class="shadow" style="height:150px; width:498px"/>
 
-The components we will cover over the two days of AMP Camp 3 are:
+<p style="margin-bottom:15px"><img src="img/header-nav-dropdown-button.png" class="shadow" style="height:150px; width:498px"/></p>
 
-## Day 1
+The components we will cover over the two days of AMP Camp 3 are listed in the following subsections.
+
+## Day 1 Exercises
 
 * [Scala](introduction-to-the-scala-shell.html) - a quick crashcourse on the Scala language and command line interface.
 * [Spark](data-exploration-using-spark.html) [(project homepage)](http://spark.incubator.apache.org) - a fast cluster compute engine.
 * [Shark](data-exploration-using-shark.html) [(project homepage)](http://shark.cs.berkeley.edu) - a SQL layer on top of Spark.
 * [Spark Streaming](realtime-processing-with-spark-streaming.html) [(project overview page)](http://spark-project.org/docs/latest/streaming-programming-guide.html) - A stream processing layer on top of Spark.
 
-## Day 2
+## Day 2 Exercises
 * [BlinkDB](blinkdb.html) [(project page)](http://blinkdb.org) - A SQL processing system providing approximate results and bounded time and errors.
 * [MLbase](mli-document-categorization.html) [(project page)](http://mlbase.org) - A machine learning system including a library of ML algorithms and tools to make ML easy to use.
 * [Mesos](mesos.html) [(project page)](http://mesos.apache.org) - A fault tolerant cluster-level operating system for managing cluster resources and frameworks.

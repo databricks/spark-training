@@ -1,12 +1,16 @@
 {% assign module_num = 0 %}
 {% for p in site.navigation %}
-  <li>
+<li xmlns="http://www.w3.org/1999/html" {% if p.url == page.url %}style="background-color:lightgray"{% endif %} >
     {% if p.categories contains "module" %}
       {% capture module_num %} {{ module_num | plus:1 }}{% endcapture %}
       {% capture module_tag %} {{module_num}}. {% endcapture %}
     {% else %}
       {% capture module_tag %}{% endcapture %}
     {% endif %}
-    <a href="{{p.url | remove_first: '/'}}">{{module_tag}}{{p.title}}</a>
+    <a href="{{p.url | remove_first: '/'}}">
+      {% if p.url == page.url %}<strong>{% endif %}
+      {{module_tag}}{{p.title}}
+      {% if p.url == page.url %}</strong>{% endif %}
+    </a>
   </li>
 {% endfor %}
