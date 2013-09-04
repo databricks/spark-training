@@ -55,7 +55,20 @@ From here onwards, we'll run all of our commands in the Spark shell.
 
 ## Command Line Preprocessing and Featurization
 
-To apply most machine learning algorithms, we must first preprocess and featurize our input data.  That is, for each data point, we must generate a vector of numbers describing the salient properties of that data point.  In our case, each data point will consist of its top-level Wikipedia category (its *label*) and a set of *features* in the form of "bigrams" (pairs of words) that are present in each article.  Specifically, we will generate 1,000-dimensional feature vectors, with each vector entry summarizing the bigrams that appear in the underlying article.  The choice of *1,000* here is arbitrary, but can be an important design decision.  Using too many features risks overfitting your model to the training data and increases the computational burden, while with too few features there may not be enough signal to discriminate between classes.
+To apply most machine learning algorithms, we must first preprocess and
+featurize our input data.  That is, for each data point, we must generate a
+vector of numbers describing the salient properties of that data point.  In our
+case, each data point will consist of its top-level Wikipedia category (its
+*label*) and a set of *features* in the form of "bigrams" (pairs of words) that
+are present in each article.  Specifically, we first pick the top 1,000 bigrams
+across the entire corpus of documents, and then for each document we compute
+the number of times each of these 1,000 bigrams appears in the document.
+Hence, we represent each data point as a vector of 1,000 dimensions (each of
+these vectors may be very sparse, i.e., contain lots of zeros).  Note that the
+choice of *1,000* here is arbitrary, but can be an important design decision.
+Using too many features could potentially lead to overfitting your model to the
+training data and also increases the computational burden, while with too few
+features there may not be enough signal to discriminate between classes.
 
 Each record in our raw dataset consists of a string in the format "`<category> <subcategory> <page_contents>`".
 This dataset was derived from raw XML dumps of the Wikipedia database.
@@ -115,6 +128,9 @@ let's start it now:
 <div data-lang="scala" markdown="1">
 ~~~
 import mli.feat._
+// c is the column on which we want to perform N-gram extraction
+// n is the N-gram length, e.g., n=2 corresponds to bigrams
+// k is the number of top N-grams we want to use (sorted by N-gram frequency)
 val (featurizedData, ngfeaturizer) = NGrams.extractNGrams(taggedInputTable, c=1, n=2, k=1000, stopWords = NGrams.stopWords)
 val (scaledData, featurizer) = Scale.scale(featurizedData.filter(_.nonZeros.length > 5).cache(), 0, ngfeaturizer)
 ~~~
@@ -125,9 +141,13 @@ While we wait for this job to finish, let's do a couple of exercises to get
 some more intuition about N-grams and understand what's happening under the
 hood.
 
-**Exercise**: Open a new `scala` prompt (locally if you have `scala` installed on your machine, or otherwise by [logging into your cluster](logging-into-the-cluster.html) in a new terminal).
-In the new `scala` prompt, write a `bigrams` function that mimics what `NGrams` does for a single string.
-Given a string, convert it to lower case, tokenize it by splitting on word boundaries (spaces), and output a set of all "word1_word2" pairs that occur in sequence in the input string.
+**Exercise**: Open a new `scala` prompt (locally if you have `scala` installed
+on your machine, or otherwise by [logging into your
+cluster](logging-into-the-cluster.html) in a new terminal).  In the new `scala`
+prompt, write a `bigrams` function that mimics what `NGrams` does for a single
+string.  Given a string, convert it to lower case, tokenize it by splitting on
+word boundaries (spaces), and output a set of all adjacent "word1_word2" pairs that
+occur in the input string.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
