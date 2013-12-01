@@ -1,34 +1,6 @@
-body {
-  padding-top: 60px;
-  padding-bottom: 0;
-}
-body #content {
-  line-height: 1.6;
-  /* Inspired by Github's wiki style */
-
-}
-h1 {
-  font-size: 29px;
-}
-h2 {
-  font-size: 22px;
-  margin-top: 12px;
-}
-h3 {
-  font-size: 18px;
-  margin-top: 10px;
-}
-table {
-  border-collapse: separate;
-  *border-collapse: collapse;
-  /* IE7 and lower */
-
-  border-spacing: 0;
-}
-.shadow {
-  border: thin grey solid;
-  box-shadow: 3px 3px 3px #888888;
-}
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
 .navbar .brand {
   height: 50px;
   width: 110px;
@@ -59,6 +31,30 @@ table {
   color: #555555;
   padding: 5px;
   margin-left: 10px;
+}
+body {
+  padding-top: 60px;
+  padding-bottom: 0;
+}
+body #content {
+  line-height: 1.6;
+  /* Inspired by Github's wiki style */
+
+}
+h2 {
+  font-size: 24px;
+  margin-top: 12px;
+}
+h3 {
+  font-size: 21px;
+  margin-top: 10px;
+}
+table {
+  border-collapse: separate;
+  *border-collapse: collapse;
+  /* IE7 and lower */
+
+  border-spacing: 0;
 }
 .bordered {
   border: solid #ccc 1px;
@@ -122,12 +118,6 @@ table {
 pre {
   font-family: "Menlo", "Lucida Console", monospace;
 }
-pre.prettyprint {
-  margin:5px;
-}
-.accordion-inner {
-  padding: 6px;
-}
 code {
   font-family: "Menlo", "Lucida Console", monospace;
   background: white;
@@ -161,26 +151,8 @@ a:hover code {
 .bar div.btn-group {
   margin: 10px 0;
 }
-.bottombar div.btn-group {
-  margin: 3px 0;
-}
-@media (min-width: 684px) {
-  .bottombar div.btn-group {
-    margin: 10px 0;
-  }
-}
 .bar ul.dropdown-menu {
   text-align: left;
-}
-.site-title {
-  margin-top: 0;
-  font-size: 1.5em;
-  font-weight: bold;
-}
-@media (min-width: 755px) {
-  .site-title {
-    margin: 15px 0 0;
-  }
 }
 .topbar {
   margin: -60px auto 25px;
@@ -189,21 +161,38 @@ a:hover code {
   display: inline-block;
   vertical-align: middle;
 }
-#ampcamp-logo {
-  width: 294px;
-  height: 70px;
+#logo {
+  width: 70px;
+  height: auto;
   display: inline-block;
   vertical-align: middle;
-  margin-right: 15px;
-  background: url(../img/ampcamp3-wide-and-skinny-294x65px.png) no-repeat left 2px;
+  margin-right: 20px;
+  /*background: url(../img/spark-summit-logo.png) no-repeat left 10px;*/
+
 }
+/*
+@media (min-width: 768px) {
+  .topbar img {
+    padding-top: 30px;
+    padding-left: 5px;
+  }
+  #ampcamp-logo {
+    float: left;
+  }
+  #amplab-logo {
+    float: right;
+  }
+}
+*/
 .bottombar {
   margin: 25px auto 0;
 }
-.bottombar .site-title {
-  margin:0 0 15px;
+.site-title {
+  font-style: italic;
+  font-size: 1.5em;
+  font-weight: bold;
+  padding: 15px 0 10px;
 }
-
 .container {
   max-width: 914px;
 }

@@ -1,6 +1,7 @@
 ---
 layout: global
 title: Introduction to the Scala Shell
+categories: [module]
 navigation:
   weight: 40
   show: true

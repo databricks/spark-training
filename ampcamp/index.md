@@ -7,32 +7,30 @@ navigation:
 ---
 
 # Welcome
-Welcome to the AMP Camp 3 hands-on exercises. These exercises will have you working directly with components of our open-source software stack,
+Welcome to the Spark Summit hands-on exercises. These exercises will have you working directly with components of our open-source software stack,
 called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack
 (BDAS)</a>.
 
 
 You can navigate around the exercises by looking in the page header or footer and clicking on the arrows or the dropdown button that shows the current page title (as shown in the figure below).
 
-<p style="margin-bottom:15px"><img src="img/header-nav-dropdown-button.png" class="shadow" style="height:150px; width:498px"/></p>
+<p style="margin-bottom:15px"><img src="img/header-nav-dropdown-button-summit.png" class="shadow" style="height:auto; width:498px"/></p>
 
-The components we will cover over the two days of AMP Camp 3 are listed in the following subsections.
+The components we will cover at the first Spark Training are listed below.
 
-## Day 1 Exercises
+## Introductory Exercises
 
 * [Scala](introduction-to-the-scala-shell.html) - a quick crashcourse on the Scala language and command line interface.
 * [Spark](data-exploration-using-spark.html) [(project homepage)](http://spark.incubator.apache.org) - a fast cluster compute engine.
 * [Shark](data-exploration-using-shark.html) [(project homepage)](http://shark.cs.berkeley.edu) - a SQL layer on top of Spark.
-* [Spark Streaming](realtime-processing-with-spark-streaming.html) [(project overview page)](http://spark-project.org/docs/latest/streaming-programming-guide.html) - A stream processing layer on top of Spark.
 
-## Day 2 Exercises
-* [BlinkDB](blinkdb.html) [(project page)](http://blinkdb.org) - A SQL processing system providing approximate results and bounded time and errors.
-* [MLbase](mli-document-categorization.html) [(project page)](http://mlbase.org) - A machine learning system including a library of ML algorithms and tools to make ML easy to use.
-* [Mesos](mesos.html) [(project page)](http://mesos.apache.org) - A fault tolerant cluster-level operating system for managing cluster resources and frameworks.
+## Advanced Exercises
+* [Spark Streaming](realtime-processing-with-spark-streaming.html) [(project overview page)](http://spark-project.org/docs/latest/streaming-programming-guide.html) - A stream processing layer on top of Spark.
+* [Machine Learning with Spark and MLlib](ml-with-spark-and-mllib.html) [(project page)](http://spark.incubator.apache.org/docs/latest/mllib-guide.html) - A library of fast and easy to use ML algorithms included with Spark.
 
 
 # Course Prerequisites
-Several components support multiple languages. For the sections about Spark and Spark Streaming, you can choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this mini course supports for each section. You are welcome to mix and match languages depending on your preferences and interests.
+Several components support multiple languages. In some sections of this training material, you can choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this mini course supports for each section. You are welcome to mix and match languages depending on your preferences and interests.
 
 <center>
 <style type="text/css">
@@ -64,16 +62,10 @@ table td, table th {
   <td class="yes">yes</td>
   <td class="no">no</td>
 </tr><tr>
-  <td>BlinkDB</td>
-  <td colspan="3" class="yes">All SQL</td>
-</tr><tr>
-  <td>MLbase</td>
+  <td>Machine Learning with Spark and MLlib</td>
+  <td class="yes">yes</td>
   <td class="yes">yes</td>
   <td class="no">no</td>
-  <td class="no">no</td>
-</tr><tr>
-  <td>Mesos</td>
-  <td colspan="3" class="yes">Command Line and WebUI</td>
 </tr>
 </tbody>
 </table>

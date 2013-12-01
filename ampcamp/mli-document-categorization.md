@@ -4,7 +4,7 @@ title: Machine Learning With MLI
 categories: [module]
 navigation:
   weight: 90
-  show: true
+  show: false
 ---
 
 In this chapter, we will use MLI and Spark to tackle a machine learning

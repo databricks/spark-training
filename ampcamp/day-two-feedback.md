@@ -3,7 +3,7 @@ layout: global
 title: Feedback for Day 2
 navigation:
   weight: 105
-  show: true
+  show: false
 skip-chapter-toc: true
 ---
 

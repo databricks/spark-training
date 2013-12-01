@@ -1,6 +1,6 @@
 ---
 layout: global
-title: Feedback for Day 1
+title: Feedback
 navigation:
   weight: 75
   show: true
