@@ -39,9 +39,10 @@ The main file you are going to edit, compile and run for the exercises is `Tutor
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-import spark._
-import spark.streaming._
-import StreamingContext._
+import org.apache.spark._
+import org.apache.spark.SparkContext._
+import org.apache.spark.streaming._
+import org.apache.spark.streaming.StreamingContext._
 import TutorialHelper._
 
 object Tutorial {
@@ -69,10 +70,10 @@ object Tutorial {
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-import spark.api.java.*;
-import spark.api.java.function.*;
-import spark.streaming.*;
-import spark.streaming.api.java.*;
+import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.*;
+import org.apache.spark.streaming.*;
+import org.apache.spark.streaming.api.java.*;
 import twitter4j.*;
 import java.util.Arrays;
 import scala.Tuple2;
