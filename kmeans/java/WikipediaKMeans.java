@@ -5,9 +5,9 @@ import java.util.*;
 import com.google.common.collect.Lists;
 
 import scala.Tuple2;
-import spark.api.java.*;
-import spark.api.java.function.*;
-import spark.util.Vector;
+import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.*;
+import org.apache.spark.util.Vector;
 
 
 public class WikipediaKMeans {
@@ -16,7 +16,7 @@ public class WikipediaKMeans {
   public static void main(String[] args) throws Exception {
     Logger.getLogger("spark").setLevel(Level.WARN);
     String sparkHome = "/root/spark";
-    String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
+    String jarFile = "target/scala-2.9.3/wikipedia-kmeans_2.9.3-0.0.jar";
     String master = JavaHelpers.getSparkUrl();
     String masterHostname = JavaHelpers.getMasterHostname();
     JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans", 

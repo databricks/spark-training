@@ -1,6 +1,6 @@
-import spark.SparkContext
-import spark.SparkContext._
-import spark.util.Vector
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.util.Vector
 
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
@@ -18,7 +18,7 @@ object WikipediaKMeans {
   def main(args: Array[String]) {
     Logger.getLogger("spark").setLevel(Level.WARN)
     val sparkHome = "/root/spark"
-    val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
+    val jarFile = "target/scala-2.9.3/wikipedia-kmeans_2.9.3-0.0.jar"
     val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
     val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
 

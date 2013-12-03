@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import com.google.common.collect.Lists;
 
-import spark.util.Vector;
+import org.apache.spark.util.Vector;
 
 public class JavaHelpers {
   /** Creates a vector object from a string */
