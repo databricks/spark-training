@@ -7,7 +7,7 @@ navigation:
   show: true
 ---
 
-In this chapter, we will use Spark to implement machine learning algorithms. To complete the machine learning exercises within the time available using our relatively small EC2 clusters, in this section we will work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, this dataset only includes a subset of all Wikipedia articles. This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.
+In this chapter, we will use Spark to implement machine learning algorithms. To complete the machine learning exercises within the time available using our relatively small EC2 clusters, in this section we will work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, this dataset only includes a subset of all Wikipedia articles.
 
 ## Background: Featurization
 
@@ -67,9 +67,9 @@ The main file you are going to edit, compile and run for the exercises is <code>
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-import spark.SparkContext
-import spark.SparkContext._
-import spark.util.Vector
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.util.Vector
 
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
@@ -87,7 +87,7 @@ object WikipediaKMeans {
   def main(args: Array[String]) {
     Logger.getLogger("spark").setLevel(Level.WARN)
     val sparkHome = "/root/spark"
-    val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
+    val jarFile = "target/scala-2.9.3/wikipedia-kmeans_2.9.3-0.0.jar"
     val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
     val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
 
@@ -117,9 +117,9 @@ import java.util.*;
 import com.google.common.collect.Lists;
 
 import scala.Tuple2;
-import spark.api.java.*;
-import spark.api.java.function.*;
-import spark.util.Vector;
+import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.*;
+import org.apache.spark.util.Vector;
 
 
 public class WikipediaKMeans {
@@ -128,7 +128,7 @@ public class WikipediaKMeans {
   public static void main(String[] args) throws Exception {
     Logger.getLogger("spark").setLevel(Level.WARN);
     String sparkHome = "/root/spark";
-    String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
+    String jarFile = "target/scala-2.9.3/wikipedia-kmeans_2.9.3-0.0.jar";
     String master = JavaHelpers.getSparkUrl();
     String masterHostname = JavaHelpers.getMasterHostname();
     JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
@@ -318,7 +318,7 @@ cd /root/kmeans/scala
 sbt/sbt package run
 </pre>
 
-This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/scala/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
+This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/scala/target/scala-2.9.3/`. Finally, it will run the program. You should see output similar to the following on your screen:
 
 </div>
 <div data-lang="java" markdown="1">
@@ -327,7 +327,7 @@ cd /root/kmeans/java
 sbt/sbt package run
 </pre>
 
-This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/java/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
+This command will compile the `WikipediaKMeans` class and create a JAR file in `/root/kmeans/java/target/scala-2.9.3/`. Finally, it will run the program. You should see output similar to the following on your screen:
 
 </div>
 <div data-lang="python" markdown="1">
@@ -815,7 +815,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
       def main(args: Array[String]) {
         Logger.getLogger("spark").setLevel(Level.WARN)
         val sparkHome = "/root/spark"
-        val jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar"
+        val jarFile = "target/scala-2.9.3/wikipedia-kmeans_2.9.3-0.0.jar"
         val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
         val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
 
@@ -905,7 +905,7 @@ We are now set to start implementing the K-means algorithm, so remove or comment
       public static void main(String[] args) throws Exception {
         Logger.getLogger("spark").setLevel(Level.WARN);
         String sparkHome = "/root/spark";
-        String jarFile = "target/scala-2.9.2/wikipedia-kmeans_2.9.2-0.0.jar";
+        String jarFile = "target/scala-2.9.3/wikipedia-kmeans_2.9.3-0.0.jar";
         String master = JavaHelpers.getSparkUrl();
         String masterHostname = JavaHelpers.getMasterHostname();
         JavaSparkContext sc = new JavaSparkContext(master, "WikipediaKMeans",
