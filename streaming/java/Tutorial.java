@@ -1,7 +1,7 @@
-import spark.api.java.*;
-import spark.api.java.function.*;
-import spark.streaming.*;
-import spark.streaming.api.java.*;
+import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.*;
+import org.apache.spark.streaming.*;
+import org.apache.spark.streaming.api.java.*;
 import twitter4j.*;
 import java.util.Arrays;
 import scala.Tuple2;

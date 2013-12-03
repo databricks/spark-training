@@ -1,5 +1,5 @@
-import spark.streaming._
-import spark.storage.StorageLevel
+import org.apache.spark.streaming._
+import org.apache.spark.storage.StorageLevel
 import scala.io.Source
 import scala.collection.mutable.HashMap
 import java.io.File

@@ -1,7 +1,7 @@
-import spark._
-import spark.streaming._
-import SparkContext._
-import StreamingContext._
+import org.apache.spark._
+import org.apache.spark.SparkContext._
+import org.apache.spark.streaming._
+import org.apache.spark.streaming.StreamingContext._
 import TutorialHelper._
 
 object Tutorial {

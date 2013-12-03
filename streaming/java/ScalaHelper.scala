@@ -1,5 +1,5 @@
-import spark.streaming.api.java._;
-import spark.storage.StorageLevel
+import org.apache.spark.streaming.api.java._
+import org.apache.spark.storage.StorageLevel
 import sys.process.stringSeqToProcess
 import java.io.File
 

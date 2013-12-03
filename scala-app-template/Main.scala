@@ -1,5 +1,5 @@
-import spark.SparkContext
-import spark.SparkContext._
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
 
 object Main {
   def main(args: Array[String]) {

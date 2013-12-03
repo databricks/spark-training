@@ -1,5 +1,5 @@
-import spark.streaming.api.java.*;
-import spark.storage.StorageLevel;
+import org.apache.spark.streaming.api.java.*;
+import org.apache.spark.storage.StorageLevel;
 import scala.io.Source;
 import java.io.*;
 import java.util.List;

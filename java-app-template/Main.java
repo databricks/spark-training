@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
-import spark.api.java.*;
-import spark.api.java.function.*;
+import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.*;
 
 public class Main {
   public static void main(String[] args) {
