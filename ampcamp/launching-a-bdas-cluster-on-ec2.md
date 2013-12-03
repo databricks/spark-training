@@ -43,9 +43,7 @@ So make sure you create a key-pair in that region!
 
 Check out the launch scripts by cloning the github repository.
 
-    git clone git://github.com/amplab/training-scripts.git
-
-You can also obtain them by downloading the zip file at `https://github.com/amplab/training-scripts/archive/ampcamp3.zip`
+    git clone git://github.com/amplab/training-scripts.git -b sparksummit1
 
 ## Launching the cluster
 Launch the cluster by running the following command.
