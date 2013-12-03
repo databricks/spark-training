@@ -20,13 +20,15 @@ The components we will cover at the first Spark Training are listed below.
 
 ## Introductory Exercises
 
-* [Scala](introduction-to-the-scala-shell.html) - a quick crashcourse on the Scala language and command line interface.
-* [Spark](data-exploration-using-spark.html) [(project homepage)](http://spark.incubator.apache.org) - a fast cluster compute engine.
-* [Shark](data-exploration-using-shark.html) [(project homepage)](http://shark.cs.berkeley.edu) - a SQL layer on top of Spark.
+1. [Scala](introduction-to-the-scala-shell.html) - a quick crashcourse on the Scala language and command line interface.
+2. [Spark](data-exploration-using-spark.html) [(project homepage)](http://spark.incubator.apache.org) - a fast cluster compute engine.
+3. [Shark](data-exploration-using-shark.html) [(project homepage)](http://shark.cs.berkeley.edu) - a SQL layer on top of Spark.
 
 ## Advanced Exercises
-* [Spark Streaming](realtime-processing-with-spark-streaming.html) [(project overview page)](http://spark-project.org/docs/latest/streaming-programming-guide.html) - A stream processing layer on top of Spark.
-* [Machine Learning with Spark](machine-learning-with-spark.html) - Implement K-Means clustering with Spark.
+<ol start="4">
+  <li><a href="realtime-processing-with-spark-streaming.html">Spark Streaming</a> <a href="http://spark-project.org/docs/latest/streaming-programming-guide.html">(project overview page)</a> - A stream processing layer on top of Spark.</li>
+  <li><a href="machine-learning-with-spark.html">Machine Learning with Spark</a> - Implement K-Means clustering with Spark.</li>
+</ol>
 
 
 # Course Prerequisites
@@ -62,10 +64,15 @@ table td, table th {
   <td class="yes">yes</td>
   <td class="no">no</td>
 </tr><tr>
-  <td>Machine Learning with Spark and MLlib</td>
+  <td class="dimmed">OPTIONAL: Machine Learning - Featurization</td>
+  <td class="dimmed yes">yes</td>
+  <td class="dimmed no">no</td>
+  <td class="dimmed yes">yes</td>
+</tr><tr>
+  <td>Machine Learning - K-Means Clustering</td>
   <td class="yes">yes</td>
   <td class="yes">yes</td>
-  <td class="no">no</td>
+  <td class="yes">yes</td>
 </tr>
 </tbody>
 </table>
