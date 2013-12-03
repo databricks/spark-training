@@ -276,7 +276,7 @@ A quick note about the `Vector` class we will using in this exercise: For Scala 
 <div data-lang="python" markdown="1">
 ~~~
     lines = sc.textFile(
-        "hdfs://" + masterHostname + ":9000/wikistats_featurized_hash_text")
+        "hdfs://" + masterHostname + ":9000/wikistats_featurized")
     data = lines.map(
         lambda x: (x.split("#")[0], parseVector(x.split("#")[1]))).cache()
     count = data.count()
