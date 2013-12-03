@@ -80,7 +80,7 @@ However, reading through that whole tutorial and trying the examples at the cons
 
    <pre class="prettyprint lang-scala linenums">
    import scala.io.Source
-   val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+   val lines = Source.fromFile("/root/spark/README").getLines.toArray
    </pre>
 
    Then, instantiate a `collection.mutable.HashMap[String,Int]` and use functional methods to populate it with wordcounts. Hint, in our solution, which is inspired by <a href="http://bit.ly/6mhGvo" target="_blank">this solution online</a>, we use <a href="http://richard.dallaway.com/in-praise-of-flatmap" target="_blank">`flatMap`</a> and then `map`.
@@ -90,7 +90,7 @@ However, reading through that whole tutorial and trying the examples at the cons
    scala> import scala.io.Source
    import scala.io.Source
 
-   scala> val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+   scala> val lines = Source.fromFile("/root/spark/README").getLines.toArray
    lines: Array[String] = Array(hlep, help, plot, set terminal pdf, pdf, set terminal pdf color, set output "monolithic-utilization-thru-day.pdf", set terminal pdf enhanced color, set terminal pdf monochrome, set terminal pdf mono, set output "graph.pdf", set terminal x11 enhanced color, help terminal, x11, quit, plot "utilization" using 1:2, plot "utilization" using 1/2:2, #plot "utilization" using 1:($2/), RadDeg, x!, Inv, sin, ln, π, cos, log, e, tan, √, Ans, EXP, xy, (, ), %, AC, 7, 8, 9, ÷, 4, 5, 6, ×, 1, 2, 3, -, 0, ., =, +, plot "utilization" using 1:($2/278400), plot "utilization.cpu.and.mem" using 1:($3/556800), plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:2, plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:($2/12500*8), plot [0:1] "7-day-mono-ya-c_0.01-stdout...
 
    scala> val counts = new collection.mutable.HashMap[String, Int].withDefaultValue(0)
@@ -110,7 +110,7 @@ However, reading through that whole tutorial and trying the examples at the cons
    scala> import scala.io.Source
    import scala.io.Source
 
-   scala> val lines = Source.fromFile("/root/mesos/README").getLines.toArray
+   scala> val lines = Source.fromFile("/root/spark/README").getLines.toArray
    lines: Array[String] = Array(hlep, help, plot, set terminal pdf, pdf, set terminal pdf color, set output "monolithic-utilization-thru-day.pdf", set terminal pdf enhanced color, set terminal pdf monochrome, set terminal pdf mono, set output "graph.pdf", set terminal x11 enhanced color, help terminal, x11, quit, plot "utilization" using 1:2, plot "utilization" using 1/2:2, #plot "utilization" using 1:($2/), RadDeg, x!, Inv, sin, ln, π, cos, log, e, tan, √, Ans, EXP, xy, (, ), %, AC, 7, 8, 9, ÷, 4, 5, 6, ×, 1, 2, 3, -, 0, ., =, +, plot "utilization" using 1:($2/278400), plot "utilization.cpu.and.mem" using 1:($3/556800), plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:2, plot "7-day-mono-ya-c_0.01-stdout-UTILIZATION" using 1:($2/12500*8), plot [0:1] "7-day-mono-ya-c_0.01-stdout...
 
    scala> val emptyCounts = Map[String,Int]().withDefaultValue(0)
