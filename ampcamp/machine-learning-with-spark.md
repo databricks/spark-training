@@ -3,8 +3,8 @@ layout: global
 title: Machine Learning With Spark
 categories: [module]
 navigation:
-  weight: 85
-  show: false
+  weight: 75
+  show: true
 ---
 
 In this chapter, we will use Spark to implement machine learning algorithms. To complete the machine learning exercises within the time available using our relatively small EC2 clusters, in this section we will work with a restricted set of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, this dataset only includes a subset of all Wikipedia articles. This restricted dataset is pre-loaded in the HDFS on your cluster in `/wikistats_20090505-07_restricted`.

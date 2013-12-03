@@ -7,7 +7,7 @@ navigation:
 ---
 
 # Welcome
-Welcome to the Spark Summit hands-on exercises. These exercises are adapted from similar exercises that wer prepared for and run at <a href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>. They were written by volunteer graduate students and postdocs in the <a href="https://amplab.cs.berkeley.edu/">UC Berkelay AMPLab</a>. Many of those same graduate students are also volunteers here on the Spark Summit Training day team as well. The exercises we cover today will have you working directly with the Spark specific components of the AMPLab's open-source software stack,
+Welcome to the Spark Summit hands-on exercises. These exercises are adapted from similar exercises that were prepared for and run at <a href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>. They were written by volunteer graduate students and postdocs in the <a href="https://amplab.cs.berkeley.edu/">UC Berkelay AMPLab</a>. Many of those same graduate students are also volunteers here on the Spark Summit Training day team as well. The exercises we cover today will have you working directly with the Spark specific components of the AMPLab's open-source software stack,
 called the <a href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack
 (BDAS)</a>.
 
@@ -26,9 +26,7 @@ The components we will cover at the first Spark Training are listed below.
 
 ## Advanced Exercises
 * [Spark Streaming](realtime-processing-with-spark-streaming.html) [(project overview page)](http://spark-project.org/docs/latest/streaming-programming-guide.html) - A stream processing layer on top of Spark.
-{% comment %}
-* [Machine Learning with Spark and MLlib](ml-with-spark-and-mllib.html) [(project overview page)](http://spark.incubator.apache.org/docs/latest/mllib-guide.html) - A library of fast and easy to use ML algorithms included with Spark.
-{% endcomment %}
+* [Machine Learning with Spark](machine-learning-with-spark.html) - Implement K-Means clustering with Spark.
 
 
 # Course Prerequisites
