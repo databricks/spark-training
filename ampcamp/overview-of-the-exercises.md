@@ -23,7 +23,6 @@ Once you've used SSH to log into the master, run the `ls` command and you will s
 Some of the more important ones are listed below:
 
 - Templates for exercises:
-   - `kmeans`: Template for the k-means clustering exercise
    - `streaming`: Standalone program for Spark Streaming exercises
    - `java-app-template`: Template for standalone Spark programs written in Java
    - `scala-app-template`: Template for standalone Spark programs written in Scala
@@ -31,15 +30,13 @@ Some of the more important ones are listed below:
    - `spark`: Spark installation
 
 - Useful scripts/documentation:
-   - `mesos-ec2`: Suite of scripts to manage Mesos on EC2
    - `spark-ec2`: Suite of scripts to manage Spark on EC2
    - `training`: Documentation and code used for training exercises
 
 - Infrastructure:
    - `ephemeral-hdfs`: Hadoop installation
    - `scala-2.9.3`: Scala installation
-   - `hive-0.9.0-bin`: Hive installation
-   - `mesos`: Mesos installation
+   - `hive`: Hive installation
 
 You can find a list of your 5 slave nodes in spark-ec2/slaves:
 
