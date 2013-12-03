@@ -6,11 +6,11 @@ navigation:
   show: true
 ---
 
-The exercises in this mini course are divided into sections designed to give a hands-on experience with various software components of the Berkeley Data Analytics Stack (BDAS).
+These exercises are divided into sections designed to give a hands-on experience with various software components of the Berkeley Data Analytics Stack (BDAS).
 For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python.
 For Shark, you will be using SQL in the Shark console to interactively explore the same data.
 For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter's sample stream of tweets.
-Finally, you will have to complete a complex machine learning exercise which will test your understanding of Spark.
+
 
 ## Cluster Details
 Your cluster contains 6 m1.xlarge Amazon EC2 nodes.
