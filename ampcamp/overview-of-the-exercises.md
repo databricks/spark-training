@@ -27,7 +27,7 @@ Some of the more important ones are listed below:
    - `streaming`: Standalone program for Spark Streaming exercises
    - `java-app-template`: Template for standalone Spark programs written in Java
    - `scala-app-template`: Template for standalone Spark programs written in Scala
-   - `shark-0.2`: Shark installation
+   - `shark`: Shark installation
    - `spark`: Spark installation
 
 - Useful scripts/documentation:
@@ -37,7 +37,7 @@ Some of the more important ones are listed below:
 
 - Infrastructure:
    - `ephemeral-hdfs`: Hadoop installation
-   - `scala-2.9.2`: Scala installation
+   - `scala-2.9.3`: Scala installation
    - `hive-0.9.0-bin`: Hive installation
    - `mesos`: Mesos installation
 

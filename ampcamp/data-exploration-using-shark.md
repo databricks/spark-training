@@ -47,7 +47,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
    
    <pre>drop table wikistats;</pre>
 
-1. Let's create a table containing all English records and cache it in the cluster's memory. Shark automatically caches any table having a name with the suffix "`_cached`".
+1. Let's create a table containing all English records and cache it in the cluster's memory. Shark automatically caches any table having a name with the suffix "`_cached`". While running the following command, you can revisit the Spark web UI (hosted at port 4040 on the master node) and click on the Storage tab to see a new cached dataset being created.
 
    <pre class="prettyprint lang-sql">
    shark> create table wikistats_cached as select * from wikistats where project_code="en";

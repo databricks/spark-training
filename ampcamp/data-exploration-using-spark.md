@@ -119,7 +119,7 @@ The prompt should appear within a few seconds. __Note:__ You may need to hit `[E
    While it's running, you can open the Spark web console to see the progress.
    To do this, open your favorite browser, and type in the following URL.
 
-   `http://<master_node_hostname>:3030`
+   `http://<master_node_hostname>:4040`
 
    Note that this page is only available if you have an active job or Spark shell.  
    You should have been given `master_node_hostname` at the beginning of the
