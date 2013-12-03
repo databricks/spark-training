@@ -7,6 +7,13 @@ title: Launching a Spark/Shark Cluster on EC2
 
 This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this [intro to AMIs](https://aws.amazon.com/amis/)).
 
+<div class="alert alert-warn" markdown="1">
+<i class="icon-info-sign">    </i>
+If you are attending the training in person, we have already launched a clutser
+for you and emailed you its hostname and SSH keys, so you can proceed directly
+to [logging into your cluster](logging-into-the-cluster.html).
+</div>
+
 ## Pre-requisites
 
 The cluster setup script we'll use below requires Python 2.x and has been tested to work on Linux or OS X.

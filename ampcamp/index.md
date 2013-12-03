@@ -78,5 +78,6 @@ We are using the cutting edge versions (i.e., the master branches) of most of ou
 
 # Getting Started
 
-Ok, If you are attending Spark Training in person, we have probably given you a hostname and instructions for downloading the private key you will need in the next section to access your cluster.
+If you are attending Spark Training in person, we have emailed you a cluster hostname and private keys, which you can use to [log into your cluster](logging-into-the-cluster.html).
+
 If you are participating in the exercises from a remote location, you will want to [launch a BDAS cluster on Amazon EC2](launching-a-bdas-cluster-on-ec2.html) for yourself.

@@ -6,7 +6,12 @@ navigation:
   show: true
 skip-chapter-toc: true
 ---
-Let's log into your cluster. Note, if you are <em>not attending the training in person</em> you need to launch your own cluster, so if you haven't done that yet [go do it now](launching-a-bdas-cluster-on-ec2.html).
+Let's log into your cluster.
+
+<div class="alert alert-warn" markdown="1">
+<i class="icon-info-sign">    </i>
+Note, if you are <em>not attending the training in person</em> you need to launch your own cluster, so if you haven't done that yet [go do it now](launching-a-bdas-cluster-on-ec2.html).
+</div>
 
 First, click the tab below that corresponds to the operating system you are running to find instructions for SSH-ing into your cluster on EC2.
 
