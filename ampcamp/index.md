@@ -64,11 +64,6 @@ table td, table th {
   <td class="yes">yes</td>
   <td class="no">no</td>
 </tr><tr>
-  <td class="dimmed">OPTIONAL: Machine Learning - Featurization</td>
-  <td class="dimmed yes">yes</td>
-  <td class="dimmed no">no</td>
-  <td class="dimmed yes">yes</td>
-</tr><tr>
   <td>Machine Learning - K-Means Clustering</td>
   <td class="yes">yes</td>
   <td class="yes">yes</td>
