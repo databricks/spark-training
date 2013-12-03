@@ -11,8 +11,8 @@ import java.lang.*;
 
 class TutorialHelper {
   static {
-    Logger.getLogger("spark").setLevel(Level.WARN);
-    Logger.getLogger("spark.streaming.NetworkInputTracker").setLevel(Level.INFO);
+    Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
+    Logger.getLogger("org.apache.spark.streaming.NetworkInputTracker").setLevel(Level.INFO);
   }
 
   static void configureTwitterCredentials() throws Exception {

@@ -8,8 +8,8 @@ import org.apache.log4j.Level
 import sys.process.stringSeqToProcess
 
 object TutorialHelper {
-  Logger.getLogger("spark").setLevel(Level.WARN)
-  Logger.getLogger("spark.streaming.NetworkInputTracker").setLevel(Level.INFO)
+  Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
+  Logger.getLogger("org.apache.spark.streaming.NetworkInputTracker").setLevel(Level.INFO)
     
   /** Configures the Oauth Credentials for accessing Twitter */
   def configureTwitterCredentials() {
