@@ -80,4 +80,9 @@ We are using the cutting edge versions (i.e., the master branches) of most of ou
 
 If you are attending Spark Training in person, we have emailed you a cluster hostname and private keys, which you can use to [log into your cluster](logging-into-the-cluster.html).
 
+<p class="alert alert-warn">
+<i class="icon-info-sign">    </i>
+We sent the email to the address you used to registered with. If you don't see the email, first check your spam filter, then ask a TA, and finally you can try emailing {{ site.organizers-email }}, though during the training event we may not be able to keep up on email, so talking to us in person is definitely best.
+</p>
+
 If you are participating in the exercises from a remote location, you will want to [launch a BDAS cluster on Amazon EC2](launching-a-bdas-cluster-on-ec2.html) for yourself.
