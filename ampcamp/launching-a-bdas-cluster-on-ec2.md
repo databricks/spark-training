@@ -281,7 +281,7 @@ We do not support running the AMI in any other EC2 regions. In case you need to 
 
 If you launched the cluster with the default script above (no custom instance type and/or number of slaves), your cluster should contain 6 m1.xlarge Amazon EC2 nodes.
 
-![Running EC2 instances in AWS Management Console](img/aws-runninginstances.png)
+![Running EC2 instances in AWS Management Console](img/aws-runninginstances-m1.xlarge.png)
 
 ## Post-launch steps
 Your cluster should be ready to use.
