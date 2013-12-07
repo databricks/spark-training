@@ -1,6 +1,9 @@
 /* ==========================================================================
    Author's custom styles
    ========================================================================== */
+.alert {
+  padding: 10px 15px;
+}
 .navbar .brand {
   height: 50px;
   width: 110px;
@@ -65,7 +68,8 @@ table {
   -moz-box-shadow: 2px 2px 3px #ccc;
   box-shadow: 2px 2px 3px #ccc;
 }
-.bordered td, .bordered th {
+.bordered td,
+.bordered th {
   border-left: 1px solid #ccc;
   border-top: 1px solid #ccc;
   padding: 10px;
@@ -85,7 +89,8 @@ table {
   border-top: none;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-.bordered td:first-child, .bordered th:first-child {
+.bordered td:first-child,
+.bordered th:first-child {
   border-left: none;
 }
 .bordered th:first-child {
@@ -205,7 +210,7 @@ a:hover code {
   border-bottom: 1px solid #e1e1e8;
 }
 .chapter-toc {
-  margin: 10px 0 10px 10px;
+  margin: 10px 0 10px 30px;
   background-color: #f7f7f9;
   border: 1px solid #e1e1e8;
   padding-top: 8px;
@@ -259,7 +264,9 @@ td.no {
   color: #D14040;
   text-align: center;
 }
-td.dimmed, td.dimmed.yes, td.dimmed.no {
+td.dimmed,
+td.dimmed.yes,
+td.dimmed.no {
   color: #888;
   background-color: #EEE;
 }

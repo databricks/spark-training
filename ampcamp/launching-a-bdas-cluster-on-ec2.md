@@ -7,12 +7,18 @@ title: Launching a Spark/Shark Cluster on EC2
 
 This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this [intro to AMIs](https://aws.amazon.com/amis/)).
 
-<div class="alert alert-warn" markdown="1">
+<p class="alert alert-warn" style="overflow:hidden;" markdown="1">
 <i class="icon-info-sign">    </i>
-If you are attending the training in person, we have already launched a clutser
+If you are attending the training in person, we have already launched a cluster
 for you and emailed you its hostname and SSH keys, so you can proceed directly
-to [logging into your cluster](logging-into-the-cluster.html).
-</div>
+to [Logging Into Your Cluster](logging-into-the-cluster.html).
+</p>
+
+<p class="alert alert-error" style="overflow:hidden;" markdown="1">
+<i class="icon-info-sign">    </i>
+<strong>If you launch your own cluster using these instructions, don't forget to turn off your cluster when you are finished with the exercises.</strong> If you leave them on, it could cost you <strong>hundreds or thousands of dollars in Amazon EC2 fees!</strong> Also, use the AWS web console to double check that the machines are shut down when finished.
+</p>
+
 
 ## Pre-requisites
 
@@ -290,6 +296,12 @@ In a later exercise, you will want to have `<master_node_hostname>` ready at han
 __After you are done with your exercises (and only then)__, you can terminate the cluster by running
 
     ./spark-ec2 -i <key_file> -k <key_pair> destroy amplab-training
+
+<p class="alert alert-error" style="overflow:hidden;" markdown="1">
+<i class="icon-info-sign">    </i>
+<strong>Don't forget to shut down your machines and double check that they successfully terminated (via the AWS web console).</strong> If you leave your machines running, it could cost you a lot of money!
+</p>
+
 
 ## Log into your cluster
 Move onto the next section for instructions that walk you through logging into your shiney new BDAS cluster.
