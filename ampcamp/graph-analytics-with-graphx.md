@@ -119,20 +119,20 @@ In the following example we create the following toy property graph:
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
-Lets begin by creating the vertices and edges.  In this toy example we will create the vertices and edges as arrays.  Paste the following code into your shell.
+Lets begin by creating the vertices and edges.  In this toy example we will create the graph from arrays of vertices and edges but later we will demonstrate how to load real data.  Paste the following code into your shell.
 
 <div class="codetabs">
 <div data-lang="scala">
 {% highlight scala %}
-val vertices = sc.parallelize(Array(
+val vertexArray = Array(
   (1L, ("Alice", 28)),
   (2L, ("Bob", 27)),
-  (3L, ("Charlie", 65))
-  (4L, ("David", 42))
-  (5L, ("Ed", 55))
+  (3L, ("Charlie", 65)),
+  (4L, ("David", 42)),
+  (5L, ("Ed", 55)),
   (6L, ("Fran", 50))
-  ))
-val edges = sc.parallelize(Array(
+  )
+val edgeArray = Array(
   Edge(2L, 1L, 7),
   Edge(2L, 4L, 2),
   Edge(3L, 2L, 4),
@@ -141,131 +141,102 @@ val edges = sc.parallelize(Array(
   Edge(5L, 2L, 2),
   Edge(5L, 3L, 8),
   Edge(5L, 6L, 3)
-  ))
+  )
 {% endhighlight %}
 </div>
 </div>
-
-
-
-
-
-
-
-<!--
-> GraphX optimizes the representation of vertex and edge types when they are plain old data-types
-> (e.g., int, double, etc...) reducing the in memory footprint by storing them in specialized
-> arrays.
- -->
-In some cases it may be desirable to have vertices with different property types in the same graph.
-This can be accomplished through inheritance.  For example to model users and products as a
-bipartite graph we might do the following:
-
-{% highlight scala %}
-class VertexProperty()
-case class UserProperty(val name: String) extends VertexProperty
-case class ProductProperty(val name: String, val price: Double) extends VertexProperty
-// The graph might then have the type:
-var graph: Graph[VertexProperty, String] = null
-{% endhighlight %}
-
-Like RDDs, property graphs are immutable, distributed, and fault-tolerant.  Changes to the values or
-structure of the graph are accomplished by producing a new graph with the desired changes.  Note
-that substantial parts of the original graph (i.e., unaffected structure, attributes, and indicies)
-are reused in the new graph reducing the cost of this inherently functional data-structure.  The
-graph is partitioned across the workers using a range of vertex-partitioning heuristics.  As with
-RDDs, each partition of the graph can be recreated on a different machine in the event of a failure.
-
-Logically the property graph corresponds to a pair of typed collections (RDDs) encoding the
-properties for each vertex and edge.  As a consequence, the graph class contains members to access
-the vertices and edges of the graph:
-
-{% highlight scala %}
-class Graph[VD, ED] {
-  val vertices: VertexRDD[VD]
-  val edges: EdgeRDD[ED]
-}
-{% endhighlight %}
-
-The classes `VertexRDD[VD]` and `EdgeRDD[ED]` extend and are optimized versions of `RDD[(VertexID,
-VD)]` and `RDD[Edge[ED]]` respectively.  Both `VertexRDD[VD]` and `EdgeRDD[ED]` provide  additional
-functionality built around graph computation and leverage internal optimizations.  We discuss the
-`VertexRDD` and `EdgeRDD` API in greater detail in the section on [vertex and edge
-RDDs](#vertex_and_edge_rdds) but for now they can be thought of as simply RDDs of the form:
-`RDD[(VertexID, VD)]` and `RDD[Edge[ED]]`.
-
-### Example Property Graph
-
-Suppose we want to construct a property graph consisting of the various collaborators on the GraphX
-project. The vertex property might contain the username and occupation.  We could annotate edges
-with a string describing the relationships between collaborators:
-
-<p style="text-align: center;">
-  <img src="img/property_graph.png"
-       title="The Property Graph"
-       alt="The Property Graph"
-       width="50%" />
-  <!-- Images are downsized intentionally to improve quality on retina displays -->
-</p>
-
-The resulting graph would have the type signature:
-
-{% highlight scala %}
-val userGraph: Graph[(String, String), String]
-{% endhighlight %}
-
-There are numerous ways to construct a property graph from raw files, RDDs, and even synthetic
-generators and these are discussed in more detail in the section on
-[graph builders](#graph_builders).  Probably the most general method is to use the
-[Graph object](api/graphx/index.html#org.apache.spark.graphx.Graph$).  For example the following
-code constructs a graph from a collection of RDDs:
-
-{% highlight scala %}
-// Assume the SparkContext has already been constructed
-val sc: SparkContext
-// Create an RDD for the vertices
-val users: RDD[(VertexId, (String, String))] =
-  sc.parallelize(Array((3L, ("rxin", "student")), (7L, ("jgonzal", "postdoc")),
-                       (5L, ("franklin", "prof")), (2L, ("istoica", "prof"))))
-// Create an RDD for edges
-val relationships: RDD[Edge[String]] =
-  sc.parallelize(Array(Edge(3L, 7L, "collab"),    Edge(5L, 3L, "advisor"),
-                       Edge(2L, 5L, "colleague"), Edge(5L, 7L, "pi")))
-// Define a default user in case there are relationship with missing user
-val defaultUser = ("John Doe", "Missing")
-// Build the initial Graph
-val graph = Graph(users, relationships, defaultUser)
-{% endhighlight %}
 
 In the above example we make use of the [`Edge`][Edge] case class. Edges have a `srcId` and a
 `dstId` corresponding to the source and destination vertex identifiers. In addition, the `Edge`
-class has an `attr` member which stores the edge property.
+class has an `attr` member which stores the edge property (in this case the number of likes).
+[Edge]: api/graphx/index.html#org.apache.spark.graphx.Edge
 
 [Edge]: api/graphx/index.html#org.apache.spark.graphx.Edge
 
-We can deconstruct a graph into the respective vertex and edge views by using the `graph.vertices`
-and `graph.edges` members respectively.
+Using `sc.parallelize` construct the following RDDs from `vertexArray` and `edgeArray`
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
 {% highlight scala %}
-val graph: Graph[(String, String), String] // Constructed from above
-// Count all users which are postdocs
-graph.vertices.filter { case (id, (name, pos)) => pos == "postdoc" }.count
-// Count all the edges where src > dst
-graph.edges.filter(e => e.srcId > e.dstId).count
+val vertexRDD: RDD[(Long, (String, Int))] = // Implement
+val edgeRDD: RDD[Edge[Int]] = // Implement
 {% endhighlight %}
+</div>
+</div>
 
-> Note that `graph.vertices` returns an `VertexRDD[(String, String)]` which extends
-> `RDD[(VertexID, (String, String))]` and so we use the scala `case` expression to deconstruct the
-> tuple.  On the other hand, `graph.edges` returns an `EdgeRDD` containing `Edge[String]` objects.
-> We could have also used the case class type constructor as in the following:
-> {% highlight scala %}
-graph.edges.filter { case Edge(src, dst, prop) => src > dst }.count
+In case you get stuck here is the solution.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
+{% highlight scala %}
+val vertexRDD: RDD[(Long, (String, Int))] = sc.parallelize(vertexArray)
+val edgeRDD: RDD[Edge[Int]] = sc.parallelize(edgeArray)
 {% endhighlight %}
+</div>
+</div>
+</div>
+
+Now we are ready to build a property graph.  The basic property graph constructor takes an RDD of vertices (with type `RDD[(VertexId, V)]`) and an RDD of edges (with type `RDD[Edge[E]]`) and builds a graph (with type `Graph[V, E]`).  Try the following:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+{% highlight scala %}
+val graph: Graph[(String, Int), Int] = Graph(vertexRDD, edgeRDD)
+{% endhighlight %}
+</div>
+</div>
+
+The vertex property for this graph is tuple `(String, Int)` corresponding to the `User Name` and `Age` and the edge property is just an `Int` corresponding to the number of likes.
+
+There are numerous ways to construct a property graph from raw files, RDDs, and even synthetic
+generators.
+Like RDDs, property graphs are immutable, distributed, and fault-tolerant.
+Changes to the values or structure of the graph are accomplished by producing a new graph with the desired changes.
+Note that substantial parts of the original graph (i.e., unaffected structure, attributes, and indicies) are reused in the new graph.
+The graph is partitioned across the workers using vertex-partitioning heuristics.
+As with RDDs, each partition of the graph can be recreated on a different machine in the event of a failure.
+
+### Graph Views
+
+In many cases we will to extract the vertex and edge RDD views of a graph (e.g., when aggregating or saving the result of calculation).
+As a consequence, the graph class contains members (i.e., `graph.vertices` and `graph.edges`) to access the vertices and edges of the graph.
+While these members extend `RDD[(VertexId, V)]` and `RDD[Edge[E]]` they are actually backed by optimized representations that leverage the internal GraphX representation of graph data.
+
+Use `graph.vertices` to display the names of the users that are at least `30` years old.  The output should contain (in addition to lots of log messages):
+
+<pre class="prettyprint lang-bsh">
+David is 42
+Fran is 50
+Ed is 55
+Charlie is 65
+</pre>
+
+Here are a few solutions:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
+{% highlight scala %}
+// Solution 1
+graph.vertices filter { case (id, (name, age)) => age > 30 } foreach {
+  case (id, (name, age)) => println(s"$name is $age")
+}
+
+// Solution 2
+graph.vertices.filter(v => v._2._2 > 30).foreach(v => println(s"${v._2._1} is ${v._2._2}"))
+
+// Solution 3
+for ((id,(name,age)) <- graph.vertices filter { case (id,(name,age)) => age > 30 }) {
+  println(s"$name is $age")
+}
+{% endhighlight %}
+</div>
+</div>
+</div>
 
 In addition to the vertex and edge views of the property graph, GraphX also exposes a triplet view.
-The triplet view logically joins the vertex and edge properties yielding an
-`RDD[EdgeTriplet[VD, ED]]` containing instances of the [`EdgeTriplet`][EdgeTriplet] class. This
-*join* can be expressed in the following SQL expression:
+The triplet view logically joins the vertex and edge properties yielding an `RDD[EdgeTriplet[VD, ED]]` containing instances of the [`EdgeTriplet`][EdgeTriplet] class. This *join* can be expressed in the following SQL expression:
 
 [EdgeTriplet]: api/graphx/index.html#org.apache.spark.graphx.EdgeTriplet
 
@@ -281,22 +252,74 @@ or graphically as:
   <img src="img/triplet.png"
        title="Edge Triplet"
        alt="Edge Triplet"
-       width="50%" />
+       width="65%" />
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
-The [`EdgeTriplet`][EdgeTriplet] class extends the [`Edge`][Edge] class by adding the `srcAttr` and
-`dstAttr` members which contain the source and destination properties respectively. We can use the
-triplet view of a graph to render a collection of strings describing relationships between users.
+The [`EdgeTriplet`][EdgeTriplet] class extends the [`Edge`][Edge] class by adding the `srcAttr` and `dstAttr` members which contain the source and destination properties respectively.
+Use the `graph.triplets` view to display who likes who.  The output should look like:
 
+<pre class="prettyprint lang-bsh">
+Bob likes Alice
+Bob likes David
+Charlie likes Bob
+Charlie likes Fran
+David likes Alice
+Ed likes Bob
+Ed likes Charlie
+Ed likes Fran
+</pre>
+
+Need a hint?  Here is a partial solution:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
 {% highlight scala %}
-val graph: Graph[(String, String), String] // Constructed from above
-// Use the triplets view to create an RDD of facts.
-val facts: RDD[String] =
-  graph.triplets.map(triplet =>
-    triplet.srcAttr._1 + " is the " + triplet.attr + " of " + triplet.dstAttr._1)
-facts.collect.foreach(println(_))
+for (triplet <- graph.triplets) {
+ /**
+   * Triplet has the following Fields:
+   *   triplet.srcAttr: (String, Int) // triplet.srcAttr._1 is the name
+   *   triplet.dstAttr: (String, Int)
+   *   triplet.attr: Int
+   *   triplet.srcId: VertexId
+   *   triplet.dstId: VertexId
+   */
+}
 {% endhighlight %}
+</div>
+</div>
+</div>
+
+Here is the full solution:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
+{% highlight scala %}
+for (triplet <- graph.triplets) {
+  println( s"${triplet.srcAttr._1} likes ${triplet.dstAttr._1}")
+}
+{% endhighlight %}
+</div>
+</div>
+</div>
+
+If someone likes someone else more than 5 times than that relationship is getting pretty serious.
+For extra credit, find the lovers.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
+{% highlight scala %}
+for (triplet <- graph.triplets.filter(t => t.attr > 5)) {
+  println( s"${triplet.srcAttr._1} loves ${triplet.dstAttr._1}")
+}
+{% endhighlight %}
+</div>
+</div>
+</div>
+
 
 
 ### The Map Reduce Triplets Operator
