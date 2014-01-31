@@ -35,7 +35,7 @@ Some of the more important ones are listed below:
 
 - Infrastructure:
    - `ephemeral-hdfs`: Hadoop installation
-   - `scala-2.9.3`: Scala installation
+   - `scala-2.10.3`: Scala installation
    - `hive`: Hive installation
 
 You can find a list of your 5 slave nodes in spark-ec2/slaves:
