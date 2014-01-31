@@ -119,20 +119,20 @@ In the following example we create the following toy property graph:
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
-Paste the following code into your shell
+Lets begin by creating the vertices and edges.  In this toy example we will create the vertices and edges as arrays.  Paste the following code into your shell.
 
 <div class="codetabs">
 <div data-lang="scala">
 {% highlight scala %}
-val vertices = Array(
+val vertices = sc.parallelize(Array(
   (1L, ("Alice", 28)),
   (2L, ("Bob", 27)),
   (3L, ("Charlie", 65))
   (4L, ("David", 42))
   (5L, ("Ed", 55))
   (6L, ("Fran", 50))
-  )
-val edges = Array(
+  ))
+val edges = sc.parallelize(Array(
   Edge(2L, 1L, 7),
   Edge(2L, 4L, 2),
   Edge(3L, 2L, 4),
@@ -141,10 +141,12 @@ val edges = Array(
   Edge(5L, 2L, 2),
   Edge(5L, 3L, 8),
   Edge(5L, 6L, 3)
-  )
+  ))
 {% endhighlight %}
 </div>
 </div>
+
+
 
 
 
