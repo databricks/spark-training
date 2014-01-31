@@ -462,7 +462,7 @@ withNames.collect.foreach(println(_))
 Now that we have learned about the individual components of the GraphX API, we are ready to put them together
 to build a real analytics pipeline. In this section, we will start with raw text data, use Spark operators to
 clean the data and extract structure, use GraphX operators to analyze the structure, and then use Spark operators
-to save the results, all from the Spark shell.
+to examine the output of the graph analysis, all from the Spark shell.
 
 If you don't already have the Spark shell open, start it now and import the `org.apache.spark.graphx` package.
 
@@ -562,7 +562,14 @@ scala> val vertices = articles.map(a => (pageHash(a.title), a.title))
 </div>
 
 
-The rest of the explanations. Here is the code.
+The next step in data-cleaning is to extract our edges to find the structure
+of the link graph. We know that the MediaWiki syntax (the markup syntax Wikipedia uses)
+indicates a link by enclosing the link destination in double square brackets on either side.
+So a link looks like "[[Article We Are Linking To]]." Based on this knowledge, we can write a
+regular expression to extract all strings that are enclosed on both sides by "[[" and "]]"
+respectively, and then apply that regular expression to each article's contents, yielding
+the destination of all links contained in the article. The to apply the transformation
+to each article and create an edge list from the results is below.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -575,16 +582,74 @@ scala> val edges = articles.flatMap { a =>
     Edge(srcVid, dstVid, 1.0)
   }
 }
-
-// wiki link graph not perfect
-scala> val g = Graph(vertices, edges, "xxxxx").cache
-scala> val cleanG = g.subgraph(vpred = {(v, d) => !(d contains "xxxxx")})
-scala> val ranksG = cleanG.staticPageRank(5).cache
-
-scala> cleanG.outerJoinVertices(ranksG.vertices)({(v, title, r) => (r.getOrElse(0.0), title)}).vertices.top(10)(Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)).foreach(t => println(t._2._2 + ": " + t._2._1))
 ~~~
 </div>
 </div>
 
+We are finally ready to create our graph. Note that at this point, we have been using core
+Spark dataflow operators, working with our data in a table view. Switching to a graph
+view of our data is now as simple as calling the Graph constructor with our vertex RDD,
+our edge RDD, and a default vertex attribute. The default vertex attribute is used
+to initialize vertices that are not present in the vertex RDD, but form one side of an
+edge in the edge RDD. GraphX takes the safe approach by creating new vertices in
+this situation, rather than let the graph have "dangling edges" or assuming the user's data
+is perfect. In our case, we are going to use a dummy value of "xxxxx" for our default
+vertex attribute. We pick "xxxxx" as there are no Wikipedia articles with that as the title,
+and so we will be able to use the dummy value as a flag to filter out any artificially created
+vertices and all edges that point to them at the same time. These edges and dummy vertices
+are an artifact of our imperfect, dirty dataset, something that inevitably occurs in real
+world analytics pipelines. Note that this is another
+round of data-cleaning, but one that is done based on properties of the graph, making it much
+simpler to do with a graph-view of our data.
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+scala> val graph = Graph(vertices, edges, "xxxxx").cache
+scala> val cleanGraph = graph.subgraph(vpred = {(v, d) => !(d contains "xxxxx")})
+~~~
+</div>
+</div>
+
+We can now do some actual graph analytics. For this example, we are going to run
+[PageRank](http://en.wikipedia.org/wiki/PageRank) (TODO should we put in an explanation
+of how PageRank works?) to evaluate what the most important pages in the Wikipedia graph
+are. [`PageRank`](PageRank) is part of a small but growing library of common graph algorithms already implemented
+in GraphX. However, the implementation is simple and straightforward, and just consists of
+some initialization code, a vertex program and message combiner to pass to Pregel.
+
+[PageRank]: api/graphx/index.html#org.apache.spark.graphx.lib.PageRank
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+scala> val prGraph = cleanGraph.staticPageRank(5).cache
+~~~
+</div>
+</div>
+
+`Graph.staticPageRank` returns a graph whose vertex attributes are the pageranks of each page. However, this
+means that while the resulting graph `prGraph` can tell us which are the most important vertices in this
+graph, we have lost the information that tells us which article titles those vertices correspond to.
+Luckily, we still have our `cleanGraph` that contains that information. Here, we can perform
+a join of the vertices in the `prGraph` that have the information about relative ranks of the vertices
+with the vertices in the `cleanGraph` that have the information about the mapping from vertex to article
+title. This yields a new graph that has combined both pieces of information, storing them both in a tuple
+as the new vertex attribute. We can then perform further table-based operators on this new list of vertices,
+such as finding the ten most important vertices (those with the highest pageranks) and printing out
+their corresponding article titles. Putting this all together, and we get the following set of operations
+to find the titles of the ten most important articles.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+scala> val titleAndPRGraph = cleanGraph.outerJoinVertices(ranksG.vertices)({(v, title, r) => (r.getOrElse(0.0), title)})
+scala> titleAndPrGraph.vertices.top(10)(Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)).foreach(t => println(t._2._2 + ": " + t._2._1))
+~~~
+</div>
+</div>
+
+This brings us to the end of the GraphX chapter of the tutorial. We encourage you to continue playing
+with the code and to check out the [Programming Guide](TODO: Link) for further documentation about the system.
+Bug reports and feature requests are welcomed.
 
