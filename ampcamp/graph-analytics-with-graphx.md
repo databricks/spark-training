@@ -573,10 +573,9 @@ lonely.collect.foreach(println(_))
 </div>
 
 
-### TODO: Reverse?
-
+<!-- ### TODO: Reverse?
 ### TODO: MapEdges or MapVertices
-
+ -->
 
 ## Constructing an End-to-End Graph Analytics Pipeline on Real Data
 
