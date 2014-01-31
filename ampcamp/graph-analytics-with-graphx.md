@@ -108,9 +108,11 @@ A directed multigraph is a directed graph with potentially multiple parallel edg
 The ability to support parallel edges simplifies modeling scenarios where multiple relationships (e.g., co-worker and friend) can appear between the same vertices.
 Each vertex is keyed by a *unique* 64-bit long identifier (`VertexID`).
 Similarly, edges have corresponding source and destination vertex identifiers.
-The properties are stored as Scala objects with each edge and vertex in the graph.
+The properties are stored as Scala/Java objects with each edge and vertex in the graph.
 
-In the following example we create the following toy property graph:
+Throughout the first half of this tutorial we will use the following toy property graph.
+While this is hardly <i>big data</i>, it provides an opportunity to learn about the graph data model and the GraphX API.  In this example we have a small social network with users and their ages modeled as vertices and likes modeled as directed edges.  In this fictional scenario users can like other users multiple times.
+
 
 <p style="text-align: center;">
   <img src="img/social_graph.png"
@@ -120,7 +122,9 @@ In the following example we create the following toy property graph:
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
-Lets begin by creating the vertices and edges.  In this toy example we will create the graph from arrays of vertices and edges but later we will demonstrate how to load real data.  Paste the following code into your shell.
+We begin by creating the property graph from arrays of vertices and edges.
+Later we will demonstrate how to load real data.
+Paste the following code into the spark shell.
 
 <div class="codetabs">
 <div data-lang="scala">
@@ -147,13 +151,13 @@ val edgeArray = Array(
 </div>
 </div>
 
-In the above example we make use of the [`Edge`][Edge] case class. Edges have a `srcId` and a
+In the above example we make use of the [`Edge`][Edge] class. Edges have a `srcId` and a
 `dstId` corresponding to the source and destination vertex identifiers. In addition, the `Edge`
 class has an `attr` member which stores the edge property (in this case the number of likes).
 
 [Edge]: api/graphx/index.html#org.apache.spark.graphx.Edge
 
-Using `sc.parallelize` construct the following RDDs from `vertexArray` and `edgeArray`
+Using `sc.parallelize` (introduced in the Spark tutorial) construct the following RDDs from `vertexArray` and `edgeArray`
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -164,7 +168,7 @@ val edgeRDD: RDD[Edge[Int]] = // Implement
 </div>
 </div>
 
-In case you get stuck here is the solution.
+In case you get stuck (or skipped the Spark tutorial) here is the solution.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -187,7 +191,7 @@ val graph: Graph[(String, Int), Int] = Graph(vertexRDD, edgeRDD)
 </div>
 </div>
 
-The vertex property for this graph is tuple `(String, Int)` corresponding to the `User Name` and `Age` and the edge property is just an `Int` corresponding to the number of likes in our toy social network.
+The vertex property for this graph is a tuple `(String, Int)` corresponding to the *User Name* and *Age* and the edge property is just an `Int` corresponding to the number of *Likes* in our hypothetical social network.
 
 There are numerous ways to construct a property graph from raw files, RDDs, and even synthetic
 generators.
@@ -199,8 +203,8 @@ As with RDDs, each partition of the graph can be recreated on a different machin
 
 ### Graph Views
 
-In many cases we will to extract the vertex and edge RDD views of a graph (e.g., when aggregating or saving the result of calculation).
-As a consequence, the graph class contains members (i.e., `graph.vertices` and `graph.edges`) to access the vertices and edges of the graph.
+In many cases we will want to extract the vertex and edge RDD views of a graph (e.g., when aggregating or saving the result of calculation).
+As a consequence, the graph class contains members (`graph.vertices` and `graph.edges`) to access the vertices and edges of the graph.
 While these members extend `RDD[(VertexId, V)]` and `RDD[Edge[E]]` they are actually backed by optimized representations that leverage the internal GraphX representation of graph data.
 
 Use `graph.vertices` to display the names of the users that are at least `30` years old.  The output should contain (in addition to lots of log messages):
@@ -212,6 +216,19 @@ Ed is 55
 Charlie is 65
 </pre>
 
+Here is a hint:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
+{% highlight scala %}
+graph.vertices.filter { /** Implement */ }.collect.foreach { /** implement */ }
+{% endhighlight %}
+</div>
+</div>
+</div>
+
+
 Here are a few solutions:
 
 <div class="codetabs">
@@ -219,15 +236,15 @@ Here are a few solutions:
 <div class="solution" markdown="1">
 {% highlight scala %}
 // Solution 1
-graph.vertices filter { case (id, (name, age)) => age > 30 } foreach {
+graph.vertices.filter { case (id, (name, age)) => age > 30 }.collect.foreach {
   case (id, (name, age)) => println(s"$name is $age")
 }
 
 // Solution 2
-graph.vertices.filter(v => v._2._2 > 30).foreach(v => println(s"${v._2._1} is ${v._2._2}"))
+graph.vertices.filter(v => v._2._2 > 30).collect.foreach(v => println(s"${v._2._1} is ${v._2._2}"))
 
 // Solution 3
-for ((id,(name,age)) <- graph.vertices filter { case (id,(name,age)) => age > 30 }) {
+for ((id,(name,age)) <- graph.vertices.filter { case (id,(name,age)) => age > 30 }.collect) {
   println(s"$name is $age")
 }
 {% endhighlight %}
@@ -272,11 +289,10 @@ Ed likes Charlie
 Ed likes Fran
 </pre>
 
-Need a hint?  Here is a partial solution:
+Here is a partial solution:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
 {% highlight scala %}
 for (triplet <- graph.triplets) {
  /**
@@ -291,9 +307,8 @@ for (triplet <- graph.triplets) {
 {% endhighlight %}
 </div>
 </div>
-</div>
 
-Here is the full solution:
+Here is the solution:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -322,13 +337,80 @@ for (triplet <- graph.triplets.filter(t => t.attr > 5)) {
 </div>
 </div>
 
-
-
 ## Graph Operators
 
-Just as RDDs have basic operations like `map`, `filter`, and `reduceByKey`, property graphs also have a collection of basic operators that take user defined functions and produce new graphs with transformed properties and structure.
-The core operators that have optimized implementations are defined in [`Graph`][Graph] and convenient operators that are expressed as a compositions of the core operators are defined in [`GraphOps`][GraphOps].
+Just as RDDs have basic operations like `count`, `map`, `filter`, and `reduceByKey`, property graphs also have a collection of basic operations.
+The following is a list of some of the many functions exposed by the Graph API.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+/** Summary of the functionality in the property graph */
+class Graph[VD, ED] {
+  // Information about the Graph
+  val numEdges: Long
+  val numVertices: Long
+  val inDegrees: VertexRDD[Int]
+  val outDegrees: VertexRDD[Int]
+  val degrees: VertexRDD[Int]
+
+  // Views of the graph as collections
+  val vertices: VertexRDD[VD]
+  val edges: EdgeRDD[ED]
+  val triplets: RDD[EdgeTriplet[VD, ED]]
+
+  // Change the partitioning heuristic
+  def partitionBy(partitionStrategy: PartitionStrategy): Graph[VD, ED]
+
+  // Transform vertex and edge attributes
+  def mapVertices[VD2](map: (VertexID, VD) => VD2): Graph[VD2, ED]
+  def mapEdges[ED2](map: Edge[ED] => ED2): Graph[VD, ED2]
+  def mapEdges[ED2](map: (PartitionID, Iterator[Edge[ED]]) => Iterator[ED2]): Graph[VD, ED2]
+  def mapTriplets[ED2](map: EdgeTriplet[VD, ED] => ED2): Graph[VD, ED2]
+
+  // Modify the graph structure
+  def reverse: Graph[VD, ED]
+  def subgraph(
+      epred: EdgeTriplet[VD,ED] => Boolean = (x => true),
+      vpred: (VertexID, VD) => Boolean = ((v, d) => true))
+    : Graph[VD, ED]
+  def groupEdges(merge: (ED, ED) => ED): Graph[VD, ED]
+
+  // Join RDDs with the graph
+  def joinVertices[U](table: RDD[(VertexID, U)])(mapFunc: (VertexID, VD, U) => VD): Graph[VD, ED]
+  def outerJoinVertices[U, VD2](other: RDD[(VertexID, U)])
+      (mapFunc: (VertexID, VD, Option[U]) => VD2)
+    : Graph[VD2, ED]
+
+  // Aggregate information about adjacent triplets
+  def collectNeighbors(edgeDirection: EdgeDirection): VertexRDD[Array[(VertexID, VD)]]
+  def mapReduceTriplets[A: ClassTag](
+      mapFunc: EdgeTriplet[VD, ED] => Iterator[(VertexID, A)],
+      reduceFunc: (A, A) => A,
+      activeSetOpt: Option[(VertexRDD[_], EdgeDirection)] = None)
+    : VertexRDD[A]
+
+  // Iterative graph-parallel computation
+  def pregel[A](initialMsg: A, maxIterations: Int, activeDirection: EdgeDirection)(
+      vprog: (VertexID, VD, A) => VD,
+      sendMsg: EdgeTriplet[VD, ED] => Iterator[(VertexID,A)],
+      mergeMsg: (A, A) => A)
+    : Graph[VD, ED]
+
+  // Basic graph algorithms
+  def pageRank(tol: Double, resetProb: Double = 0.15): Graph[Double, Double]
+  def connectedComponents(): Graph[VertexID, ED]
+  def triangleCount(): Graph[Int, ED]
+  def stronglyConnectedComponents(numIter: Int): Graph[VertexID, ED]
+}
+~~~
+</div>
+</div>
+
+
+These functions are split between [`Graph`][Graph] and [`GraphOps`][GraphOps].
 However, thanks to the "magic" of Scala implicits the operators in `GraphOps` are automatically available as members of `Graph`.
+
 For example, we can compute the in-degree of each vertex (defined in `GraphOps`) by the following:
 
 [Graph]: api/graphx/index.html#org.apache.spark.graphx.Graph
@@ -342,16 +424,24 @@ val inDegrees: VertexRDD[Int] = graph.inDegrees
 </div>
 </div>
 
-In the above example the `graph.inDegrees` operators returned a `VertexRDD[Int]` (recall that this behaves like `RDD[(VertexId, Int)]`).  What if we wanted to incorporate the in and out degree of each vertex as a vertex property?  To do this we will use a set of common graph operators.  Paste the following code into the spark shell:
+In the above example the `graph.inDegrees` operators returned a `VertexRDD[Int]` (recall that this behaves like `RDD[(VertexId, Int)]`).  What if we wanted to incorporate the in and out degree of each vertex into the vertex property?  To do this we will use a set of common graph operators.
+
+Paste the following code into the spark shell:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
+// Define a class to more clearly model the user property
+case class User(name: String, age: Int, inDeg: Int, outDeg: Int)
+
+// Transform the
+val userGraph = graph.mapVertices{ case (id, (name, age)) => User(name, age, 0, 0) }
+
 // Fill in the degree information
-val degreeGraph = graph.outerJoinVertices(graph.inDegrees) {
-  (id, u, inDegOpt) => (u._1, u._2, inDegOpt.getOrElse(0))
+val degreeGraph = userGraph.outerJoinVertices(userGraph.inDegrees) {
+  case (id, u, inDegOpt) => User(u.name, u.age, inDegOpt.getOrElse(0), u.outDeg)
 }.outerJoinVertices(graph.outDegrees) {
-  (id, u, outDegOpt) => (u._1, u._2, u._3, outDegOpt.getOrElse(0))
+  case (id, u, outDegOpt) => User(u.name, u.age, u.inDeg, outDegOpt.getOrElse(0))
 }
 ~~~
 </div>
@@ -374,14 +464,14 @@ The first contains an `RDD` of vertex values and the second argument list takes 
 Note that it is possible that the input `RDD` may not contain values for some of the vertices in the graph.
 In these cases the `Option` argument is empty and `optOutDeg.getOrElse(0)` returns 0.
 
-Print the names of the users who like the same number of people who like them.
+Print the names of the users who liked by the same number of people they like.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
 degreeGraph.vertices.filter {
-  case (id, (name, age, inDeg, outDeg)) => inDeg == outDeg
+  case (id, u) => u.inDeg == u.outDeg
 }.collect.foreach(println(_))
 ~~~
 </div>
