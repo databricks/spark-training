@@ -28,6 +28,7 @@ The components we will cover at the first Spark Training are listed below.
 <ol start="4">
   <li><a href="realtime-processing-with-spark-streaming.html">Spark Streaming</a> <a href="http://spark-project.org/docs/latest/streaming-programming-guide.html">(project overview page)</a> - A stream processing layer on top of Spark.</li>
   <li><a href="machine-learning-with-spark.html">Machine Learning with Spark</a> - Implement K-Means clustering with Spark.</li>
+  <li><a href="graph-analytics-with-graphx.html">Graph Analytics with GraphX</a> - Explore graph-structured data (e.g., Web-Graph) and graph algorithms (e.g., PageRank) with GraphX.</li>
 </ol>
 
 
