@@ -3,7 +3,7 @@ layout: global
 title: Movie Recommendation with MLlib
 categories: [module]
 navigation:
-  weight: 91
+  weight: 78
   show: true
 ---
 
