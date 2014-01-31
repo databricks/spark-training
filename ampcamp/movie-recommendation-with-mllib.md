@@ -90,13 +90,13 @@ object MovieLensALS {
 
     // load ratings and movie titles
 
-       val ratings = sc.textFile("/Users/meng/share/data/movielens/ml-1m/ratings.dat")
+       val ratings = sc.textFile("hdfs://" + masterHostname + ":9000/movielens/ratings.dat")
                  .map { line =>
       val fields = line.split("::")
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 
-    val movies = sc.textFile("/Users/meng/share/data/movielens/ml-1m/movies.dat")
+    val movies = sc.textFile("hdfs://" + masterHostname + ":9000/movielens/movies.dat")
                    .map { line =>
       val fields = line.split("::")
       (fields(0).toInt, fields(1))
