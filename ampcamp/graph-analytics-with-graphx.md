@@ -298,6 +298,40 @@ val facts: RDD[String] =
 facts.collect.foreach(println(_))
 {% endhighlight %}
 
+
+### The Map Reduce Triplets Operator
+
+Using the property graph from Section 2.1, suppose we want to find the oldest follower of each user. The [`mapReduceTriplets`][Graph.mapReduceTriplets] operator allows us to do this. It enables neighborhood aggregation, and its simplified signature is as follows:
+
+[Graph.mapReduceTriplets]: api/graphx/index.html#org.apache.spark.graphx.Graph@mapReduceTriplets[A](mapFunc:org.apache.spark.graphx.EdgeTriplet[VD,ED]=&gt;Iterator[(org.apache.spark.graphx.VertexId,A)],reduceFunc:(A,A)=&gt;A,activeSetOpt:Option[(org.apache.spark.graphx.VertexRDD[_],org.apache.spark.graphx.EdgeDirection)])(implicitevidence$10:scala.reflect.ClassTag[A]):org.apache.spark.graphx.VertexRDD[A]
+
+{% highlight scala %}
+class Graph[VD, ED] {
+  def mapReduceTriplets[A](
+      map: EdgeTriplet[VD, ED] => Iterator[(VertexId, A)],
+      reduce: (A, A) => A): VertexRDD[A]
+}
+{% endhighlight %}
+
+The map function is applied to each edge triplet in the graph, yielding messages destined to the adjacent vertices. The reduce function combines messages destined to the same vertex. The operation results in a `VertexRDD` containing an aggregated message for each vertex.
+
+We can find the oldest follower for each user by sending age messages along each edge and aggregating them with the `max` function:
+
+{% highlight scala %}
+val graph: Graph[(String, Int), Int] // Constructed from above
+val oldestFollowerAge: VertexRDD[Int] = graph.mapReduceTriplets[Int](
+  edge => Iterator((edge.dstId, edge.srcAttr._2)),
+  (a, b) => max(a, b))
+
+val withNames = graph.vertices.innerJoin(oldestFollowerAge) {
+  (id, pair, oldestAge) => (pair._1, oldestAge)
+}
+
+withNames.collect.foreach(println(_))
+{% endhighlight %}
+
+As an exercise, try finding the average follower age for each user instead of the max.
+
 # Graph Operators
 
 Just as RDDs have basic operations like `map`, `filter`, and `reduceByKey`, property graphs also
@@ -1793,5 +1827,3 @@ We are now set to start implementing the K-means algorithm, so remove or comment
     </div>
 
 1. **Challenge Exercise:** The K-Means implementation uses a `groupBy` and `mapValues` to compute the new centers. This can be optimized by using a running sum of the vectors that belong to a cluster and running counter of the number of vectors present in a cluster. How would you use the Spark API to implement this?
-
-
