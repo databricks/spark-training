@@ -536,7 +536,42 @@ withNames.collect.foreach(println(_))
 </div>
 </div>
 
-### TODO: Subgraph
+### Subgraph
+
+Suppose we want to find users in the above graph who are lonely so we can suggest new friends for them. The [subgraph][Graph.subgraph] operator takes vertex and edge predicates and returns the graph containing only the vertices that satisfy the vertex predicate (evaluate to true) and edges that satisfy the edge predicate *and connect vertices that satisfy the vertex predicate*.
+
+We can use the subgraph operator to consider only strong relationships with more than 2 likes. We do this by supplying an edge predicate only:
+
+[Graph.subgraph]: api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val graph: Graph[(String, Int), Int] // Constructed from above
+val strongRelationships: Graph[(String, Int), Int] =
+  graph.subgraph(epred = (edge => edge.attr > 2))
+~~~
+</div>
+</div>
+
+As an exercise, use this subgraph to find lonely users who have no strong relationships (i.e., have degree 0 in the subgraph).
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
+~~~
+val strongRelationships: Graph[(String, Int), Int] = // from above
+
+val lonely = strongRelationships.degrees.filter {
+  case (id, degree) => degree == 0
+}
+
+lonely.collect.foreach(println(_))
+~~~
+</div>
+</div>
+</div>
+
 
 ### TODO: Reverse?
 
@@ -771,4 +806,3 @@ with the code and to check out the [Programming Guide](TODO: Link) for further d
 
 
 Bug reports and feature requests are welcomed.
-
