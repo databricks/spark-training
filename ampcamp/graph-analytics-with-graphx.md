@@ -24,7 +24,7 @@ navigation:
 
 
 GraphX is the new (alpha) Spark API for graphs (e.g., Web-Graphs and Social Networks) and graph-parallel computation (e.g., PageRank and Collaborative Filtering).
-At a high-level, GraphX extends the Spark RDD by introducing the [Resilient Distributed Property Graph](#property_graph): a directed multigraph with properties attached to each vertex and edge.
+At a high-level, GraphX extends the Spark RDD abstraction by introducing the [Resilient Distributed Property Graph](#property_graph): a directed multigraph with properties attached to each vertex and edge.
 To support graph computation, GraphX exposes a set of fundamental operators (e.g., [subgraph](#structural_operators), [joinVertices](#join_operators), and [mapReduceTriplets](#mrTriplets)) as well as an optimized variant of the [Pregel](#pregel) API.
 In addition, GraphX includes a growing collection of graph [algorithms](#graph_algorithms) and
 [builders](#graph_builders) to simplify graph analytics tasks.
@@ -47,12 +47,11 @@ By restricting the types of computation that can be expressed and introducing ne
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
-However, the same restrictions that enable these substantial performance gains also make it
-difficult to express many of the important stages in a typical graph-analytics pipeline:
-constructing the graph, modifying its structure, or expressing computation that spans multiple
-graphs.
-Furthermore, how we look at data depends on our objectives and the same raw data may have
-many different table and graph views.
+The same restrictions that enable graph-parallel systems to achieve substantial performance gains also limit their ability to express many of the important stages in a typical graph-analytics pipeline.
+Moreover while graph-parallel systems are optimized for iterative diffusion algorithms like PageRank they are not well suited to more basic tasks like constructing the graph, modifying its structure, or expressing computation that spans multiple graphs.
+
+These tasks typically require data-movement outside of the graph topology and are often more naturally expressed as operations on tables in more traditional data-parallel systems like Map-Reduce.
+Furthermore, how we look at data depends on our objectives and the same raw data may require many different table and graph views throughout the analysis process:
 
 <p style="text-align: center;">
   <img src="img/tables_and_graphs.png"
@@ -62,9 +61,9 @@ many different table and graph views.
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
-As a consequence, it is often necessary to be able to move between table and graph views of the same physical data and to leverage the properties of each view to easily and efficiently express
+Moreover, it is often desirable to be able to move between table and graph views of the same physical data and to leverage the properties of each view to easily and efficiently express
 computation.
-However, existing graph analytics pipelines must compose graph-parallel and data- parallel systems, leading to extensive data movement and duplication and a complicated programming
+However, existing graph analytics pipelines compose graph-parallel and data-parallel systems, leading to extensive data movement and duplication and a complicated programming
 model.
 
 <p style="text-align: center;">
@@ -92,12 +91,12 @@ To get started you first need to import GraphX.  Run the following in your Spark
 <div data-lang="scala">
 {% highlight scala %}
 import org.apache.spark.graphx._
-// To make some of the examples work we will also need RDD
 import org.apache.spark.rdd.RDD
 {% endhighlight %}
 </div>
 </div>
 
+Great! You have now "installed" GraphX.
 
 ### The Property Graph
 <a name="property_graph"></a>
