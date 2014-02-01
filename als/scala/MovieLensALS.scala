@@ -13,25 +13,32 @@ object MovieLensALS {
   def main(args: Array[String]) {
     Logger.getLogger("spark").setLevel(Level.INFO)
 
+    if (args.length != 1) {
+      println("Usage: MovieLensALS movieLensHomeDir")
+      exit(1)
+    }
+
+    val movieLensHomeDir = args(0)
+
     // set up environment
 
-    val sc = new SparkContext(
-      "spark://xiangruis-mbp.att.net:7077",
-      "MovieLensALS",
-      "/Users/meng/src/spark-mengxr/dist", 
-      Seq("target/scala-2.10/movielens-als_2.10-0.0.jar")
-    )
+    val sparkHome = "/root/spark"
+    val jarFile = "target/scala-2.10/movielens-als_2.10-0.0.jar"
+    val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
+    val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
+
+    val sc = new SparkContext(master, "MovieLensALS", sparkHome, Seq(jarFile))
 
     // load ratings and movie titles
 
-    val ratings = sc.textFile("/Users/meng/share/data/movielens/ml-1m/ratings.dat")
+    val ratings = sc.textFile(movieLensHome + "/ratings.dat")
                  .map { line =>
       val fields = line.split("::")
       // format: (timestamp % 10, Rating(user, product, rating))
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 
-    val movies = sc.textFile("/Users/meng/share/data/movielens/ml-1m/movies.dat")
+    val movies = sc.textFile(movieLensHome + "/movies.dat")
                    .map { line =>
       val fields = line.split("::")
       // format: (movieId, movieName)
@@ -137,8 +144,8 @@ object MovieLensALS {
   
   /** Elicitate ratings from command-line. */
   def elicitateRatings(movies: Seq[(Int, String)]) = {
-    val usage = "Please rate the following movie (1-5 (best), or 0 if not seen):"
-    println(usage)
+    val prompt = "Please rate the following movie (1-5 (best), or 0 if not seen):"
+    println(prompt)
     val ratings = movies.flatMap { x =>
       var rating: Option[Rating] = None
       var valid = false
@@ -147,7 +154,7 @@ object MovieLensALS {
         try {
           val r = Console.readInt
           if (r < 0 || r > 5) {
-            println(usage)
+            println(prompt)
           } else {
             valid = true
             if (r > 0) {
@@ -155,7 +162,7 @@ object MovieLensALS {
             }
           }
         } catch {
-          case e: Exception => println(usage)
+          case e: Exception => println(prompt)
         }
       }
       rating match {
