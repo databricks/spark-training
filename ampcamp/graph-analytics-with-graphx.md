@@ -157,22 +157,15 @@ Using `sc.parallelize` (introduced in the Spark tutorial) construct the followin
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-{% highlight scala %}
+~~~
 val vertexRDD: RDD[(Long, (String, Int))] = // Implement
 val edgeRDD: RDD[Edge[Int]] = // Implement
-{% endhighlight %}
-</div>
-</div>
-
-In case you get stuck (or skipped the Spark tutorial) here is the solution.
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+~~~
 <div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 val vertexRDD: RDD[(Long, (String, Int))] = sc.parallelize(vertexArray)
 val edgeRDD: RDD[Edge[Int]] = sc.parallelize(edgeArray)
-{% endhighlight %}
+~~~
 </div>
 </div>
 </div>
@@ -216,21 +209,11 @@ Here is a hint:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 graph.vertices.filter { /** Implement */ }.collect.foreach { /** implement */ }
-{% endhighlight %}
-</div>
-</div>
-</div>
-
-
-Here are a few solutions:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+~~~
 <div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 // Solution 1
 graph.vertices.filter { case (id, (name, age)) => age > 30 }.collect.foreach {
   case (id, (name, age)) => println(s"$name is $age")
@@ -243,7 +226,7 @@ graph.vertices.filter(v => v._2._2 > 30).collect.foreach(v => println(s"${v._2._
 for ((id,(name,age)) <- graph.vertices.filter { case (id,(name,age)) => age > 30 }.collect) {
   println(s"$name is $age")
 }
-{% endhighlight %}
+~~~
 </div>
 </div>
 </div>
@@ -289,7 +272,7 @@ Here is a partial solution:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-{% highlight scala %}
+~~~
 for (triplet <- graph.triplets) {
  /**
    * Triplet has the following Fields:
@@ -300,20 +283,13 @@ for (triplet <- graph.triplets) {
    *   triplet.dstId: VertexId
    */
 }
-{% endhighlight %}
-</div>
-</div>
-
-Here is the solution:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+~~~
 <div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 for (triplet <- graph.triplets) {
   println( s"${triplet.srcAttr._1} likes ${triplet.dstAttr._1}")
 }
-{% endhighlight %}
+~~~
 </div>
 </div>
 </div>
@@ -324,11 +300,11 @@ For extra credit, find the lovers.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 for (triplet <- graph.triplets.filter(t => t.attr > 5)) {
   println( s"${triplet.srcAttr._1} loves ${triplet.dstAttr._1}")
 }
-{% endhighlight %}
+~~~
 </div>
 </div>
 </div>
@@ -414,9 +390,9 @@ For example, we can compute the in-degree of each vertex (defined in `GraphOps`)
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-{% highlight scala %}
+~~~
 val inDegrees: VertexRDD[Int] = graph.inDegrees
-{% endhighlight %}
+~~~
 </div>
 </div>
 
@@ -499,7 +475,6 @@ We can find the oldest follower for each user by sending age messages along each
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val graph: Graph[(String, Int), Int] // Constructed from above
 val oldestFollowerAge: VertexRDD[Int] = graph.mapReduceTriplets[Int](
   edge => Iterator((edge.dstId, edge.srcAttr._2)),
   (a, b) => max(a, b))
@@ -519,7 +494,6 @@ As an exercise, try finding the average follower age for each user instead of th
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-val graph: Graph[(String, Int), Int] // Constructed from above
 val oldestFollowerAge: VertexRDD[Int] = graph.mapReduceTriplets[Int](
   // map function
   edge => Iterator((edge.dstId, (1.0, edge.srcAttr._2))),
@@ -589,7 +563,7 @@ If you don't already have the Spark shell open, start it now and import the `org
 <div data-lang="scala" markdown="1">
 ~~~
 import org.apache.spark.graphx._
-import org.apache.spark.graphx.RDD
+import org.apache.spark.rdd.RDD
 ~~~
 </div>
 </div>
@@ -612,7 +586,7 @@ val wiki: RDD[String] = // implement
 ~~~
 // We tell Spark to cache the result in memory so we won't have to
 // repeat the expensive disk IO
-val wiki: RDD[String] = sc.textFile("/wiki_dump/part*").cache
+val wiki: RDD[String] = sc.textFile("/enwiki_txt/part*", 20).cache
 ~~~
 </div>
 </div>
@@ -666,14 +640,14 @@ parse from the raw string, and filter out articles that are malformed or redirec
 <div data-lang="scala" markdown="1">
 ~~~
 // Define the article class
-class Article(val title: String, val body: String)
+case class Article(val title: String, val body: String)
 
 // Parse the articles
 val articles = wiki.map(_.split('\t')).
   // two filters on article format
-  filter(line => (line.length > 1 && !(line(1) contains "REDIRECT")).
+  filter(line => (line.length > 1 && !(line(1) contains "REDIRECT"))).
   // store the results in an object for easier access
-  map(line => new Article(line(0).trim, line(1).trim))
+  map(line => new Article(line(0).trim, line(1).trim)).cache
 ~~~
 </div>
 </div>
@@ -745,9 +719,9 @@ In our case, we are going to use a dummy value of "xxxxx" for our default
 vertex attribute.
 We pick "xxxxx" as there are no Wikipedia articles with that as the title, and so we will be able to use the dummy value as a flag to filter out any artificially created vertices and all edges that point to them at the same time.
 These edges and dummy vertices are an artifact of our imperfect, dirty dataset, something that inevitably occurs in real world analytics pipelines.
-Note that this is another round of data-cleaning, but one that is done based on properties of the graph, making it much simpler to do with a graph-view of our data.
+<!-- Note that this is another round of data-cleaning, but one that is done based on properties of the graph, making it much simpler to do with a graph-view of our data. -->
 
-Complete the following:
+Complete the following by restricting the graph to vertices that do not have "xxxxx" in the title:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
