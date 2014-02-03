@@ -1,12 +1,13 @@
 import java.util.Random
 
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
+
+import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd._
 import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationModel}
-
-import org.apache.log4j.Logger
-import org.apache.log4j.Level
 
 object MovieLensALS {
 
@@ -14,7 +15,7 @@ object MovieLensALS {
     Logger.getLogger("spark").setLevel(Level.INFO)
 
     if (args.length != 1) {
-      println("Usage: MovieLensALS movieLensHomeDir")
+      println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
       exit(1)
     }
 
@@ -22,23 +23,31 @@ object MovieLensALS {
 
     // set up environment
 
-    val sparkHome = "/root/spark"
+    // val sparkHome = "/root/spark"
+    val sparkHome = "/Users/meng/src/spark-mengxr/dist"
     val jarFile = "target/scala-2.10/movielens-als_2.10-0.0.jar"
-    val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
-    val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
+    // val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
+    val master = "spark://xm.local:7077"
+    // val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
 
-    val sc = new SparkContext(master, "MovieLensALS", sparkHome, Seq(jarFile))
+    val conf = new SparkConf()
+                 .setMaster(master)
+                 .setAppName("MovieLensALS")
+                 .set("spark.executor.memory", "2g")
+                 .setJars(Seq(jarFile))
+
+    val sc = new SparkContext(conf)
 
     // load ratings and movie titles
 
-    val ratings = sc.textFile(movieLensHome + "/ratings.dat")
+    val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat")
                  .map { line =>
       val fields = line.split("::")
       // format: (timestamp % 10, Rating(user, product, rating))
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 
-    val movies = sc.textFile(movieLensHome + "/movies.dat")
+    val movies = sc.textFile(movieLensHomeDir + "/movies.dat")
                    .map { line =>
       val fields = line.split("::")
       // format: (movieId, movieName)
@@ -82,7 +91,7 @@ object MovieLensALS {
     println("Training: " + numTraining + ", validation: " + numValidation + ", test: " + numTest)
 
     // train models and evaluate them on the validation set
-    val ranks = List(4, 8, 12)
+    val ranks = List(8, 12, 16)
     val lambdas = List(0.1, 1.0, 10.0)
     val numIter = 25
     var bestModel: Option[MatrixFactorizationModel] = None
