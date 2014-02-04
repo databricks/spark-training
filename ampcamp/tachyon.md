@@ -257,7 +257,9 @@ counts.saveAsTextFile("tachyon://...")
 </div>
 
 From web user interface, or command line, you can see that the `\LICENSE.txt` file is in memory
-now.
+now. So, each time when a new Spark program comes up, it will load in memory data directly from
+Tachyon. In the meantime, we are also working on other features to make Tachyon further enhance
+Spark's performance.
 
 This brings us to the end of the Tachyon chapter of the tutorial. We encourage you to continue
 playing with the code and to check out the [project website](http://tachyon-project.org/) for
