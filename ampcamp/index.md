@@ -70,6 +70,11 @@ table td, table th {
   <td class="yes">yes</td>
   <td class="yes">yes</td>
   <td class="yes">yes</td>
+</tr><tr>
+  <td>GraphX - Graph Analytics</td>
+  <td class="yes">yes</td>
+  <td class="no">no</td>
+  <td class="no">no</td>
 </tr>
 </tbody>
 </table>
