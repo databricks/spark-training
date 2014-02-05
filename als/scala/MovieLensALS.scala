@@ -27,7 +27,7 @@ object MovieLensALS {
     val sparkHome = "/Users/meng/src/spark-mengxr/dist"
     val jarFile = "target/scala-2.10/movielens-als_2.10-0.0.jar"
     // val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
-    val master = "spark://xm.local:7077"
+    val master = "spark://127.0.0.1:7077"
     // val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
 
     val conf = new SparkConf()
