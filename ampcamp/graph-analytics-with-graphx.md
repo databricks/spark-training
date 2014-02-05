@@ -210,7 +210,7 @@ Here is a hint:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-graph.vertices.filter { /** Implement */ }.collect.foreach { /** implement */ }
+graph.vertices.filter { /* implement */ }.collect.foreach { /* implement */ }
 ~~~
 <div class="solution" markdown="1">
 ~~~
@@ -568,6 +568,15 @@ import org.apache.spark.rdd.RDD
 </div>
 </div>
 
+GraphX requires the Kryo serializer to be enabled for good performance. Open `http://<MASTER_URL>:4040/environment/` and ensure that the `spark.serializer.class` property is set to `org.apache.spark.serializer.KryoSerializer`. If not, add the following lines to `conf/spark-env.sh`, copy it to the slaves, and restart the Spark cluster:
+
+~~~
+SPARK_JAVA_OPTS+='
+ -Dspark.serializer.class=org.apache.spark.serializer.KryoSerializer
+ -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator'
+export SPARK_JAVA_OPTS
+~~~
+
 If you are using a cluster provided by the AMPLab for this tutorial, you already have a dataset that contains
 all of the English Wikipedia articles in HDFS on your cluster. If you are following along at
 home: TODO (what should they do???).
@@ -584,9 +593,11 @@ val wiki: RDD[String] = // implement
 ~~~
 <div class="solution" markdown="1">
 ~~~
-// We tell Spark to cache the result in memory so we won't have to
-// repeat the expensive disk IO
-val wiki: RDD[String] = sc.textFile("/enwiki_txt/part*", 20).cache
+
+// We tell Spark to cache the result in memory so we won't have to repeat the
+// expensive disk IO. We coalesce down to 20 partitions to avoid excessive
+// communication.
+val wiki: RDD[String] = sc.textFile("/enwiki_txt/part*").coalesce(20).cache
 ~~~
 </div>
 </div>
@@ -652,6 +663,17 @@ val articles = wiki.map(_.split('\t')).
 </div>
 </div>
 
+We can see how many cleaned articles are left, computing and caching the cleaned article RDD in the process:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+articles.count
+~~~
+</div>
+</div>
+
+
 ### Making a Vertex RDD
 
 At this point, our data is in a clean enough format that we can create our vertex RDD.
@@ -663,19 +685,31 @@ Finish implementing the following:
 <div data-lang="scala" markdown="1">
 ~~~
 // Hash function to assign an Id to each article
-def pageHash(title: String) = title.toLowerCase.replace(" ", "").hashCode
+def pageHash(title: String): VertexId = {
+  title.toLowerCase.replace(" ", "").hashCode.toLong
+}
 
 // The vertices with id and article title:
-val vertices: RDD[(VertexId, String)] = /** Implement */
+val vertices: RDD[(VertexId, String)] = /* implement */
 ~~~
 <div class="solution" markdown="1">
 ~~~
 // Hash function to assign an Id to each article
 def pageHash(title: String) = title.toLowerCase.replace(" ", "").hashCode
 // The vertices with id and article title:
-val vertices = articles.map(a => (pageHash(a.title), a.title))
+val vertices = articles.map(a => (pageHash(a.title), a.title)).cache
 ~~~
 </div>
+</div>
+</div>
+
+Again, let's force the vertices RDD by counting it:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+vertices.count
+~~~
 </div>
 </div>
 
@@ -710,33 +744,44 @@ This code extracts all the outbound links on each page and produces an RDD of ed
 We are finally ready to create our graph.
 Note that at this point, we have been using core Spark dataflow operators, working with our data in a table view.
 Switching to a graph view of our data is now as simple as calling the Graph constructor with our vertex RDD, our edge RDD, and a default vertex attribute.
-The default vertex attribute is used to initialize vertices that are not present in the vertex RDD, but are found link edges (links).
+The default vertex attribute is used to initialize vertices that are not present in the vertex RDD, but are mentioned by an edge (that is, pointed to by a link).
 In the Wikipedia data there are often links to nonexistent pages.
 <!-- GraphX takes the safe approach by creating new vertices in this situation, rather than let the graph have "dangling edges" or assuming the user's data is perfect.
  -->
 
-In our case, we are going to use a dummy value of "xxxxx" for our default
-vertex attribute.
-We pick "xxxxx" as there are no Wikipedia articles with that as the title, and so we will be able to use the dummy value as a flag to filter out any artificially created vertices and all edges that point to them at the same time.
-These edges and dummy vertices are an artifact of our imperfect, dirty dataset, something that inevitably occurs in real world analytics pipelines.
+We will use an empty title string as the default vertex attribute to represent the target of a broken link.
+Note that this concern arises because our dataset is imperfect ("dirty"), as might occur in a real world analytics pipeline.
 <!-- Note that this is another round of data-cleaning, but one that is done based on properties of the graph, making it much simpler to do with a graph-view of our data. -->
 
-Complete the following by restricting the graph to vertices that do not have "xxxxx" in the title:
+Complete the following by restricting the graph to vertices with non-empty titles:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val graph = Graph(vertices, edges, "xxxxx").cache
-val cleanGraph = graph.subgraph(vpred = /* Implement */)
+val graph = Graph(vertices, edges, "").cache
+val cleanGraph = graph.subgraph(vpred = /* implement */).cache
 ~~~
 <div class="solution" markdown="1">
 ~~~
-val graph = Graph(vertices, edges, "xxxxx").cache
-val cleanGraph = graph.subgraph(vpred = {(v, d) => !(d contains "xxxxx")}).cache
+val graph = Graph(vertices, edges, "").cache
+val cleanGraph = graph.subgraph(vpred = {(v, d) => d.nonEmpty}).cache
 ~~~
 </div>
 </div>
 </div>
+
+Let's force these graphs to be computed by counting some of their attributes:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+graph.vertices.count
+cleanGraph.triplets.count
+~~~
+</div>
+</div>
+
+This should a while (about 3 minutes on a 5-node cluster) because it triggers the string parsing from the previous section.
 
 ### Running PageRank on Wikipedia
 
@@ -768,14 +813,35 @@ to find the titles of the ten most important articles.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val titleAndPRGraph = cleanGraph.outerJoinVertices(ranksG.vertices)({(v, title, r) => (r.getOrElse(0.0), title)})
-titleAndPrGraph.vertices.top(10)(Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)).foreach(t => println(t._2._2 + ": " + t._2._1))
+val titleAndPRGraph = cleanGraph.outerJoinVertices(prGraph.vertices) {
+  (v, title, rank) => (rank.getOrElse(0.0), title)
+}
+
+titleAndPrGraph.vertices.top(10) {
+  Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)
+}.foreach(t => println(t._2._2 + ": " + t._2._1))
 ~~~
 </div>
 </div>
 
-This brings us to the end of the GraphX chapter of the tutorial. We encourage you to continue playing
-with the code and to check out the [Programming Guide](TODO: Link) for further documentation about the system.
+Finally, let's find the most important page within the subgraph of Wikipedia that mentions Berkeley in the title:
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val berkeleyGraph = cleanGraph.subgraph(vpred = (v, t) => t.toLowerCase contains "berkeley")
+
+berkeleyGraph.outerJoinVertices(prGraph.vertices) {
+  (v, title, r) => (r.getOrElse(0.0), title)
+}.vertices.top(10) {
+  Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)
+}.foreach(t => println(t._2._2 + ": " + t._2._1))
+~~~
+</div>
+</div>
+
+This brings us to the end of the GraphX chapter of the tutorial. We encourage you to continue playing with the code and to check out the [GraphX Programming Guide][GraphX Programming Guide] for further documentation about the system.
+
+[GraphX Programming Guide]: http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html
 
 Bug reports and feature requests are welcomed.
