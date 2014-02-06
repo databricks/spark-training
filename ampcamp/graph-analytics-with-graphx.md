@@ -21,9 +21,17 @@ navigation:
 
 GraphX is the new (alpha) Spark API for graphs (e.g., Web-Graphs and Social Networks) and graph-parallel computation (e.g., PageRank and Collaborative Filtering).
 At a high-level, GraphX extends the Spark RDD abstraction by introducing the [Resilient Distributed Property Graph](#property_graph): a directed multigraph with properties attached to each vertex and edge.
-To support graph computation, GraphX exposes a set of fundamental operators (e.g., [subgraph](#structural_operators), [joinVertices](#join_operators), and [mapReduceTriplets](#mrTriplets)) as well as an optimized variant of the [Pregel](#pregel) API.
-In addition, GraphX includes a growing collection of graph [algorithms](#graph_algorithms) and
-[builders](#graph_builders) to simplify graph analytics tasks.
+To support graph computation, GraphX exposes a set of fundamental operators (e.g., [subgraph][subgraph], [joinVertices][joinVertices], and [mapReduceTriplets][mapReduceTriplets]) as well as an optimized variant of the [Pregel](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#pregel) API.
+In addition, GraphX includes a growing collection of graph [algorithms](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#graph_algorithms) and
+[builders](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#graph_builders) to simplify graph analytics tasks.
+
+[subgraph]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
+
+[joinVertices]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.GraphOps@joinVertices[U](RDD[(VertexId,U)])((VertexId,VD,U)⇒VD)(ClassTag[U]):Graph[VD,ED]
+
+[mapReduceTriplets]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@mapReduceTriplets[A](mapFunc:org.apache.spark.graphx.EdgeTriplet[VD,ED]=>Iterator[(org.apache.spark.graphx.VertexId,A)],reduceFunc:(A,A)=>A,activeSetOpt:Option[(org.apache.spark.graphx.VertexRDD[_],org.apache.spark.graphx.EdgeDirection)])(implicitevidence$10:scala.reflect.ClassTag[A]):org.apache.spark.graphx.VertexRDD[A]
+
+[graphAlgorithms]: http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#graph_algorithms
 
 In this chapter we use GraphX to analyze Wikipedia data and implement graph algorithms in Spark.
 The GraphX API is currently only available in Scala but we plan to provide Java and Python bindings in the future.
@@ -75,8 +83,11 @@ The GraphX API enables users to view data both as graphs and as collections (i.e
 
 Prior to the release of GraphX, graph computation in Spark was expressed using Bagel, an implementation of Pregel.
 GraphX improves upon Bagel by exposing a richer property graph API, a more streamlined version of the Pregel abstraction, and system optimizations to improve performance and reduce memory overhead.
-While we plan to eventually deprecate Bagel, we will continue to support the [Bagel API](api/bagel/index.html#org.apache.spark.bagel.package) and [Bagel programming guide](bagel-programming-guide.html).
+While we plan to eventually deprecate Bagel, we will continue to support the [Bagel API][BagelAPI] and [Bagel programming guide][BagelGuide].
 However, we encourage Bagel users to explore the new GraphX API and comment on issues that may complicate the transition from Bagel.
+
+[BagelAPI]: http://spark.incubator.apache.org/docs/latest/api/bagel/index.html#org.apache.spark.bagel.Bagel$
+[BagelGuide]: http://spark.incubator.apache.org/docs/latest/bagel-programming-guide.html
 
 
 ## Introduction to the GraphX API
@@ -97,14 +108,15 @@ Great! You have now "installed" GraphX.
 ### The Property Graph
 <a name="property_graph"></a>
 
-[PropertyGraph]: api/graphx/index.html#org.apache.spark.graphx.Graph
-
-The [property graph](PropertyGraph) is a directed multigraph with properties attached to each vertex and edge.
+The [property graph][Graph] is a directed multigraph with properties attached to each vertex and edge.
 A directed multigraph is a directed graph with potentially multiple parallel edges sharing the same source and destination vertex.
 The ability to support parallel edges simplifies modeling scenarios where multiple relationships (e.g., co-worker and friend) can appear between the same vertices.
 Each vertex is keyed by a *unique* 64-bit long identifier (`VertexID`).
 Similarly, edges have corresponding source and destination vertex identifiers.
 The properties are stored as Scala/Java objects with each edge and vertex in the graph.
+
+[Graph]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph
+
 
 Throughout the first half of this tutorial we will use the following toy property graph.
 While this is hardly <i>big data</i>, it provides an opportunity to learn about the graph data model and the GraphX API.  In this example we have a small social network with users and their ages modeled as vertices and likes modeled as directed edges.  In this fictional scenario users can like other users multiple times.
@@ -151,7 +163,7 @@ In the above example we make use of the [`Edge`][Edge] class. Edges have a `srcI
 `dstId` corresponding to the source and destination vertex identifiers. In addition, the `Edge`
 class has an `attr` member which stores the edge property (in this case the number of likes).
 
-[Edge]: api/graphx/index.html#org.apache.spark.graphx.Edge
+[Edge]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Edge
 
 Using `sc.parallelize` (introduced in the Spark tutorial) construct the following RDDs from `vertexArray` and `edgeArray`
 
@@ -234,7 +246,7 @@ for ((id,(name,age)) <- graph.vertices.filter { case (id,(name,age)) => age > 30
 In addition to the vertex and edge views of the property graph, GraphX also exposes a triplet view.
 The triplet view logically joins the vertex and edge properties yielding an `RDD[EdgeTriplet[VD, ED]]` containing instances of the [`EdgeTriplet`][EdgeTriplet] class. This *join* can be expressed in the following SQL expression:
 
-[EdgeTriplet]: api/graphx/index.html#org.apache.spark.graphx.EdgeTriplet
+[EdgeTriplet]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.EdgeTriplet
 
 {% highlight sql %}
 SELECT src.id, dst.id, src.attr, e.attr, dst.attr
@@ -385,8 +397,7 @@ However, thanks to the "magic" of Scala implicits the operators in `GraphOps` ar
 
 For example, we can compute the in-degree of each vertex (defined in `GraphOps`) by the following:
 
-[Graph]: api/graphx/index.html#org.apache.spark.graphx.Graph
-[GraphOps]: api/graphx/index.html#org.apache.spark.graphx.GraphOps
+[GraphOps]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.GraphOps
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -454,7 +465,8 @@ degreeGraph.vertices.filter {
 
 Using the property graph from Section 2.1, suppose we want to find the oldest follower of each user. The [`mapReduceTriplets`][Graph.mapReduceTriplets] operator allows us to do this. It enables neighborhood aggregation, and its simplified signature is as follows:
 
-[Graph.mapReduceTriplets]: api/graphx/index.html#org.apache.spark.graphx.Graph@mapReduceTriplets[A](mapFunc:org.apache.spark.graphx.EdgeTriplet[VD,ED]=&gt;Iterator[(org.apache.spark.graphx.VertexId,A)],reduceFunc:(A,A)=&gt;A,activeSetOpt:Option[(org.apache.spark.graphx.VertexRDD[_],org.apache.spark.graphx.EdgeDirection)])(implicitevidence$10:scala.reflect.ClassTag[A]):org.apache.spark.graphx.VertexRDD[A]
+[Graph.mapReduceTriplets]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@mapReduceTriplets[A](mapFunc:org.apache.spark.graphx.EdgeTriplet[VD,ED]=>Iterator[(org.apache.spark.graphx.VertexId,A)],reduceFunc:(A,A)=>A,activeSetOpt:Option[(org.apache.spark.graphx.VertexRDD[_],org.apache.spark.graphx.EdgeDirection)])(implicitevidence$10:scala.reflect.ClassTag[A]):org.apache.spark.graphx.VertexRDD[A]
+
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -516,7 +528,7 @@ Suppose we want to find users in the above graph who are lonely so we can sugges
 
 We can use the subgraph operator to consider only strong relationships with more than 2 likes. We do this by supplying an edge predicate only:
 
-[Graph.subgraph]: api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
+[Graph.subgraph]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -554,7 +566,7 @@ lonely.collect.foreach(println(_))
 ## Constructing an End-to-End Graph Analytics Pipeline on Real Data
 
 Now that we have learned about the individual components of the GraphX API, we are ready to put them together to build a real analytics pipeline.
-In this section, we will start with raw Wikipedia text data, use Spark operators to clean the data and extract structure, use GraphX operators to analyze the structure, and then use Spark operators
+In this section, we will start with Wikipedia link data, use Spark operators to clean the data and extract structure, use GraphX operators to analyze the structure, and then use Spark operators
 to examine the output of the graph analysis, all from the Spark shell.
 
 If you don't already have the Spark shell open, start it now and import the `org.apache.spark.graphx` package.
@@ -568,23 +580,54 @@ import org.apache.spark.rdd.RDD
 </div>
 </div>
 
-GraphX requires the Kryo serializer to be enabled for good performance. Open `http://<MASTER_URL>:4040/environment/` and ensure that the `spark.serializer.class` property is set to `org.apache.spark.serializer.KryoSerializer`. If not, add the following lines to `conf/spark-env.sh`, copy it to the slaves, and restart the Spark cluster:
+GraphX requires the Kryo serializer to be achieve maximum performance.
+To see what serializer is being used check the Spark Shell UI by going to `http://<MASTER_URL>:4040/environment/` and checking the `spark.serializer.class` property:
+
+<p style="text-align: center;">
+  <img src="img/spark_shell_ui_kryo.png"
+       title="Spark Shell UI"
+       alt="Spark Shell UI"
+       width="65%" />
+  <!-- Images are downsized intentionally to improve quality on retina displays -->
+</p>
+
+By default Kryo Serialization is not enabled.
+In this exercise we will walk through the process of enabling Kyro Serialization for the spark shell.
+First exit the current Spark Shell (either type exit or ctrl-c).
+
+Open a text editor (e.g., the one true editor emacs or vim) and add the following to `/root/spark/conf/spark-env.sh`:
 
 ~~~
 SPARK_JAVA_OPTS+='
  -Dspark.serializer.class=org.apache.spark.serializer.KryoSerializer
- -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator'
+ -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator '
 export SPARK_JAVA_OPTS
 ~~~
 
-If you are using a cluster provided by the AMPLab for this tutorial, you already have a dataset that contains
-all of the English Wikipedia articles in HDFS on your cluster. If you are following along at
-home: TODO (what should they do???).
+or if you are feeling lazy paste the following command in the terminal (not the spark shell):
+
+~~~
+echo -e "SPARK_JAVA_OPTS+=' -Dspark.serializer.class=org.apache.spark.serializer.KryoSerializer -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator ' \nexport SPARK_JAVA_OPTS" >> /root/spark/conf/spark-env.sh
+~~~
+
+Then run the following command which will update the conf on all machines in the cluster:
+
+~~~
+/root/spark-ec2/copy-dir.sh /root/spark/conf
+~~~
+
+Finally restart the cluster (by again running the following in the terminal):
+
+~~~
+/root/spark/sbin/stop-all.sh
+/root/spark/sbin/start-all.sh
+~~~
+
+If you now check `http://<MASTER_URL>:4040/environment/` the serializer property `spark.serializer.class` property should be set to `org.apache.spark.serializer.KryoSerializer`.
 
 ### Load the Wikipedia Articles
 
-The first step in our analytics pipeline is to ingest our raw data into Spark. Load the data (located at
-`"/wiki_dump/part*"` in HDFS) into an RDD:
+The first step in our analytics pipeline is to ingest our raw data into Spark. Load the data (located at `"/wiki_links/part*"` in HDFS) into an RDD:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -597,7 +640,7 @@ val wiki: RDD[String] = // implement
 // We tell Spark to cache the result in memory so we won't have to repeat the
 // expensive disk IO. We coalesce down to 20 partitions to avoid excessive
 // communication.
-val wiki: RDD[String] = sc.textFile("/enwiki_txt/part*").coalesce(20).cache
+val wiki: RDD[String] = sc.textFile("/wiki_links/part*").coalesce(20).cache
 ~~~
 </div>
 </div>
@@ -695,7 +738,7 @@ val vertices: RDD[(VertexId, String)] = /* implement */
 <div class="solution" markdown="1">
 ~~~
 // Hash function to assign an Id to each article
-def pageHash(title: String) = title.toLowerCase.replace(" ", "").hashCode
+def pageHash(title: String) = title.toLowerCase.replace(" ", "").hashCode.toLong
 // The vertices with id and article title:
 val vertices = articles.map(a => (pageHash(a.title), a.title)).cache
 ~~~
@@ -790,7 +833,7 @@ For this example, we are going to run [PageRank](http://en.wikipedia.org/wiki/Pa
 [`PageRank`](PageRank) is part of a small but growing library of common graph algorithms already implemented in GraphX.
 However, the implementation is simple and straightforward, and just consists of some initialization code, a vertex program and message combiner to pass to Pregel.
 
-[PageRank]: api/graphx/index.html#org.apache.spark.graphx.lib.PageRank
+[PageRank]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.lib.PageRank$
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
