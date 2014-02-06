@@ -788,13 +788,11 @@ Complete the following by restricting the graph to vertices with non-empty title
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val graph = Graph(vertices, edges, "").cache
-val cleanGraph = graph.subgraph(vpred = /* implement */).cache
+val graph = Graph(vertices, edges, "").subgraph(vpred = /* implement */).cache
 ~~~
 <div class="solution" markdown="1">
 ~~~
-val graph = Graph(vertices, edges, "").cache
-val cleanGraph = graph.subgraph(vpred = {(v, d) => d.nonEmpty}).cache
+val graph = Graph(vertices, edges, "").subgraph(vpred = {(v, d) => d.nonEmpty}).cache
 ~~~
 </div>
 </div>
@@ -816,7 +814,7 @@ Computing the triplets will require an additional join but this should run quick
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-cleanGraph.triplets.count
+graph.triplets.count
 ~~~
 </div>
 </div>
@@ -834,15 +832,15 @@ However, the implementation is simple and straightforward, and just consists of 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val prGraph = cleanGraph.staticPageRank(5).cache
+val prGraph = graph.staticPageRank(5).cache
 ~~~
 </div>
 </div>
 
 `Graph.staticPageRank` returns a graph whose vertex attributes are the PageRank values of each page.
 However, this means that while the resulting graph `prGraph` only contains the PageRank of the vertices and no longer contains the original vertex properties including the title.
-Luckily, we still have our `cleanGraph` that contains that information.
-Here, we can perform a join of the vertices in the `prGraph` that have the information about relative ranks of the vertices with the vertices in the `cleanGraph` that have the information about the mapping from vertex to article title.
+Luckily, we still have our `graph` that contains that information.
+Here, we can perform a join of the vertices in the `prGraph` that have the information about relative ranks of the vertices with the vertices in the `graph` that have the information about the mapping from vertex to article title.
 This yields a new graph that has combined both pieces of information, storing them both in a tuple
 as the new vertex attribute. We can then perform further table-based operators on this new list of vertices,
 such as finding the ten most important vertices (those with the highest pageranks) and printing out
@@ -852,7 +850,7 @@ to find the titles of the ten most important articles.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val titleAndPRGraph = cleanGraph.outerJoinVertices(prGraph.vertices) {
+val titleAndPRGraph = graph.outerJoinVertices(prGraph.vertices) {
   (v, title, rank) => (rank.getOrElse(0.0), title)
 }
 
@@ -868,7 +866,7 @@ Finally, let's find the most important page within the subgraph of Wikipedia tha
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val berkeleyGraph = cleanGraph.subgraph(vpred = (v, t) => t.toLowerCase contains "berkeley")
+val berkeleyGraph = graph.subgraph(vpred = (v, t) => t.toLowerCase contains "berkeley")
 
 berkeleyGraph.outerJoinVertices(prGraph.vertices) {
   (v, title, r) => (r.getOrElse(0.0), title)
