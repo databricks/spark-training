@@ -569,16 +569,7 @@ Now that we have learned about the individual components of the GraphX API, we a
 In this section, we will start with Wikipedia link data, use Spark operators to clean the data and extract structure, use GraphX operators to analyze the structure, and then use Spark operators
 to examine the output of the graph analysis, all from the Spark shell.
 
-If you don't already have the Spark shell open, start it now and import the `org.apache.spark.graphx` package.
 
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-import org.apache.spark.graphx._
-import org.apache.spark.rdd.RDD
-~~~
-</div>
-</div>
 
 GraphX requires the Kryo serializer to be achieve maximum performance.
 To see what serializer is being used check the Spark Shell UI by going to `http://<MASTER_URL>:4040/environment/` and checking the `spark.serializer.class` property:
@@ -625,6 +616,25 @@ Finally restart the cluster (by again running the following in the terminal):
 
 If you now check `http://<MASTER_URL>:4040/environment/` the serializer property `spark.serializer.class` property should be set to `org.apache.spark.serializer.KryoSerializer`.
 
+### Getting Started (Again)
+
+Start the spark shell:
+
+~~~
+/root/spark/bin/spark-shell
+~~~
+
+Import the standard packages.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+import org.apache.spark.graphx._
+import org.apache.spark.rdd.RDD
+~~~
+</div>
+</div>
+
 ### Load the Wikipedia Articles
 
 The first step in our analytics pipeline is to ingest our raw data into Spark. Load the data (located at `"/wiki_links/part*"` in HDFS) into an RDD:
@@ -632,34 +642,11 @@ The first step in our analytics pipeline is to ingest our raw data into Spark. L
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val wiki: RDD[String] = // implement
-~~~
-<div class="solution" markdown="1">
-~~~
-
 // We tell Spark to cache the result in memory so we won't have to repeat the
 // expensive disk IO. We coalesce down to 20 partitions to avoid excessive
 // communication.
-val wiki: RDD[String] = sc.textFile("/wiki_links/part*").coalesce(20).cache
+val wiki: RDD[String] = sc.textFile("/wiki_links/part*").coalesce(20)
 ~~~
-</div>
-</div>
-</div>
-
-### Count the articles
-
-Use the `RDD` count method:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
-~~~
-// Notice that count is not just doing the count but also triggers the wiki RDD's lazy evaluation.
-// This means that the read from HDFS is being performed here as well.
-wiki.count
-// res0: Long = 13449972
-~~~
-</div>
 </div>
 </div>
 
@@ -813,18 +800,27 @@ val cleanGraph = graph.subgraph(vpred = {(v, d) => d.nonEmpty}).cache
 </div>
 </div>
 
-Let's force these graphs to be computed by counting some of their attributes:
+Let's force these graphs to be computed by counting some of their attributes (this might take two minutes):
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
 graph.vertices.count
+~~~
+</div>
+</div>
+
+The first time the graph is created index data-structures are created for all the vertices in the graph and missing vertices are detected and allocated.
+Computing the triplets will require an additional join but this should run quickly now that the index data-structures have been created.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
 cleanGraph.triplets.count
 ~~~
 </div>
 </div>
 
-This should a while (about 3 minutes on a 5-node cluster) because it triggers the string parsing from the previous section.
 
 ### Running PageRank on Wikipedia
 
