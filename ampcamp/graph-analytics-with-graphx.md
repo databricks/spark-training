@@ -572,7 +572,7 @@ to examine the output of the graph analysis, all from the Spark shell.
 
 
 GraphX requires the Kryo serializer to be achieve maximum performance.
-To see what serializer is being used check the Spark Shell UI by going to `http://<MASTER_URL>:4040/environment/` and checking the `spark.serializer.class` property:
+To see what serializer is being used check the Spark Shell UI by going to `http://<MASTER_URL>:4040/environment/` and checking the `spark.serializer` property:
 
 <p style="text-align: center;">
   <img src="img/spark_shell_ui_kryo.png"
@@ -590,7 +590,7 @@ Open a text editor (e.g., the one true editor emacs or vim) and add the followin
 
 ~~~
 SPARK_JAVA_OPTS+='
- -Dspark.serializer.class=org.apache.spark.serializer.KryoSerializer
+ -Dspark.serializer=org.apache.spark.serializer.KryoSerializer
  -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator '
 export SPARK_JAVA_OPTS
 ~~~
@@ -598,7 +598,7 @@ export SPARK_JAVA_OPTS
 or if you are feeling lazy paste the following command in the terminal (not the spark shell):
 
 ~~~
-echo -e "SPARK_JAVA_OPTS+=' -Dspark.serializer.class=org.apache.spark.serializer.KryoSerializer -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator ' \nexport SPARK_JAVA_OPTS" >> /root/spark/conf/spark-env.sh
+echo -e "SPARK_JAVA_OPTS+=' -Dspark.serializer=org.apache.spark.serializer.KryoSerializer -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator ' \nexport SPARK_JAVA_OPTS" >> /root/spark/conf/spark-env.sh
 ~~~
 
 Then run the following command which will update the conf on all machines in the cluster:
@@ -611,10 +611,11 @@ Finally restart the cluster (by again running the following in the terminal):
 
 ~~~
 /root/spark/sbin/stop-all.sh
+sleep 3
 /root/spark/sbin/start-all.sh
 ~~~
 
-If you now check `http://<MASTER_URL>:4040/environment/` the serializer property `spark.serializer.class` property should be set to `org.apache.spark.serializer.KryoSerializer`.
+After starting the Spark shell below, if you check `http://<MASTER_URL>:4040/environment/` the serializer property `spark.serializer` property should be set to `org.apache.spark.serializer.KryoSerializer`.
 
 ### Getting Started (Again)
 
@@ -650,7 +651,7 @@ val wiki: RDD[String] = sc.textFile("/wiki_links/part*").coalesce(20)
 </div>
 </div>
 
-### Look at top article:
+### Look at the First Article
 
 Display the contents of the first article:
 
@@ -658,8 +659,8 @@ Display the contents of the first article:
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-wiki.take(1)
-// res1: Array[String] = Array(AccessibleComputing #REDIRECT [[Computer accessibility]] {{R from CamelCase}})
+wiki.first
+// res0: String = AccessibleComputing      [[Computer accessibility]]
 ~~~
 </div>
 </div>
@@ -725,7 +726,9 @@ val vertices: RDD[(VertexId, String)] = /* implement */
 <div class="solution" markdown="1">
 ~~~
 // Hash function to assign an Id to each article
-def pageHash(title: String) = title.toLowerCase.replace(" ", "").hashCode.toLong
+def pageHash(title: String): VertexId = {
+  title.toLowerCase.replace(" ", "").hashCode.toLong
+}
 // The vertices with id and article title:
 val vertices = articles.map(a => (pageHash(a.title), a.title)).cache
 ~~~
@@ -798,7 +801,7 @@ val graph = Graph(vertices, edges, "").subgraph(vpred = {(v, d) => d.nonEmpty}).
 </div>
 </div>
 
-Let's force these graphs to be computed by counting some of their attributes (this might take two minutes):
+Let's force the graph to be computed by counting some of their attributes (this might take two minutes):
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -808,8 +811,8 @@ graph.vertices.count
 </div>
 </div>
 
-The first time the graph is created index data-structures are created for all the vertices in the graph and missing vertices are detected and allocated.
-Computing the triplets will require an additional join but this should run quickly now that the index data-structures have been created.
+The first time the graph is created, GraphX constructs index data structures for all the vertices in the graph and detects and allocates missing vertices.
+Computing the triplets will require an additional join but this should run quickly now that the indexes have been created.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -850,7 +853,7 @@ to find the titles of the ten most important articles.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val titleAndPRGraph = graph.outerJoinVertices(prGraph.vertices) {
+val titleAndPrGraph = graph.outerJoinVertices(prGraph.vertices) {
   (v, title, rank) => (rank.getOrElse(0.0), title)
 }
 
