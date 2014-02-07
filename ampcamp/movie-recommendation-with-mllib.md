@@ -10,9 +10,9 @@ navigation:
 In this chapter, we will use MLlib to make personalized movie recommendations
 tailored *for you*. We will work with 10 million ratings from 72,000 users on
 10,000 movies, collected by [MovieLens](http://movielens.umn.edu/).  This
-dataset is pre-loaded in the HDFS on your cluster in `/movielens/ml-10m`. For
+dataset is pre-loaded in the HDFS on your cluster in `/movielens/large`. For
 quick testing of your code, you may want to use a smaller dataset under
-`/movielens/ml-1m`, which contains 1 million ratings from 6000 users on 4000
+`/movielens/medium`, which contains 1 million ratings from 6000 users on 4000
 movies.
 
 ##Data set
@@ -79,6 +79,8 @@ import java.util.Random
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
 
+import scala.io.Source
+
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
@@ -88,48 +90,53 @@ import org.apache.spark.mllib.recommendation.{ALS, Rating, MatrixFactorizationMo
 object MovieLensALS {
 
   def main(args: Array[String]) {
-  
-    Logger.getLogger("spark").setLevel(Level.INFO)
+
+    Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
 
     if (args.length != 1) {
       println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
       exit(1)
     }
 
-    val movieLensHomeDir = args(0)
-
     // set up environment
 
-    val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
     val jarFile = "target/scala-2.10/movielens-als_2.10-0.0.jar"
+    val sparkHome = "/root/spark"
+    val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
+    val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
     val conf = new SparkConf()
-                 .setMaster(master)
-                 .setAppName("MovieLensALS")
-                 .set("spark.executor.memory", "2g")
-                 .setJars(Seq(jarFile))
+      .setMaster(master)
+      .setSparkHome(sparkHome)
+      .setAppName("MovieLensALS")
+      .set("spark.executor.memory", "8g")
+      .setJars(Seq(jarFile))
     val sc = new SparkContext(conf)
 
     // load ratings and movie titles
 
-    val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat")
-                 .map { line =>
+    val movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + args(0)
+
+    val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map { line =>
       val fields = line.split("::")
+      // format: (timestamp % 10, Rating(userId, movieId, rating))
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 
-    val movies = sc.textFile(movieLensHomeDir + "/movies.dat")
-                   .map { line =>
+    val movies = sc.textFile(movieLensHomeDir + "/movies.dat").map { line =>
       val fields = line.split("::")
+      // format: (movieId, movieName)
       (fields(0).toInt, fields(1))
     }.collect.toMap
 
     // your code here
 
+    // clean up
+
     sc.stop();
     System.exit(0)
   }
-
-  /** Compute RMSE (Root Mean Sqaured Error). */
+  
+  /** Compute RMSE (Root Mean Squared Error). */
   def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], n: Long) = {
     // ...
   }
@@ -173,11 +180,12 @@ This is what it looks like in our template code:
 <div data-lang="scala" markdown="1">
 ~~~
     val conf = new SparkConf()
-                 .setMaster(master)
-                 .setAppName("MovieLensALS")
-                 .set("spark.executor.memory", "2g")
-                 .setJars(Seq(jarFile))
-    val sc = new SparkContext(conf)	
+      .setMaster(master)
+      .setSparkHome(sparkHome)
+      .setAppName("MovieLensALS")
+      .set("spark.executor.memory", "8g")
+      .setJars(Seq(jarFile))
+    val sc = new SparkContext(conf)
 ~~~
 </div>
 </div>
@@ -192,10 +200,12 @@ around tuple `(user: Int, product: Int, rating: Double)` defined in
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val ratings = sc.textFile("hdfs://" + masterHostname + ":9000/movielens/ratings.dat")
-                 .map { line =>
+    val movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + args(0)
+
+    val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map { line =>
       val fields = line.split("::")
-      (fields(3).long % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
+      // format: (timestamp % 10, Rating(userId, movieId, rating))
+      (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 ~~~
 </div>
@@ -207,9 +217,9 @@ title map.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val movies = sc.textFile("hdfs://" + masterHostname + ":9000/movielens/movies.dat")
-                   .map { line =>
+    val movies = sc.textFile(movieLensHomeDir + "/movies.dat").map { line =>
       val fields = line.split("::")
+      // format: (movieId, movieName)
       (fields(0).toInt, fields(1))
     }.collect.toMap
 ~~~
@@ -241,8 +251,8 @@ file run the following commands:
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
 cd /root/als/scala
-# change the folder name to ml-10m to run on the bigger data set
-sbt/sbt package "run hdfs://movielens/ml-1m"
+# change the folder name from "medium" to "large" to run on the large data set
+sbt/sbt package "run /movielens/medium"
 </pre>
 
 This command will compile the `MovieLensALS` class and create a JAR file in
@@ -269,12 +279,12 @@ rated movies and sample a small subset for rating elicitation.
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-    val mostRatedMovieIds = ratings.map(_._2.product)
-                                   .countByValue
-                                   .toSeq
-                                   .sortBy(-_._2)
-                                   .take(50)
-                                   .map(_._1)
+    val mostRatedMovieIds = ratings.map(_._2.product) // extract movie ids
+                                   .countByValue      // count ratings per movie
+                                   .toSeq             // convert map to Seq
+                                   .sortBy(- _._2)    // sort by rating count
+                                   .take(50)          // take 50 most rated
+                                   .map(_._1)         // get their ids
     val random = new Random(0)
     val selectedMovies = mostRatedMovieIds.filter(x => random.nextDouble() < 0.2)
                                           .map(x => (x, movies(x)))
@@ -305,7 +315,7 @@ Please rate the following movie (1-5 (best), or 0 if not seen):
 Raiders of the Lost Ark (1981): 
 ~~~
 
-##Split training data
+##Splitting training data
 
 We will use MLlib's `ALS` to train a `MatrixFactorizationModel`, which takes a
 `RDD[Rating]` object as input. ALS has training parameters such as rank for
@@ -315,13 +325,23 @@ named training, test, and validation, based on the last digit of the timestamp,
 and cache them. We will train multiple models based on the training set, select
 the best model on the validation set based on RMSE (Root Mean Squared Error),
 and finally evaluate the best model on the test set. We also add your ratings to
-the training set to make recommendations for you.
+the training set to make recommendations for you. We hold the training,
+validation, and test sets in memory by calling `persist` because we need to
+visit them multiple times.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val training = ratings.filter(x => x._1 < 6).values.union(myRatingsRDD).persist
-    val validation = ratings.filter(x => x._1 >= 6 && x._1 < 8).values.persist
+    val numPartitions = 20
+    val training = ratings.filter(x => x._1 < 6)
+                          .values
+                          .union(myRatingsRDD)
+                          .repartition(numPartitions)
+                          .persist
+    val validation = ratings.filter(x => x._1 >= 6 && x._1 < 8)
+                            .values
+                            .repartition(numPartitions)
+                            .persist
     val test = ratings.filter(x => x._1 >= 8).values.persist
 
     val numTraining = training.count
@@ -361,39 +381,43 @@ object ALS {
 </div>
 
 Ideally, we want to try a large number of combinations of them in order to find
-the best one. Due to time constraint, we will test only 9 combinations resulting
-from the cross product of 3 different ranks (8, 12, and 16) and 3 different
-lambdas (0.1, 1.0, and 10.0), while fixing the number of iterations to 25. We
-use the provided method `computeRmse` to compute the RMSE on the validation set
-for each model. The model with the smallest RMSE on the validation set becomes
-the one selected and its RMSE on the test set is used as the final metric.
+the best one. Due to time constraint, we will test only 8 combinations resulting
+from the cross product of 2 different ranks (8 and 12), 2 different lambdas (1.0
+and 10.0), and two different numbers of iterations (10 and 20). We use the
+provided method `computeRmse` to compute the RMSE on the validation set for each
+model. The model with the smallest RMSE on the validation set becomes the one
+selected and its RMSE on the test set is used as the final metric.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-    val ranks = List(4, 8, 12)
-    val lambdas = List(0.1, 1.0, 10.0)
-    val numIter = 25
+    val ranks = List(8, 12)
+    val lambdas = List(0.1, 10.0)
+    val numIters = List(10, 20)
     var bestModel: Option[MatrixFactorizationModel] = None
     var bestValidationRmse = Double.MaxValue
     var bestRank = 0
     var bestLambda = -1.0
-    for(rank <- ranks; lambda <- lambdas) {
+    var bestNumIter = -1
+    for (rank <- ranks; lambda <- lambdas; numIter <- numIters) {
       val model = ALS.train(training, rank, numIter, lambda)
       val validationRmse = computeRmse(model, validation, numValidation)
-      if(validationRmse < bestValidationRmse) {
+      println("RMSE (validation) = " + validationRmse + " for the model trained with rank = " 
+        + rank + ", lambda = " + lambda + ", and numIter = " + numIter + ".")
+      if (validationRmse < bestValidationRmse) {
         bestModel = Some(model)
         bestValidationRmse = validationRmse
         bestRank = rank
         bestLambda = lambda
+        bestNumIter = numIter
       }
     }
 
     val testRmse = computeRmse(bestModel.get, test, numTest)
 
-    println("The best model was trained using rank " + bestRank + " and lambda " + bestLambda
-      + ", and its RMSE on test is " + testRmse + ".")
+    println("The best model was trained with rank = " + bestRank + " and lambda = " + bestLambda
+      + ", and numIter = " + bestNumIter + ", and its RMSE on the test set is " + testRmse + ".")
 ~~~
 </div>
 </div>
@@ -406,39 +430,7 @@ following on the screen:
 The best model was trained using rank 8 and lambda 10.0, and its RMSE on test is 0.8808492431998702.
 ~~~
 
-##Compare to a naive baseline
-
-Does ALS output a non-trivial model? We can compare the evaluation result with a
-naive baseline model that only outputs the average rating (or you may try one
-that outputs the average rating per movie). Computing the baseline's RMSE is
-straightforward:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
-~~~
-    val meanRating = training.union(validation).map(_.rating).mean
-    val baselineRmse = math.sqrt(test.map(x => (meanRating - x.rating) * (meanRating - x.rating))
-                                     .reduce(_ + _) / numTest)
-    val improvement = (baselineRmse - testRmse) / baselineRmse * 100
-    println("The best model improves the baseline by " + "%1.2f".format(improvement) + "%.")
-~~~
-</div>
-</div>
-</div>
-
-The output should be
-
-~~~
-The best model improves the baseline by 20.96%.
-~~~
-
-The result that the trained model outperforms the naive baseline seems to be
-obvious but actually not. A bad combination of rank and lambda would lead to a
-model worse than this naive baseline. So choosing the right set of parameters is
-quite important for this task.
-
-##Recommend movies for you
+##Recommending movies for you
 
 As the last part of our tutorial, let's take a look at what movies our model
 recommends for you. This is done by generating `(0, movieId)` pairs for all
@@ -503,6 +495,40 @@ Movies recommended for you:
 YMMV, and don't expect to see movies from this decade, becaused the data set is old.
 
 ##Exercises
+
+### Comparing to a naive baseline ###
+
+Does ALS output a non-trivial model? We can compare the evaluation result with a
+naive baseline model that only outputs the average rating (or you may try one
+that outputs the average rating per movie). Computing the baseline's RMSE is
+straightforward:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
+~~~
+    val meanRating = training.union(validation).map(_.rating).mean
+    val baselineRmse = math.sqrt(test.map(x => (meanRating - x.rating) * (meanRating - x.rating))
+                                     .reduce(_ + _) / numTest)
+    val improvement = (baselineRmse - testRmse) / baselineRmse * 100
+    println("The best model improves the baseline by " + "%1.2f".format(improvement) + "%.")
+~~~
+</div>
+</div>
+</div>
+
+The output should be
+
+~~~
+The best model improves the baseline by 20.96%.
+~~~
+
+It seems obvious that the trained model would outperform the naive
+baseline. However, a bad combination of training parameters would lead to a
+model worse than this naive baseline. Choosing the right set of parameters is
+quite important for this task.
+
+### Augmenting matrix factors ###
 
 In this tutorial, we add your ratings to the training set. A better way to get
 the recommendations for you is training a matrix factorization model first and
