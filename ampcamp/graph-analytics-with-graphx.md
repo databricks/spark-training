@@ -285,7 +285,7 @@ Here is a partial solution:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-for (triplet <- graph.triplets) {
+for (triplet <- graph.triplets.collect) {
  /**
    * Triplet has the following Fields:
    *   triplet.srcAttr: (String, Int) // triplet.srcAttr._1 is the name
@@ -298,11 +298,11 @@ for (triplet <- graph.triplets) {
 ~~~
 <div class="solution" markdown="1">
 ~~~
-for (triplet <- graph.triplets) {
+for (triplet <- graph.triplets.collect) {
   println( s"${triplet.srcAttr._1} likes ${triplet.dstAttr._1}")
 }
 ~~~
-</div>
+</Div>
 </div>
 </div>
 
@@ -370,8 +370,7 @@ class Graph[VD, ED] {
   def collectNeighbors(edgeDirection: EdgeDirection): VertexRDD[Array[(VertexID, VD)]]
   def mapReduceTriplets[A: ClassTag](
       mapFunc: EdgeTriplet[VD, ED] => Iterator[(VertexID, A)],
-      reduceFunc: (A, A) => A,
-      activeSetOpt: Option[(VertexRDD[_], EdgeDirection)] = None)
+      reduceFunc: (A, A) => A)
     : VertexRDD[A]
 
   // Iterative graph-parallel computation
@@ -474,7 +473,7 @@ Using the property graph from Section 2.1, suppose we want to find the oldest fo
 class Graph[VD, ED] {
   def mapReduceTriplets[A](
       map: EdgeTriplet[VD, ED] => Iterator[(VertexId, A)],
-      reduce: (A, A) => A): VertexRDD[A]
+      reduce: (A, A) => A): VertexRDD[A]))
 }
 ~~~
 </div>
@@ -489,9 +488,9 @@ We can find the oldest follower for each user by sending age messages along each
 ~~~
 val oldestFollowerAge: VertexRDD[Int] = graph.mapReduceTriplets[Int](
   edge => Iterator((edge.dstId, edge.srcAttr._2)),
-  (a, b) => max(a, b))
+  (a, b) => math.max(a, b))
 
-val withNames = graph.vertices.innerJoin(oldestFollowerAge) {
+Val withNames = graph.vertices.innerJoin(oldestFollowerAge) {
   (id, pair, oldestAge) => (pair._1, oldestAge)
 }
 
@@ -506,19 +505,19 @@ As an exercise, try finding the average follower age for each user instead of th
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-val oldestFollowerAge: VertexRDD[Int] = graph.mapReduceTriplets[Int](
+val oldestFollowerAge: VertexRDD[(Int, Double)] = graph.mapReduceTriplets[(Int, Double)](
   // map function
-  edge => Iterator((edge.dstId, (1.0, edge.srcAttr._2))),
+  edge => Iterator((edge.dstId, (1, edge.srcAttr._2.toDouble))),
   // reduce function
   (a, b) => ((a._1 + b._1), (a._1*a._2 + b._1*b._2)/(a._1+b._1)))
 
 val withNames = graph.vertices.innerJoin(oldestFollowerAge) {
-  (id, pair, oldestAge) => (pair._1, oldestAge)
+  (id, pair, oldestAge) => (pair._1, oldestAge._2)
 }
 
 withNames.collect.foreach(println(_))
 ~~~
-</div>
+</Div>
 </div>
 </div>
 
@@ -533,7 +532,6 @@ We can use the subgraph operator to consider only strong relationships with more
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val graph: Graph[(String, Int), Int] // Constructed from above
 val strongRelationships: Graph[(String, Int), Int] =
   graph.subgraph(epred = (edge => edge.attr > 2))
 ~~~
@@ -546,8 +544,6 @@ As an exercise, use this subgraph to find lonely users who have no strong relati
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-val strongRelationships: Graph[(String, Int), Int] = // from above
-
 val lonely = strongRelationships.degrees.filter {
   case (id, degree) => degree == 0
 }
