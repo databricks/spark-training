@@ -21,9 +21,17 @@ navigation:
 
 GraphX is the new (alpha) Spark API for graphs (e.g., Web-Graphs and Social Networks) and graph-parallel computation (e.g., PageRank and Collaborative Filtering).
 At a high-level, GraphX extends the Spark RDD abstraction by introducing the [Resilient Distributed Property Graph](#property_graph): a directed multigraph with properties attached to each vertex and edge.
-To support graph computation, GraphX exposes a set of fundamental operators (e.g., [subgraph](#structural_operators), [joinVertices](#join_operators), and [mapReduceTriplets](#mrTriplets)) as well as an optimized variant of the [Pregel](#pregel) API.
-In addition, GraphX includes a growing collection of graph [algorithms](#graph_algorithms) and
-[builders](#graph_builders) to simplify graph analytics tasks.
+To support graph computation, GraphX exposes a set of fundamental operators (e.g., [subgraph][subgraph], [joinVertices][joinVertices], and [mapReduceTriplets][mapReduceTriplets]) as well as an optimized variant of the [Pregel](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#pregel) API.
+In addition, GraphX includes a growing collection of graph [algorithms](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#graph_algorithms) and
+[builders](http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#graph_builders) to simplify graph analytics tasks.
+
+[subgraph]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
+
+[joinVertices]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.GraphOps@joinVertices[U](RDD[(VertexId,U)])((VertexId,VD,U)⇒VD)(ClassTag[U]):Graph[VD,ED]
+
+[mapReduceTriplets]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@mapReduceTriplets[A](mapFunc:org.apache.spark.graphx.EdgeTriplet[VD,ED]=>Iterator[(org.apache.spark.graphx.VertexId,A)],reduceFunc:(A,A)=>A,activeSetOpt:Option[(org.apache.spark.graphx.VertexRDD[_],org.apache.spark.graphx.EdgeDirection)])(implicitevidence$10:scala.reflect.ClassTag[A]):org.apache.spark.graphx.VertexRDD[A]
+
+[graphAlgorithms]: http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html#graph_algorithms
 
 In this chapter we use GraphX to analyze Wikipedia data and implement graph algorithms in Spark.
 The GraphX API is currently only available in Scala but we plan to provide Java and Python bindings in the future.
@@ -75,8 +83,11 @@ The GraphX API enables users to view data both as graphs and as collections (i.e
 
 Prior to the release of GraphX, graph computation in Spark was expressed using Bagel, an implementation of Pregel.
 GraphX improves upon Bagel by exposing a richer property graph API, a more streamlined version of the Pregel abstraction, and system optimizations to improve performance and reduce memory overhead.
-While we plan to eventually deprecate Bagel, we will continue to support the [Bagel API](api/bagel/index.html#org.apache.spark.bagel.package) and [Bagel programming guide](bagel-programming-guide.html).
+While we plan to eventually deprecate Bagel, we will continue to support the [Bagel API][BagelAPI] and [Bagel programming guide][BagelGuide].
 However, we encourage Bagel users to explore the new GraphX API and comment on issues that may complicate the transition from Bagel.
+
+[BagelAPI]: http://spark.incubator.apache.org/docs/latest/api/bagel/index.html#org.apache.spark.bagel.Bagel$
+[BagelGuide]: http://spark.incubator.apache.org/docs/latest/bagel-programming-guide.html
 
 
 ## Introduction to the GraphX API
@@ -97,14 +108,15 @@ Great! You have now "installed" GraphX.
 ### The Property Graph
 <a name="property_graph"></a>
 
-[PropertyGraph]: api/graphx/index.html#org.apache.spark.graphx.Graph
-
-The [property graph](PropertyGraph) is a directed multigraph with properties attached to each vertex and edge.
+The [property graph][Graph] is a directed multigraph with properties attached to each vertex and edge.
 A directed multigraph is a directed graph with potentially multiple parallel edges sharing the same source and destination vertex.
 The ability to support parallel edges simplifies modeling scenarios where multiple relationships (e.g., co-worker and friend) can appear between the same vertices.
 Each vertex is keyed by a *unique* 64-bit long identifier (`VertexID`).
 Similarly, edges have corresponding source and destination vertex identifiers.
 The properties are stored as Scala/Java objects with each edge and vertex in the graph.
+
+[Graph]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph
+
 
 Throughout the first half of this tutorial we will use the following toy property graph.
 While this is hardly <i>big data</i>, it provides an opportunity to learn about the graph data model and the GraphX API.  In this example we have a small social network with users and their ages modeled as vertices and likes modeled as directed edges.  In this fictional scenario users can like other users multiple times.
@@ -151,28 +163,21 @@ In the above example we make use of the [`Edge`][Edge] class. Edges have a `srcI
 `dstId` corresponding to the source and destination vertex identifiers. In addition, the `Edge`
 class has an `attr` member which stores the edge property (in this case the number of likes).
 
-[Edge]: api/graphx/index.html#org.apache.spark.graphx.Edge
+[Edge]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Edge
 
 Using `sc.parallelize` (introduced in the Spark tutorial) construct the following RDDs from `vertexArray` and `edgeArray`
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-{% highlight scala %}
+~~~
 val vertexRDD: RDD[(Long, (String, Int))] = // Implement
 val edgeRDD: RDD[Edge[Int]] = // Implement
-{% endhighlight %}
-</div>
-</div>
-
-In case you get stuck (or skipped the Spark tutorial) here is the solution.
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+~~~
 <div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 val vertexRDD: RDD[(Long, (String, Int))] = sc.parallelize(vertexArray)
 val edgeRDD: RDD[Edge[Int]] = sc.parallelize(edgeArray)
-{% endhighlight %}
+~~~
 </div>
 </div>
 </div>
@@ -216,21 +221,11 @@ Here is a hint:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
+~~~
+graph.vertices.filter { /* implement */ }.collect.foreach { /* implement */ }
+~~~
 <div class="solution" markdown="1">
-{% highlight scala %}
-graph.vertices.filter { /** Implement */ }.collect.foreach { /** implement */ }
-{% endhighlight %}
-</div>
-</div>
-</div>
-
-
-Here are a few solutions:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 // Solution 1
 graph.vertices.filter { case (id, (name, age)) => age > 30 }.collect.foreach {
   case (id, (name, age)) => println(s"$name is $age")
@@ -243,7 +238,7 @@ graph.vertices.filter(v => v._2._2 > 30).collect.foreach(v => println(s"${v._2._
 for ((id,(name,age)) <- graph.vertices.filter { case (id,(name,age)) => age > 30 }.collect) {
   println(s"$name is $age")
 }
-{% endhighlight %}
+~~~
 </div>
 </div>
 </div>
@@ -251,7 +246,7 @@ for ((id,(name,age)) <- graph.vertices.filter { case (id,(name,age)) => age > 30
 In addition to the vertex and edge views of the property graph, GraphX also exposes a triplet view.
 The triplet view logically joins the vertex and edge properties yielding an `RDD[EdgeTriplet[VD, ED]]` containing instances of the [`EdgeTriplet`][EdgeTriplet] class. This *join* can be expressed in the following SQL expression:
 
-[EdgeTriplet]: api/graphx/index.html#org.apache.spark.graphx.EdgeTriplet
+[EdgeTriplet]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.EdgeTriplet
 
 {% highlight sql %}
 SELECT src.id, dst.id, src.attr, e.attr, dst.attr
@@ -289,7 +284,7 @@ Here is a partial solution:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-{% highlight scala %}
+~~~
 for (triplet <- graph.triplets) {
  /**
    * Triplet has the following Fields:
@@ -300,20 +295,13 @@ for (triplet <- graph.triplets) {
    *   triplet.dstId: VertexId
    */
 }
-{% endhighlight %}
-</div>
-</div>
-
-Here is the solution:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
+~~~
 <div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 for (triplet <- graph.triplets) {
   println( s"${triplet.srcAttr._1} likes ${triplet.dstAttr._1}")
 }
-{% endhighlight %}
+~~~
 </div>
 </div>
 </div>
@@ -324,11 +312,11 @@ For extra credit, find the lovers.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
-{% highlight scala %}
+~~~
 for (triplet <- graph.triplets.filter(t => t.attr > 5)) {
   println( s"${triplet.srcAttr._1} loves ${triplet.dstAttr._1}")
 }
-{% endhighlight %}
+~~~
 </div>
 </div>
 </div>
@@ -409,14 +397,13 @@ However, thanks to the "magic" of Scala implicits the operators in `GraphOps` ar
 
 For example, we can compute the in-degree of each vertex (defined in `GraphOps`) by the following:
 
-[Graph]: api/graphx/index.html#org.apache.spark.graphx.Graph
-[GraphOps]: api/graphx/index.html#org.apache.spark.graphx.GraphOps
+[GraphOps]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.GraphOps
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-{% highlight scala %}
+~~~
 val inDegrees: VertexRDD[Int] = graph.inDegrees
-{% endhighlight %}
+~~~
 </div>
 </div>
 
@@ -478,7 +465,8 @@ degreeGraph.vertices.filter {
 
 Using the property graph from Section 2.1, suppose we want to find the oldest follower of each user. The [`mapReduceTriplets`][Graph.mapReduceTriplets] operator allows us to do this. It enables neighborhood aggregation, and its simplified signature is as follows:
 
-[Graph.mapReduceTriplets]: api/graphx/index.html#org.apache.spark.graphx.Graph@mapReduceTriplets[A](mapFunc:org.apache.spark.graphx.EdgeTriplet[VD,ED]=&gt;Iterator[(org.apache.spark.graphx.VertexId,A)],reduceFunc:(A,A)=&gt;A,activeSetOpt:Option[(org.apache.spark.graphx.VertexRDD[_],org.apache.spark.graphx.EdgeDirection)])(implicitevidence$10:scala.reflect.ClassTag[A]):org.apache.spark.graphx.VertexRDD[A]
+[Graph.mapReduceTriplets]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@mapReduceTriplets[A](mapFunc:org.apache.spark.graphx.EdgeTriplet[VD,ED]=>Iterator[(org.apache.spark.graphx.VertexId,A)],reduceFunc:(A,A)=>A,activeSetOpt:Option[(org.apache.spark.graphx.VertexRDD[_],org.apache.spark.graphx.EdgeDirection)])(implicitevidence$10:scala.reflect.ClassTag[A]):org.apache.spark.graphx.VertexRDD[A]
+
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -499,7 +487,6 @@ We can find the oldest follower for each user by sending age messages along each
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val graph: Graph[(String, Int), Int] // Constructed from above
 val oldestFollowerAge: VertexRDD[Int] = graph.mapReduceTriplets[Int](
   edge => Iterator((edge.dstId, edge.srcAttr._2)),
   (a, b) => max(a, b))
@@ -519,7 +506,6 @@ As an exercise, try finding the average follower age for each user instead of th
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-val graph: Graph[(String, Int), Int] // Constructed from above
 val oldestFollowerAge: VertexRDD[Int] = graph.mapReduceTriplets[Int](
   // map function
   edge => Iterator((edge.dstId, (1.0, edge.srcAttr._2))),
@@ -542,7 +528,7 @@ Suppose we want to find users in the above graph who are lonely so we can sugges
 
 We can use the subgraph operator to consider only strong relationships with more than 2 likes. We do this by supplying an edge predicate only:
 
-[Graph.subgraph]: api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
+[Graph.subgraph]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -580,62 +566,92 @@ lonely.collect.foreach(println(_))
 ## Constructing an End-to-End Graph Analytics Pipeline on Real Data
 
 Now that we have learned about the individual components of the GraphX API, we are ready to put them together to build a real analytics pipeline.
-In this section, we will start with raw Wikipedia text data, use Spark operators to clean the data and extract structure, use GraphX operators to analyze the structure, and then use Spark operators
+In this section, we will start with Wikipedia link data, use Spark operators to clean the data and extract structure, use GraphX operators to analyze the structure, and then use Spark operators
 to examine the output of the graph analysis, all from the Spark shell.
 
-If you don't already have the Spark shell open, start it now and import the `org.apache.spark.graphx` package.
+
+
+GraphX requires the Kryo serializer to be achieve maximum performance.
+To see what serializer is being used check the Spark Shell UI by going to `http://<MASTER_URL>:4040/environment/` and checking the `spark.serializer` property:
+
+<p style="text-align: center;">
+  <img src="img/spark_shell_ui_kryo.png"
+       title="Spark Shell UI"
+       alt="Spark Shell UI"
+       width="65%" />
+  <!-- Images are downsized intentionally to improve quality on retina displays -->
+</p>
+
+By default Kryo Serialization is not enabled.
+In this exercise we will walk through the process of enabling Kyro Serialization for the spark shell.
+First exit the current Spark Shell (either type exit or ctrl-c).
+
+Open a text editor (e.g., the one true editor emacs or vim) and add the following to `/root/spark/conf/spark-env.sh`:
+
+~~~
+SPARK_JAVA_OPTS+='
+ -Dspark.serializer=org.apache.spark.serializer.KryoSerializer
+ -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator '
+export SPARK_JAVA_OPTS
+~~~
+
+or if you are feeling lazy paste the following command in the terminal (not the spark shell):
+
+~~~
+echo -e "SPARK_JAVA_OPTS+=' -Dspark.serializer=org.apache.spark.serializer.KryoSerializer -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator ' \nexport SPARK_JAVA_OPTS" >> /root/spark/conf/spark-env.sh
+~~~
+
+Then run the following command which will update the conf on all machines in the cluster:
+
+~~~
+/root/spark-ec2/copy-dir.sh /root/spark/conf
+~~~
+
+Finally restart the cluster (by again running the following in the terminal):
+
+~~~
+/root/spark/sbin/stop-all.sh
+sleep 3
+/root/spark/sbin/start-all.sh
+~~~
+
+After starting the Spark shell below, if you check `http://<MASTER_URL>:4040/environment/` the serializer property `spark.serializer` property should be set to `org.apache.spark.serializer.KryoSerializer`.
+
+### Getting Started (Again)
+
+Start the spark shell:
+
+~~~
+/root/spark/bin/spark-shell
+~~~
+
+Import the standard packages.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
 import org.apache.spark.graphx._
-import org.apache.spark.graphx.RDD
+import org.apache.spark.rdd.RDD
 ~~~
 </div>
 </div>
-
-If you are using a cluster provided by the AMPLab for this tutorial, you already have a dataset that contains
-all of the English Wikipedia articles in HDFS on your cluster. If you are following along at
-home: TODO (what should they do???).
 
 ### Load the Wikipedia Articles
 
-The first step in our analytics pipeline is to ingest our raw data into Spark. Load the data (located at
-`"/wiki_dump/part*"` in HDFS) into an RDD:
+The first step in our analytics pipeline is to ingest our raw data into Spark. Load the data (located at `"/wiki_links/part*"` in HDFS) into an RDD:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val wiki: RDD[String] = // implement
+// We tell Spark to cache the result in memory so we won't have to repeat the
+// expensive disk IO. We coalesce down to 20 partitions to avoid excessive
+// communication.
+val wiki: RDD[String] = sc.textFile("/wiki_links/part*").coalesce(20)
 ~~~
-<div class="solution" markdown="1">
-~~~
-// We tell Spark to cache the result in memory so we won't have to
-// repeat the expensive disk IO
-val wiki: RDD[String] = sc.textFile("/wiki_dump/part*").cache
-~~~
-</div>
 </div>
 </div>
 
-### Count the articles
-
-Use the `RDD` count method:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
-~~~
-// Notice that count is not just doing the count but also triggers the wiki RDD's lazy evaluation.
-// This means that the read from HDFS is being performed here as well.
-wiki.count
-// res0: Long = 13449972
-~~~
-</div>
-</div>
-</div>
-
-### Look at top article:
+### Look at the First Article
 
 Display the contents of the first article:
 
@@ -643,8 +659,8 @@ Display the contents of the first article:
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-wiki.take(1)
-// res1: Array[String] = Array(AccessibleComputing #REDIRECT [[Computer accessibility]] {{R from CamelCase}})
+wiki.first
+// res0: String = AccessibleComputing      [[Computer accessibility]]
 ~~~
 </div>
 </div>
@@ -666,17 +682,28 @@ parse from the raw string, and filter out articles that are malformed or redirec
 <div data-lang="scala" markdown="1">
 ~~~
 // Define the article class
-class Article(val title: String, val body: String)
+case class Article(val title: String, val body: String)
 
 // Parse the articles
 val articles = wiki.map(_.split('\t')).
   // two filters on article format
-  filter(line => (line.length > 1 && !(line(1) contains "REDIRECT")).
+  filter(line => (line.length > 1 && !(line(1) contains "REDIRECT"))).
   // store the results in an object for easier access
-  map(line => new Article(line(0).trim, line(1).trim))
+  map(line => new Article(line(0).trim, line(1).trim)).cache
 ~~~
 </div>
 </div>
+
+We can see how many cleaned articles are left, computing and caching the cleaned article RDD in the process:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+articles.count
+~~~
+</div>
+</div>
+
 
 ### Making a Vertex RDD
 
@@ -689,19 +716,33 @@ Finish implementing the following:
 <div data-lang="scala" markdown="1">
 ~~~
 // Hash function to assign an Id to each article
-def pageHash(title: String) = title.toLowerCase.replace(" ", "").hashCode
+def pageHash(title: String): VertexId = {
+  title.toLowerCase.replace(" ", "").hashCode.toLong
+}
 
 // The vertices with id and article title:
-val vertices: RDD[(VertexId, String)] = /** Implement */
+val vertices: RDD[(VertexId, String)] = /* implement */
 ~~~
 <div class="solution" markdown="1">
 ~~~
 // Hash function to assign an Id to each article
-def pageHash(title: String) = title.toLowerCase.replace(" ", "").hashCode
+def pageHash(title: String): VertexId = {
+  title.toLowerCase.replace(" ", "").hashCode.toLong
+}
 // The vertices with id and article title:
-val vertices = articles.map(a => (pageHash(a.title), a.title))
+val vertices = articles.map(a => (pageHash(a.title), a.title)).cache
 ~~~
 </div>
+</div>
+</div>
+
+Again, let's force the vertices RDD by counting it:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+vertices.count
+~~~
 </div>
 </div>
 
@@ -736,33 +777,51 @@ This code extracts all the outbound links on each page and produces an RDD of ed
 We are finally ready to create our graph.
 Note that at this point, we have been using core Spark dataflow operators, working with our data in a table view.
 Switching to a graph view of our data is now as simple as calling the Graph constructor with our vertex RDD, our edge RDD, and a default vertex attribute.
-The default vertex attribute is used to initialize vertices that are not present in the vertex RDD, but are found link edges (links).
+The default vertex attribute is used to initialize vertices that are not present in the vertex RDD, but are mentioned by an edge (that is, pointed to by a link).
 In the Wikipedia data there are often links to nonexistent pages.
 <!-- GraphX takes the safe approach by creating new vertices in this situation, rather than let the graph have "dangling edges" or assuming the user's data is perfect.
  -->
 
-In our case, we are going to use a dummy value of "xxxxx" for our default
-vertex attribute.
-We pick "xxxxx" as there are no Wikipedia articles with that as the title, and so we will be able to use the dummy value as a flag to filter out any artificially created vertices and all edges that point to them at the same time.
-These edges and dummy vertices are an artifact of our imperfect, dirty dataset, something that inevitably occurs in real world analytics pipelines.
-Note that this is another round of data-cleaning, but one that is done based on properties of the graph, making it much simpler to do with a graph-view of our data.
+We will use an empty title string as the default vertex attribute to represent the target of a broken link.
+Note that this concern arises because our dataset is imperfect ("dirty"), as might occur in a real world analytics pipeline.
+<!-- Note that this is another round of data-cleaning, but one that is done based on properties of the graph, making it much simpler to do with a graph-view of our data. -->
 
-Complete the following:
+Complete the following by restricting the graph to vertices with non-empty titles:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val graph = Graph(vertices, edges, "xxxxx").cache
-val cleanGraph = graph.subgraph(vpred = /* Implement */)
+val graph = Graph(vertices, edges, "").subgraph(vpred = /* implement */).cache
 ~~~
 <div class="solution" markdown="1">
 ~~~
-val graph = Graph(vertices, edges, "xxxxx").cache
-val cleanGraph = graph.subgraph(vpred = {(v, d) => !(d contains "xxxxx")}).cache
+val graph = Graph(vertices, edges, "").subgraph(vpred = {(v, d) => d.nonEmpty}).cache
 ~~~
 </div>
 </div>
 </div>
+
+Let's force the graph to be computed by counting some of their attributes (this might take two minutes):
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+graph.vertices.count
+~~~
+</div>
+</div>
+
+The first time the graph is created, GraphX constructs index data structures for all the vertices in the graph and detects and allocates missing vertices.
+Computing the triplets will require an additional join but this should run quickly now that the indexes have been created.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+graph.triplets.count
+~~~
+</div>
+</div>
+
 
 ### Running PageRank on Wikipedia
 
@@ -771,20 +830,20 @@ For this example, we are going to run [PageRank](http://en.wikipedia.org/wiki/Pa
 [`PageRank`](PageRank) is part of a small but growing library of common graph algorithms already implemented in GraphX.
 However, the implementation is simple and straightforward, and just consists of some initialization code, a vertex program and message combiner to pass to Pregel.
 
-[PageRank]: api/graphx/index.html#org.apache.spark.graphx.lib.PageRank
+[PageRank]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.lib.PageRank$
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val prGraph = cleanGraph.staticPageRank(5).cache
+val prGraph = graph.staticPageRank(5).cache
 ~~~
 </div>
 </div>
 
 `Graph.staticPageRank` returns a graph whose vertex attributes are the PageRank values of each page.
 However, this means that while the resulting graph `prGraph` only contains the PageRank of the vertices and no longer contains the original vertex properties including the title.
-Luckily, we still have our `cleanGraph` that contains that information.
-Here, we can perform a join of the vertices in the `prGraph` that have the information about relative ranks of the vertices with the vertices in the `cleanGraph` that have the information about the mapping from vertex to article title.
+Luckily, we still have our `graph` that contains that information.
+Here, we can perform a join of the vertices in the `prGraph` that have the information about relative ranks of the vertices with the vertices in the `graph` that have the information about the mapping from vertex to article title.
 This yields a new graph that has combined both pieces of information, storing them both in a tuple
 as the new vertex attribute. We can then perform further table-based operators on this new list of vertices,
 such as finding the ten most important vertices (those with the highest pageranks) and printing out
@@ -794,14 +853,35 @@ to find the titles of the ten most important articles.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val titleAndPRGraph = cleanGraph.outerJoinVertices(ranksG.vertices)({(v, title, r) => (r.getOrElse(0.0), title)})
-titleAndPrGraph.vertices.top(10)(Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)).foreach(t => println(t._2._2 + ": " + t._2._1))
+val titleAndPrGraph = graph.outerJoinVertices(prGraph.vertices) {
+  (v, title, rank) => (rank.getOrElse(0.0), title)
+}
+
+titleAndPrGraph.vertices.top(10) {
+  Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)
+}.foreach(t => println(t._2._2 + ": " + t._2._1))
 ~~~
 </div>
 </div>
 
-This brings us to the end of the GraphX chapter of the tutorial. We encourage you to continue playing
-with the code and to check out the [Programming Guide](TODO: Link) for further documentation about the system.
+Finally, let's find the most important page within the subgraph of Wikipedia that mentions Berkeley in the title:
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val berkeleyGraph = graph.subgraph(vpred = (v, t) => t.toLowerCase contains "berkeley")
+
+berkeleyGraph.outerJoinVertices(prGraph.vertices) {
+  (v, title, r) => (r.getOrElse(0.0), title)
+}.vertices.top(10) {
+  Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)
+}.foreach(t => println(t._2._2 + ": " + t._2._1))
+~~~
+</div>
+</div>
+
+This brings us to the end of the GraphX chapter of the tutorial. We encourage you to continue playing with the code and to check out the [GraphX Programming Guide][GraphX Programming Guide] for further documentation about the system.
+
+[GraphX Programming Guide]: http://spark.incubator.apache.org/docs/latest/graphx-programming-guide.html
 
 Bug reports and feature requests are welcomed.
