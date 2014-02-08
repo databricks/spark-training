@@ -17,8 +17,6 @@ navigation:
 </p>
  -->
 
-<!-- In this chapter we use GraphX to analyze Wikipedia data and implement graph algorithms in Spark. As with other exercises we will work with a subset of the Wikipedia traffic statistics data from May 5-7, 2009. In particular, this dataset only includes a subset of all Wikipedia articles. -->
-
 In-memory data processing has gained tremendous attention recently. People use in-memory computation
 frameworks to perform fast and interactive queries. However, there are still several problems that
 remain unsolved.
@@ -46,7 +44,8 @@ and frameworks to access cached files at memory speed. Thus, Tachyon avoids goin
 datasets that are frequently read.
 
 In this chapter we first go over basic operations of Tachyon, and then run two Spark programs on top
-of it. For more information, please visit Tachyon's [website](http://tachyon-project.org/).
+of it. For more information, please visit Tachyon's [website](http://tachyon-project.org) or Github
+[repository](https://github.com/amplab/tachyon).
 
 ## Launch Tachyon
 
@@ -58,7 +57,7 @@ memory is configured on each worker node?
 <div class="solution" markdown="1">
 ~~~
 $ grep "TACHYON_WORKER_MEMORY_SIZE=" conf/tachyon-env.sh
-$ export TACHYON_WORKER_MEMORY_SIZE=1.1GB
+$ export TACHYON_WORKER_MEMORY_SIZE=12936MB
 ~~~
 </div>
 
@@ -103,17 +102,15 @@ $ Starting worker @ hy-ubuntu
 
 ## Interacting with Tachyon
 
-There are several approaches to interact with Tachyon:
+In this section, we will go over three approaches to interact with Tachyon:
 
 1. Command Line Interface
 2. Application Programming Interface
 3. Web User Interface
 
-In this section, we will go through them one by one.
-
 ### Command Line Interface
 
-You can start to interact with Tachyon using the following command:
+You can interact with Tachyon using the following command:
 
 ~~~
 $ ./bin/tachyon tfs
@@ -140,7 +137,8 @@ $        [report <path>]
 $        [request <tachyonaddress> <dependencyId>]
 ~~~
 
-Please, could you put the `tachyon/LICENSE` file into Tachyon file system as /LICENSE.txt?
+Please try to put the local file `tachyon/LICENSE` into Tachyon file system as /LICENSE.txt using
+command line.
 
 <div class="solution" markdown="1">
 ~~~
@@ -154,12 +152,11 @@ You can also use command line interface to verify this:
 <div class="solution" markdown="1">
 ~~~
 $ ./bin/tachyon tfs ls /
-$ 11.40 KB  02-04-2014 01:45:31:778  Not In Memory  /LICENSE.txt
+$ 11.40 KB  02-07-2014 23:23:44:008  In Memory      /LICENSE.txt
 ~~~
 </div>
 
-Note, unless there is a Tachyon worker running on the machine where this copyFromLocal is executed,
-LICENSE.txt file will not be in the memory. Now, you want to see the file's content:
+Now, you want to check out the conent of the file:
 
 <div class="solution" markdown="1">
 ~~~
@@ -176,23 +173,37 @@ $ ....
 ### Application Programming Interface
 
 After using command line to interact with Tachyon, you can also use its API. We have several sample
-applications, for example: [BasicOperations.java](https://github.com/amplab/tachyon/blob/master/src/main/java/tachyon/examples/BasicOperations.java)
+[applications](https://github.com/amplab/tachyon/tree/master/src/main/java/tachyon/examples).
+For example, [BasicOperations.java](https://github.com/amplab/tachyon/blob/master/src/main/java/tachyon/examples/BasicOperations.java)
+shows how to user file create, write, and read operations.
 
 You have put these into our script, you can simple use the following command to run this sample
-program. The following command also verifies the correct installation of the system.
+program. The following command runs [BasicOperations.java], and also verifies Tachyon's
+installation.
 
 <div class="solution" markdown="1">
 ~~~
 $ ./bin/tachyon runTests
-$ /home/haoyuan/Tachyon/tachyon/bin/tachyon runTest Basic MUST_CACHE
+$ /root/tachyon/bin/tachyon runTest Basic MUST_CACHE
 $ /BasicFile_MUST_CACHE has been removed
-$ 2014-02-04 01:51:56,054 INFO   (TachyonFS.java:connect) - Trying to connect master @ localhost/127.0.0.1:19998
-$ 2014-02-04 01:51:56,088 INFO   (MasterClient.java:getUserId) - User registered at the master localhost/127.0.0.1:19998 got UserId 5
-$ 2014-02-04 01:51:56,088 INFO   (TachyonFS.java:connect) - Trying to get local worker host : hy-ubuntu
-$ 2014-02-04 01:51:56,095 INFO   (TachyonFS.java:connect) - Connecting local worker @ hy-ubuntu/127.0.1.1:29998
-$ 2014-02-04 01:51:56,114 INFO   (CommonUtils.java:printTimeTakenMs) - createFile with fileId 3 took 62 ms.
-$ 2014-02-04 01:51:56,133 INFO   (TachyonFS.java:createAndGetUserTempFolder) - Folder /mnt/ramdisk/tachyonworker/users/5 was created!
-$ 2014-02-04 01:51:56,138 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/5/3221225472 was created!
+$ 2014-02-07 23:46:57,529 INFO   (TachyonFS.java:connect) - Trying to connect master @ ec2-23-20-202-253.compute-1.amazonaws.com/10.91.151.150:19998
+$ 2014-02-07 23:46:57,599 INFO   (MasterClient.java:getUserId) - User registered at the master ec2-23-20-202-253.compute-1.amazonaws.com/10.91.151.150:19998 got UserId 6
+$ 2014-02-07 23:46:57,600 INFO   (TachyonFS.java:connect) - Trying to get local worker host : ip-10-91-151-150.ec2.internal
+$ 2014-02-07 23:46:57,618 INFO   (TachyonFS.java:connect) - Connecting local worker @ ip-10-91-151-150.ec2.internal/10.91.151.150:29998
+$ 2014-02-07 23:46:57,661 INFO   (CommonUtils.java:printTimeTakenMs) - createFile with fileId 3 took 133 ms.
+$ 2014-02-07 23:46:57,707 INFO   (TachyonFS.java:createAndGetUserTempFolder) - Folder /mnt/ramdisk/tachyonworker/users/6 was created!
+$ 2014-02-07 23:46:57,714 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/6/3221225472 was created!
+$ Passed the test!
+$ /root/tachyon/bin/tachyon runTest BasicRawTable MUST_CACHE
+$ /BasicRawTable_MUST_CACHE has been removed
+$ 2014-02-07 23:46:58,633 INFO   (TachyonFS.java:connect) - Trying to connect master @ ec2-23-20-202-253.compute-1.amazonaws.com/10.91.151.150:19998
+$ 2014-02-07 23:46:58,705 INFO   (MasterClient.java:getUserId) - User registered at the master ec2-23-20-202-253.compute-1.amazonaws.com/10.91.151.150:19998 got UserId 8
+$ 2014-02-07 23:46:58,706 INFO   (TachyonFS.java:connect) - Trying to get local worker host : ip-10-91-151-150.ec2.internal
+$ 2014-02-07 23:46:58,725 INFO   (TachyonFS.java:connect) - Connecting local worker @ ip-10-91-151-150.ec2.internal/10.91.151.150:29998
+$ 2014-02-07 23:46:58,859 INFO   (TachyonFS.java:createAndGetUserTempFolder) - Folder /mnt/ramdisk/tachyonworker/users/8 was created!
+$ 2014-02-07 23:46:58,866 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/8/8589934592 was created!
+$ 2014-02-07 23:46:58,904 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/8/9663676416 was created!
+$ 2014-02-07 23:46:58,914 INFO   (BlockOutStream.java:<init>) - /mnt/ramdisk/tachyonworker/users/8/10737418240 was created!
 $ Passed the test!
 $ ...
 ~~~
@@ -200,11 +211,11 @@ $ ...
 
 ### Web User Interface
 
-Now, after running all these commands and executing the applications, let's checkout Tachyon's
-web user interface. You can access it by put `http://ec2masterhost:19999` into your browser.
+After using commands and API to interact with Tachyon, let's take a look at its web user interface.
+The URI is `http://ec2masterhost:19999`.
 
-The first page has summary information about the cluster. If you click on the `Browse File System`,
-it will show you all the files you just created or copied.
+The first page is the cluster's summary. If you click on the `Browse File System`, it shows you
+all the files you just created and copied.
 
 You can also click a particular file or folder. e.g. `/LICENSE.txt` file, and then you will see the
 detailed information about it.
@@ -215,23 +226,21 @@ In this section, we run a Spark program to interact with Tachyon. The first one 
 count on `/LICENSE.txt` file.
 
 ~~~
-$ ./spark-shell
+$ MASTER=spark://ec2masterhostname.com:7077 ADD_JARS=/root/tachyon/target/tachyon-0.4.0-jar-with-dependencies.jar ./spark-shell
 ~~~
 
 <div class="solution" markdown="1">
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val file = spark.textFile("tachyon://...")
-val counts = file.flatMap(line => line.split(" "))
-                 .map(word => (word, 1))
-                 .reduceByKey(_ + _)
-counts.saveAsTextFile("tachyon://...")
+var file = sc.textFile("tachyon://ec2masterhostname:19998/LICENSE.txt")
+val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
+counts.saveAsTextFile("tachyon://ec2masterhostname:19998/result")
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-JavaRDD<String> file = spark.textFile("tachyon://...");
+JavaRDD<String> file = spark.textFile("tachyon://ec2masterhostname:19998/LICENSE.txt");
 JavaRDD<String> words = file.flatMap(new FlatMapFunction<String, String>()
   public Iterable<String> call(String s) { return Arrays.asList(s.split(" ")); }
 });
@@ -241,28 +250,28 @@ JavaPairRDD<String, Integer> pairs = words.map(new PairFunction<String, String, 
 JavaPairRDD<String, Integer> counts = pairs.reduceByKey(new Function2<Integer, Integer>()
   public Integer call(Integer a, Integer b) { return a + b; }
 });
-counts.saveAsTextFile("tachyon://...");
+counts.saveAsTextFile("tachyon://ec2masterhostname:19998/result");
 ~~~
 </div>
 <div data-lang="python" markdown="1">
 ~~~
-file = spark.textFile("tachyon://...")
+file = spark.textFile("tachyon://ec2masterhostname:19998/LICENSE.txt")
 counts = file.flatMap(lambda line: line.split(" ")) \
              .map(lambda word: (word, 1)) \
              .reduceByKey(lambda a, b: a + b)
-counts.saveAsTextFile("tachyon://...")
+counts.saveAsTextFile("tachyon://ec2masterhostname:19998/result")
 ~~~
 </div>
 </div>
 </div>
 
-From web user interface, or command line, you can see that the `\LICENSE.txt` file is in memory
-now. So, each time when a new Spark program comes up, it will load in memory data directly from
-Tachyon. In the meantime, we are also working on other features to make Tachyon further enhance
-Spark's performance.
+The results are stored in `/result` folder. You can verfy the results through Web UI or commands.
+Because `\LICENSE.txt` is in memory, when a new Spark program comes up, it can load in memory data
+directly from Tachyon. In the meantime, we are also working on other features to make Tachyon
+further enhance Spark's performance.
 
 This brings us to the end of the Tachyon chapter of the tutorial. We encourage you to continue
-playing with the code and to check out the [project website](http://tachyon-project.org/) for
-further documentation about the system.
+playing with the code and to check out the [project website](http://tachyon-project.org/) or Github
+[repository](https://github.com/amplab/tachyon) for further information.
 
 Bug reports and feature requests are welcomed.
