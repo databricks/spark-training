@@ -43,7 +43,7 @@ memory aggressively. Tachyon caches working set files in memory, and enables dif
 and frameworks to access cached files at memory speed. Thus, Tachyon avoids going to disk to load
 datasets that are frequently read.
 
-In this chapter we first go over basic operations of Tachyon, and then run two Spark programs on top
+In this chapter we first go over basic operations of Tachyon, and then run a Spark program on top
 of it. For more information, please visit Tachyon's [website](http://tachyon-project.org) or Github
 [repository](https://github.com/amplab/tachyon).
 
