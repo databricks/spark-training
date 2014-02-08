@@ -223,10 +223,11 @@ detailed information about it.
 ## Run Spark on Tachyon
 
 In this section, we run a Spark program to interact with Tachyon. The first one is to do a word
-count on `/LICENSE.txt` file.
+count on `/LICENSE.txt` file. In `/root/spark` folder, execute the following command to start
+Spark shell.
 
 ~~~
-$ MASTER=spark://ec2masterhostname.com:7077 ADD_JARS=/root/tachyon/target/tachyon-0.4.0-jar-with-dependencies.jar ./spark-shell
+$ MASTER=spark://ec2masterhostname.com:7077 ADD_JARS=/root/tachyon/target/tachyon-0.4.0-jar-with-dependencies.jar ./bin/spark-shell
 ~~~
 
 <div class="solution" markdown="1">
