@@ -227,7 +227,7 @@ count on `/LICENSE.txt` file. In `/root/spark` folder, execute the following com
 Spark shell.
 
 ~~~
-$ MASTER=spark://ec2masterhostname.com:7077 ADD_JARS=/root/tachyon/target/tachyon-0.4.0-jar-with-dependencies.jar ./bin/spark-shell
+$ MASTER=spark://ec2masterhostname.com:7077 SPARK_CLASSPATH=/root/tachyon/target/tachyon-0.4.0-jar-with-dependencies.jar ADD_JARS=/root/tachyon/target/tachyon-0.4.0-jar-with-dependencies.jar ./bin/spark-shell
 ~~~
 
 <div class="solution" markdown="1">
