@@ -523,9 +523,12 @@ Using the property graph from Section 2.1, suppose we want to find the oldest fo
 <div data-lang="scala" markdown="1">
 ~~~
 class Graph[VD, ED] {
-  def mapReduceTriplets[A](
-      map: EdgeTriplet[VD, ED] => Iterator[(VertexId, A)],
-      reduce: (A, A) => A): VertexRDD[A]))
+  def mapReduceTriplets[MsgType](
+      // Function from an edge triplet to a collection of messages (i.e., Map)
+      map: EdgeTriplet[VD, ED] => Iterator[(VertexId, MsgType)],
+      // Function that combines messages to the same vertex (i.e., Reduce)
+      reduce: (MsgType, MsgType) => MsgType)
+    : VertexRDD[MsgType]
 }
 ~~~
 </div>
@@ -533,7 +536,7 @@ class Graph[VD, ED] {
 
 The map function is applied to each edge triplet in the graph, yielding messages destined to the adjacent vertices. The reduce function aggregates messages destined to the same vertex. The operation results in a `VertexRDD` containing the aggregate message for each vertex.
 
-We can find the oldest follower for each user by sending age messages along each edge and aggregating them with the `max` function:
+We can find the oldest follower for each user by sending a message containing the name and age of each follower and aggregating the messages by taking the message from the older follower:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -665,7 +668,7 @@ to examine the output of the graph analysis, all from the Spark shell.
 
 
 
-GraphX requires the Kryo serializer to be achieve maximum performance.
+GraphX requires the Kryo serializer to achieve maximum performance.
 To see what serializer is being used check the Spark Shell UI by going to `http://<MASTER_URL>:4040/environment/` and checking the `spark.serializer` property:
 
 <p style="text-align: center;">
