@@ -119,7 +119,9 @@ The properties are stored as Scala/Java objects with each edge and vertex in the
 
 
 Throughout the first half of this tutorial we will use the following toy property graph.
-While this is hardly <i>big data</i>, it provides an opportunity to learn about the graph data model and the GraphX API.  In this example we have a small social network with users and their ages modeled as vertices and likes modeled as directed edges.  In this fictional scenario users can like other users multiple times.
+While this is hardly <i>big data</i>, it provides an opportunity to learn about the graph data model and the GraphX API.
+In this example we have a small social network with users and their ages modeled as vertices and likes modeled as directed edges.
+In this fictional scenario users can like other users multiple times.
 
 
 <p style="text-align: center;">
@@ -159,13 +161,24 @@ val edgeArray = Array(
 </div>
 </div>
 
-In the above example we make use of the [`Edge`][Edge] class. Edges have a `srcId` and a
-`dstId` corresponding to the source and destination vertex identifiers. In addition, the `Edge`
-class has an `attr` member which stores the edge property (in this case the number of likes).
+In the above example we make use of the [`Edge`][Edge] class. Edges have a `srcId` and a `dstId` corresponding to the source and destination vertex identifiers.
+In addition, the `Edge` class has an `attr` member which stores the edge property (in this case the number of likes).
+
+For example the following snippet makes an edge between `VertexId` 1 and 3 with property `works with`:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val e = Edge(1L, 3L, "works with")
+println(e.srcId + " " + e.attr + " " + e.dstId)
+~~~
+</div>
+</div>
+
 
 [Edge]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Edge
 
-Using `sc.parallelize` (introduced in the Spark tutorial) construct the following RDDs from `vertexArray` and `edgeArray`
+Using `sc.parallelize` (introduced in the Spark tutorial) construct the following RDDs from the `vertexArray` and `edgeArray` variables.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -186,9 +199,9 @@ Now we are ready to build a property graph.  The basic property graph constructo
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-{% highlight scala %}
+~~~
 val graph: Graph[(String, Int), Int] = Graph(vertexRDD, edgeRDD)
-{% endhighlight %}
+~~~
 </div>
 </div>
 
@@ -299,10 +312,17 @@ for (triplet <- graph.triplets.collect) {
 <div class="solution" markdown="1">
 ~~~
 for (triplet <- graph.triplets.collect) {
-  println( s"${triplet.srcAttr._1} likes ${triplet.dstAttr._1}")
+  println(s"${triplet.srcAttr._1} likes ${triplet.dstAttr._1}")
 }
 ~~~
-</Div>
+
+Here we use a cool new String Interpolation feature in Scala 2.10:
+
+~~~
+val name = "Joey"
+println(s"$name is ${ 3 * 10 }")
+~~~
+</div>
 </div>
 </div>
 
@@ -313,8 +333,8 @@ For extra credit, find the lovers.
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-for (triplet <- graph.triplets.filter(t => t.attr > 5)) {
-  println( s"${triplet.srcAttr._1} loves ${triplet.dstAttr._1}")
+for (triplet <- graph.triplets.filter(t => t.attr > 5).collect) {
+  println(s"${triplet.srcAttr._1} loves ${triplet.dstAttr._1}")
 }
 ~~~
 </div>
@@ -408,21 +428,28 @@ val inDegrees: VertexRDD[Int] = graph.inDegrees
 
 In the above example the `graph.inDegrees` operators returned a `VertexRDD[Int]` (recall that this behaves like `RDD[(VertexId, Int)]`).  What if we wanted to incorporate the in and out degree of each vertex into the vertex property?  To do this we will use a set of common graph operators.
 
-Paste the following code into the spark shell:
+First we define a `User` class to better organize the vertex property and build a new graph with the user property (paste the following code into the spark shell):
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
 // Define a class to more clearly model the user property
 case class User(name: String, age: Int, inDeg: Int, outDeg: Int)
+// Create a user Graph
+val initialUserGraph: Graph[User, Int] = graph.mapVertices{ case (id, (name, age)) => User(name, age, 0, 0) }
+~~~
+</div>
+</div>
 
-// Transform the
-val userGraph = graph.mapVertices{ case (id, (name, age)) => User(name, age, 0, 0) }
+Notice that we initialized each vertex with 0 in and out degree.  Now we join the in and out degree information with each vertex building the new vertex property (paste the following code into the spark shell):
 
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
 // Fill in the degree information
-val degreeGraph = userGraph.outerJoinVertices(userGraph.inDegrees) {
+val userGraph = initialUserGraph.outerJoinVertices(initialUserGraph.inDegrees) {
   case (id, u, inDegOpt) => User(u.name, u.age, inDegOpt.getOrElse(0), u.outDeg)
-}.outerJoinVertices(graph.outDegrees) {
+}.outerJoinVertices(initialUserGraph.outDegrees) {
   case (id, u, outDegOpt) => User(u.name, u.age, u.inDeg, outDegOpt.getOrElse(0))
 }
 ~~~
@@ -446,15 +473,40 @@ The first contains an `RDD` of vertex values and the second argument list takes 
 Note that it is possible that the input `RDD` may not contain values for some of the vertices in the graph.
 In these cases the `Option` argument is empty and `optOutDeg.getOrElse(0)` returns 0.
 
-Print the names of the users who liked by the same number of people they like.
+Using the `degreeGraph` print the number of people who like each user:
+
+<pre class="prettyprint lang-bsh">
+User 1 is called Alice and is liked by 2 people.
+User 2 is called Bob and is liked by 2 people.
+User 3 is called Charlie and is liked by 1 people.
+User 4 is called David and is liked by 1 people.
+User 5 is called Ed and is liked by 0 people.
+User 6 is called Fran and is liked by 2 people.
+</pre>
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-degreeGraph.vertices.filter {
+for ((id, property) <- userGraph.vertices.collect) {
+  println(s"User $id is called ${property.name} and is liked by ${property.inDeg} people.")
+}
+~~~
+</div>
+</div>
+</div>
+
+Print the names of the users who are liked by the same number of people they like.
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<div class="solution" markdown="1">
+~~~
+userGraph.vertices.filter {
   case (id, u) => u.inDeg == u.outDeg
-}.collect.foreach(println(_))
+}.collect.foreach {
+  case (id, property) => println(property.name)
+}
 ~~~
 </div>
 </div>
@@ -479,45 +531,91 @@ class Graph[VD, ED] {
 </div>
 </div>
 
-The map function is applied to each edge triplet in the graph, yielding messages destined to the adjacent vertices. The reduce function combines messages destined to the same vertex. The operation results in a `VertexRDD` containing an aggregated message for each vertex.
+The map function is applied to each edge triplet in the graph, yielding messages destined to the adjacent vertices. The reduce function aggregates messages destined to the same vertex. The operation results in a `VertexRDD` containing the aggregate message for each vertex.
 
 We can find the oldest follower for each user by sending age messages along each edge and aggregating them with the `max` function:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val oldestFollowerAge: VertexRDD[Int] = graph.mapReduceTriplets[Int](
-  edge => Iterator((edge.dstId, edge.srcAttr._2)),
-  (a, b) => math.max(a, b))
-
-Val withNames = graph.vertices.innerJoin(oldestFollowerAge) {
-  (id, pair, oldestAge) => (pair._1, oldestAge)
-}
-
-withNames.collect.foreach(println(_))
+// Find the oldest follower for each user
+val oldestFollower: VertexRDD[(String, Int)] = userGraph.mapReduceTriplets[(String, Int)](
+  // For each edge send a message to the destination vertex with the attribute of the source vertex
+  edge => Iterator((edge.dstId, (edge.srcAttr.name, edge.srcAttr.age))),
+  // To combine messages take the message for the older follower
+  (a, b) => if (a._2 > b._2) a else b
+  )
 ~~~
 </div>
 </div>
 
-As an exercise, try finding the average follower age for each user instead of the max.
+Display the oldest follower for each user:
+
+<pre class="prettyprint lang-bsh">
+David is the oldest follower of Alice.
+Charlie is the oldest follower of Bob.
+Ed is the oldest follower of Charlie.
+Bob is the oldest follower of David.
+Ed does not have any followers.
+Charlie is the oldest follower of Fran.
+</pre>
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+userGraph.vertices.leftJoin(oldestFollower) { (id, user, optOldestFollower) =>
+  /**
+   * Implement: Generate a string naming the oldest follower of each user
+   * Note: Some users may have no messages optOldestFollower.isEmpty if they have no followers
+   *
+   * Try using the match syntax:
+   *
+   *  optOldestFollower match {
+   *    case None => "No followers! implement me!"
+   *    case Some((name, age)) => "implement me!"
+   *  }
+   *
+   */
+}.collect.foreach {
+  case (id, str) => println(str)
+}
+~~~
+<div class="solution" markdown="1">
+~~~
+userGraph.vertices.leftJoin(oldestFollower) { (id, user, optOldestFollower) =>
+  optOldestFollower match {
+    case None => s"${user.name} does not have any followers."
+    case Some((name, age)) => s"${name} is the oldest follower of ${user.name}."
+  }
+}.collect.foreach { case (id, str) => println(str) }
+~~~
+</div>
+</div>
+</div>
+
+
+As an exercise, try finding the average follower age of the followers of each user.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <div class="solution" markdown="1">
 ~~~
-val oldestFollowerAge: VertexRDD[(Int, Double)] = graph.mapReduceTriplets[(Int, Double)](
+val averageAge: VertexRDD[Double] = userGraph.mapReduceTriplets[(Int, Double)](
   // map function
-  edge => Iterator((edge.dstId, (1, edge.srcAttr._2.toDouble))),
+  edge => Iterator((edge.dstId, (1, edge.srcAttr.age.toDouble))),
   // reduce function
-  (a, b) => ((a._1 + b._1), (a._1*a._2 + b._1*b._2)/(a._1+b._1)))
+  (a, b) => ((a._1 + b._1), (a._2 + b._2))
+  ).mapValues((id, p) => p._2 / p._1)
 
-val withNames = graph.vertices.innerJoin(oldestFollowerAge) {
-  (id, pair, oldestAge) => (pair._1, oldestAge._2)
-}
-
-withNames.collect.foreach(println(_))
+// Display the results
+userGraph.vertices.leftJoin(averageAge) { (id, user, optAverageAge) =>
+  optAverageAge match {
+    case None => s"${user.name} does not have any followers."
+    case Some(avgAge) => s"The average age of ${user.name}\'s followers is $avgAge."
+  }
+}.collect.foreach { case (id, str) => println(str) }
 ~~~
-</Div>
+</div>
 </div>
 </div>
 
