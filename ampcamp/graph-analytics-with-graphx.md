@@ -685,32 +685,32 @@ First exit the current Spark Shell (either type exit or ctrl-c).
 
 Open a text editor (e.g., the one true editor emacs or vim) and add the following to `/root/spark/conf/spark-env.sh`:
 
-~~~
+<pre class="prettyprint lang-bsh">
 SPARK_JAVA_OPTS+='
  -Dspark.serializer=org.apache.spark.serializer.KryoSerializer
  -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator '
 export SPARK_JAVA_OPTS
-~~~
+</pre>
 
 or if you are feeling lazy paste the following command in the terminal (not the spark shell):
 
-~~~
+<pre class="prettyprint lang-bsh">
 echo -e "SPARK_JAVA_OPTS+=' -Dspark.serializer=org.apache.spark.serializer.KryoSerializer -Dspark.kryo.registrator=org.apache.spark.graphx.GraphKryoRegistrator ' \nexport SPARK_JAVA_OPTS" >> /root/spark/conf/spark-env.sh
-~~~
+</pre>
 
 Then run the following command which will update the conf on all machines in the cluster:
 
-~~~
+<pre class="prettyprint lang-bsh">
 /root/spark-ec2/copy-dir.sh /root/spark/conf
-~~~
+</pre>
 
 Finally restart the cluster (by again running the following in the terminal):
 
-~~~
+<pre class="prettyprint lang-bsh">
 /root/spark/sbin/stop-all.sh
 sleep 3
 /root/spark/sbin/start-all.sh
-~~~
+</pre>
 
 After starting the Spark shell below, if you check `http://<MASTER_URL>:4040/environment/` the serializer property `spark.serializer` property should be set to `org.apache.spark.serializer.KryoSerializer`.
 
