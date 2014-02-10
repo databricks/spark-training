@@ -4,7 +4,7 @@ title: Data Exploration Using BlinkDB
 categories: [module]
 navigation:
   weight: 100
-  show: false
+  show: true
 skip-chapter-toc: true
 ---
 
@@ -43,41 +43,41 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
    <pre>FAILED: Error in metadata: AlreadyExistsException(message:Table wikistats already exists)
    FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask</pre>
 
-   To fix this, drop the table (`wikistats` or, introduced shortly, `wikistats_cached` or `wikistats_sample_cached`), then create it again using the same command described above.  You can drop a table with:
+   To fix this, drop the table (`wikistats` or, introduced shortly, `wikistats_mem` or `wikistats_sample_mem`), then create it again using the same command described above.  You can drop a table with:
 
    <pre>drop table wikistats;</pre>
 
-3. Like Shark, BlinkDB allows tables to be cached in the cluster's memory for faster access.  Any table having a name with the suffix "_cached" is automatically cached.  We'll take advantage of caching to speed up queries on the `wikistats` table.  Create a cached version of it:
+3. Like Shark, BlinkDB allows tables to be cached in the cluster's memory for faster access.  Any table having a name with the suffix "_mem" is automatically cached.  We'll take advantage of caching to speed up queries on the `wikistats` table.  Create a cached version of it:
 
    <pre class="prettyprint lang-sql">
-   blinkdb> create table wikistats_cached as select * from wikistats;
+   blinkdb> create table wikistats_mem TBLPROPERTIES('shark.cache'='MEMORY_ONLY') as select * from wikistats;
    <span class="nocode">
-   Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_cached
+   Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_mem
    OK
    Time taken: 56.664 seconds</span></pre>
 
 4. First, check the number of records in the table.  (If you have some familiarity with databases, note that we use the "`count(1)`" syntax here since in earlier versions of Hive, the more popular "`count(*)`" operation was not supported. BlinkDB supports most of Hive's flavor of SQL.  Hive SQL syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.)
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select count(1) from wikistats_cached;
+   blinkdb> select count(1) from wikistats_mem;
    <span class="nocode">
    OK
    329641466
    Time taken: 27.889 seconds</span></pre>
 
-5. Now let's create a random sample of this table using BlinkDB's `samplewith` operator and cache it in the cluster's memory.  We'll use a sample that's about 1% of the original Wikipedia dataset in size.  This sample will be used to compute _approximations_ to various queries on `wikistats_cached`.
+5. Now let's create a random sample of this table using BlinkDB's `samplewith` operator and cache it in the cluster's memory.  We'll use a sample that's about 1% of the original Wikipedia dataset in size.  This sample will be used to compute _approximations_ to various queries on `wikistats_mem`.
 
    <pre class="prettyprint lang-sql">
-   blinkdb> create table wikistats_sample_cached as select * from wikistats_cached samplewith 0.01;
+   blinkdb> create table wikistats_sample_mem TBLPROPERTIES('shark.cache'='MEMORY_ONLY') as select * from wikistats_mem samplewith 0.01;
    <span class="nocode">
-   Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_sample_cached
+   Moving data to: hdfs://ec2-107-22-9-64.compute-1.amazonaws.com:9000/user/hive/warehouse/wikistats_sample_mem
    OK
    Time taken: 22.703 seconds</span></pre>
 
    In alpha-0.1.0, we need to tell BlinkDB the size of the sample and of the original table.  First, check the sample's size.  The sample table is just like any other table; you can run any SQL query you want on it, including `count`:
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select count(1) from wikistats_sample_cached;
+   blinkdb> select count(1) from wikistats_sample_mem;
    <span class="nocode">
    OK
    3294551
@@ -100,7 +100,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 6. Our first real task is to compute a simple count of the number of English records (i.e., those with "`project_code="en"`").  We're not using our sample yet.
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select count(1) from wikistats_cached where project_code = "en";
+   blinkdb> select count(1) from wikistats_mem where project_code = "en";
    <span class="nocode">
    OK
    122352588
@@ -109,7 +109,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 7. Now approximate the same count using the sampled table.  In alpha-0.1.0, you need to tell BlinkDB to compute an approximation by prepending "`approx_`" to your aggregation function.  (Also, only queries that compute `count`, `sum`, or `average` can be approximated.  In the future many more functions, including UDFs, will be approximable.)
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select approx_count(1) from wikistats_sample_cached where project_code = "en";
+   blinkdb> select approx_count(1) from wikistats_sample_mem where project_code = "en";
    <span class="nocode">
    OK
    122340466 +/- 225926.0 (99% Confidence)
@@ -122,16 +122,16 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 8. Now we would like to find out the average number of hits on pages with "San Francisco" in the title throughout the entire period:
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select approx_avg(page_views) from wikistats_sample_cached where lcase(page_name) like "%san_francisco%";
+   blinkdb> select approx_avg(page_views) from wikistats_sample_mem where lcase(page_name) like "%san_francisco%";
    <span class="nocode">
    OK
    3.053745928338762 +/- 0.9373634631550505 (99% Confidence)
    Time taken: 12.09 seconds</span></pre>
 
-   You can also compute an exact answer by running the same query on the table `wikistats_cached`, replacing "`approx_avg`" with "`avg`":
+   You can also compute an exact answer by running the same query on the table `wikistats_mem`, replacing "`approx_avg`" with "`avg`":
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select avg(page_views) from wikistats_cached where lcase(page_name) like "%san_francisco%";
+   blinkdb> select avg(page_views) from wikistats_mem where lcase(page_name) like "%san_francisco%";
    <span class="nocode">
    OK
    3.0695254665165628
@@ -140,7 +140,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 9. BlinkDB is targeted at interactive-speed analysis, so let's dive a little further into traffic patterns on Wikipedia.  First, check which time intervals had the most traffic:
 
    <pre class="prettyprint lang-sql">
-   blinkdb> select dt, approx_sum(page_views) as views from wikistats_sample_cached group by dt order by views;
+   blinkdb> select dt, approx_sum(page_views) as views from wikistats_sample_mem group by dt order by views;
    <span class="nocode">
    OK
    20090505-060000	1.0786954974766022E7 +/- 146937.0 (99% Confidence)
@@ -159,7 +159,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 10. The hour "`20090506-120000`" seems to be a fairly typical interval.  Now let's see which project codes (roughly, which languages) contributed to this:
 
     <pre class="prettyprint lang-sql">
-    blinkdb> select project_code, approx_sum(page_views) as views from wikistats_sample_cached where dt="20090506-120000" group by project_code;
+    blinkdb> select project_code, approx_sum(page_views) as views from wikistats_sample_mem where dt="20090506-120000" group by project_code;
     <span class="nocode">
     OK
     vi.d	10197.941673238138 +/- 2724.0 (99% Confidence)
@@ -176,7 +176,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 
     <pre class="prettyprint lang-sql">
     blinkdb> select project_code, approx_count(1) as num_pages, approx_sum(page_views) as views from
-    wikistats_sample_cached where dt="20090506-160000" group by project_code;
+    wikistats_sample_mem where dt="20090506-160000" group by project_code;
     <span class="nocode">
     OK
     fr	315836 +/- 14463.0 (99% Confidence)	1003897.3758920014 +/- 45994.0 (99% Confidence)
@@ -190,7 +190,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 12. However, the random sampling used by BlinkDB doesn't always work well. For instance, try computing the average number of hits on all pages:
 
     <pre class="prettyprint lang-sql">
-    blinkdb> select approx_avg(page_views) from wikistats_sample_cached;
+    blinkdb> select approx_avg(page_views) from wikistats_sample_mem;
     <span class="nocode">
     OK
     3.6420454545454546 +/- 1.7610655103860877 (99% Confidence)
@@ -198,10 +198,10 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 
     Also try computing the true average on the original table.  You'll probably notice that the 99% confidence interval provided by BlinkDB doesn't cover the true answer.
 
-13. Let's investigate this a bit further.  The kind of sampling supported in alpha-0.1.0 (simple random sampling) typically works poorly on data that contains large, important outliers.  Let's check what the raw distribution of `page_views` looks like.  (You can also try this on `wikistats_sample_cached`; percentiles on samples are not officially supported yet, but unofficially they work quite well!)
+13. Let's investigate this a bit further.  The kind of sampling supported in alpha-0.1.0 (simple random sampling) typically works poorly on data that contains large, important outliers.  Let's check what the raw distribution of `page_views` looks like.  (You can also try this on `wikistats_sample_mem`; percentiles on samples are not officially supported yet, but unofficially they work quite well!)
 
     <pre class="prettyprint lang-sql">
-    blinkdb> select percentile_approx(page_views, array(0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999)) as page_views_percentiles from wikistats_cached;
+    blinkdb> select percentile_approx(page_views, array(0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999)) as page_views_percentiles from wikistats_mem;
     <span class="nocode">
     OK
     [1.0,1.0,1.0,1.0,1.9999999999999998,4.867578875914043,35.00000000000001,151.9735162220546]
@@ -225,30 +225,30 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select count(distinct project_code) from wikistats_sample_cached;</pre>
+   select count(distinct project_code) from wikistats_sample_mem;</pre>
    </div>
 
    - Which day (5th, 6th or 7th May 2009) was the most popular in terms of the number of hits?
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select approx_sum(page_views) from wikistats_sample_cached where dt like "20090505%";</pre>
+   select approx_sum(page_views) from wikistats_sample_mem where dt like "20090505%";</pre>
    </div>
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select approx_sum(page_views) from wikistats_sample_cached where dt like "20090506%";</pre>
+   select approx_sum(page_views) from wikistats_sample_mem where dt like "20090506%";</pre>
    </div>
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select approx_sum(page_views) from wikistats_sample_cached where dt like "20090507%";</pre>
+   select approx_sum(page_views) from wikistats_sample_mem where dt like "20090507%";</pre>
    </div>
 
    - What was the total traffic to Wikipedia pages on May 7 between 7AM - 8AM? FIXME
 
       <pre class="prettyprint lang-sql">
-      blinkdb> select approx_sum(page_views) from wikistats_sample_cached where dt="20090507-070000";
+      blinkdb> select approx_sum(page_views) from wikistats_sample_mem where dt="20090507-070000";
       <span class="nocode">
       OK
       1.1811077507224506E7 +/- 147736.0 (99% Confidence)
