@@ -967,7 +967,9 @@ Finally, let's find the most important page within the subgraph of Wikipedia tha
 ~~~
 val berkeleyGraph = graph.subgraph(vpred = (v, t) => t.toLowerCase contains "berkeley")
 
-berkeleyGraph.outerJoinVertices(prGraph.vertices) {
+val prBerkeley = berkeleyGraph.staticPageRank(5).cache
+
+berkeleyGraph.outerJoinVertices(prBerkeley.vertices) {
   (v, title, r) => (r.getOrElse(0.0), title)
 }.vertices.top(10) {
   Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)
