@@ -479,7 +479,7 @@ Here we use the `outerJoinVertices` method of `Graph` which has the following (c
 </div>
 </div>
 
-It takes *two* argument lists.
+Notice that `outerJoinVertices` takes *two* argument lists.
 The first contains an `RDD` of vertex values and the second argument list takes a function from the id, attribute, and Optional matching value in the `RDD` to a new vertex value.
 Note that it is possible that the input `RDD` may not contain values for some of the vertices in the graph.
 In these cases the `Option` argument is empty and `optOutDeg.getOrElse(0)` returns 0.
