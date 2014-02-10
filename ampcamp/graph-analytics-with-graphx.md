@@ -3,7 +3,7 @@ layout: global
 title: Graph Analytics With GraphX
 categories: [module]
 navigation:
-  weight: 75
+  weight: 80
   show: true
 ---
 
@@ -768,8 +768,7 @@ wiki.first
 The next steps in the pipeline are to clean the data and extract the graph structure.
 In this example, we will be extracting the link graph but one could imagine other graphs (e.g., the keyword by document graph and the contributor graph).
 From the sample article we printed out, we can already observe some structure to the data.
-The first word in the line is the name of the article, and the rest of string is the article contents.
-We also can see that this article is a redirect to the "Computer Accessibility" article, and not a full independent article.
+The first word in the line is the name of the article, and the rest of string contains the links in the article.
 
 Now we are going to use the structure we've already observed to do the first round of data-cleaning.
 We define the `Article` class to hold the different parts of the article which we
@@ -968,7 +967,9 @@ Finally, let's find the most important page within the subgraph of Wikipedia tha
 ~~~
 val berkeleyGraph = graph.subgraph(vpred = (v, t) => t.toLowerCase contains "berkeley")
 
-berkeleyGraph.outerJoinVertices(prGraph.vertices) {
+val prBerkeley = berkeleyGraph.staticPageRank(5).cache
+
+berkeleyGraph.outerJoinVertices(prBerkeley.vertices) {
   (v, title, r) => (r.getOrElse(0.0), title)
 }.vertices.top(10) {
   Ordering.by((entry: (VertexId, (Double, String))) => entry._2._1)

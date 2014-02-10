@@ -3,7 +3,7 @@ layout: global
 title: Feedback
 navigation:
   weight: 85
-  show: true
+  show: false
 skip-chapter-toc: true
 ---
 

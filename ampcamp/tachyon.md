@@ -3,7 +3,7 @@ layout: global
 title: Tachyon - Reliable File Sharing at Memory Speed Across Cluster Frameworks
 categories: [module]
 navigation:
-  weight: 75
+  weight: 90
   show: true
 ---
 

@@ -19,11 +19,11 @@ First, launch the Spark shell:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-/root/spark/spark-shell</pre>
+/root/spark/bin/spark-shell</pre>
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
-/root/spark/pyspark</pre>
+/root/spark/bin/pyspark</pre>
 </div>
 </div>
 

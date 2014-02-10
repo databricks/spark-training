@@ -3,7 +3,7 @@ layout: global
 title: Stream Processing w/ Spark Streaming
 categories: [module]
 navigation:
-  weight: 70
+  weight: 65
   show: true
 ---
 

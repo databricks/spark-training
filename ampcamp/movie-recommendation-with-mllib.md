@@ -3,7 +3,7 @@ layout: global
 title: Movie Recommendation with MLlib
 categories: [module]
 navigation:
-  weight: 78
+  weight: 70
   show: true
 ---
 
@@ -52,7 +52,7 @@ these latent factors.
 ##Setup
 
 We will be using a standalone project template for this exercise. In your AMI,
-this has been setup in `/root/als/scala/`. You should find the following items
+this has been setup in `/root/machine-learning/scala/`. You should find the following items
 in the directory.
 
 <div class="codetabs">
@@ -157,7 +157,7 @@ cluster itself, then we'll start adding code to the template. Locate the
 <div class="codetabs">
 <div data-lang="scala">
 <pre class="prettyprint lang-bsh">
-cd /root/als/scala
+cd /root/machine-learning/scala
 vim MovieLensALS.scala  # If you don't know vim, you can use emacs or nano
 </pre>
 </div>
@@ -250,13 +250,13 @@ file run the following commands:
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-cd /root/als/scala
+cd /root/machine-learning/scala
 # change the folder name from "medium" to "large" to run on the large data set
 sbt/sbt package "run /movielens/medium"
 </pre>
 
 This command will compile the `MovieLensALS` class and create a JAR file in
-`/root/als/scala/target/scala-2.10/`. Finally, it will run the program. You
+`/root/machine-learning/scala/target/scala-2.10/`. Finally, it will run the program. You
 should see output similar to the following on your screen:
 
 </div>
