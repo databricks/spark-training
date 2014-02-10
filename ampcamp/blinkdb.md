@@ -10,7 +10,7 @@ skip-chapter-toc: true
 
 BlinkDB is a large-scale data warehouse system like Shark that adds the ability to create and use smaller samples of large datasets to make queries even faster.  Today you're going to get a sneak peek at an alpha release of BlinkDB.  We'll set up BlinkDB and use it to run some SQL queries against the English Wikipedia, as in the Shark exercises.  Don't worry if you haven't seen SQL or Shark before, though - we haven't assumed that you have.
 
-BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0), and you'll probably notice some of its limitations.  We'll mention them as they come up in the tutorial.
+BlinkDB is in its alpha stage of development (the current release is alpha-0.2.0), and you'll probably notice some of its limitations.  We'll mention them as they come up in the tutorial.
 
 1. First, launch the BlinkDB console:
 
@@ -47,7 +47,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 
    <pre>drop table wikistats;</pre>
 
-3. Like Shark, BlinkDB allows tables to be cached in the cluster's memory for faster access.  Any table having a name with the suffix "_mem" is automatically cached.  We'll take advantage of caching to speed up queries on the `wikistats` table.  Create a cached version of it:
+3. Like Shark, BlinkDB allows tables to be cached in the cluster's memory for faster access.  Any table having a name with the suffix "_mem" is automatically cached.  We'll take advantage of caching to speed up queries on the `wikistats` table. Create a cached version of it (please note that caching large tables can take several tens of seconds):
 
    <pre class="prettyprint lang-sql">
    blinkdb> create table wikistats_mem TBLPROPERTIES('shark.cache'='MEMORY_ONLY') as select * from wikistats;
@@ -74,7 +74,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
    OK
    Time taken: 22.703 seconds</span></pre>
 
-   In alpha-0.1.0, we need to tell BlinkDB the size of the sample and of the original table.  First, check the sample's size.  The sample table is just like any other table; you can run any SQL query you want on it, including `count`:
+   In alpha-0.2.0, we need to tell BlinkDB the size of the sample and of the original table. First, check the sample's size.  The sample table is just like any other table; you can run any SQL query you want on it, including `count`:
 
    <pre class="prettyprint lang-sql">
    blinkdb> select count(1) from wikistats_sample_mem;
@@ -106,7 +106,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
    122352588
    Time taken: 21.632 seconds</span></pre>
 
-7. Now approximate the same count using the sampled table.  In alpha-0.1.0, you need to tell BlinkDB to compute an approximation by prepending "`approx_`" to your aggregation function.  (Also, only queries that compute `count`, `sum`, or `average` can be approximated.  In the future many more functions, including UDFs, will be approximable.)
+7. Now approximate the same count using the sampled table.  In alpha-0.2.0, you need to tell BlinkDB to compute an approximation by prepending "`approx_`" to your aggregation function.  (Also, only queries that compute `count`, `sum`, or `average` can be approximated.  In the future many more functions, including UDFs, will be approximable.)
 
    <pre class="prettyprint lang-sql">
    blinkdb> select approx_count(1) from wikistats_sample_mem where project_code = "en";
@@ -154,7 +154,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
    20090505-200001	5.331630157237396E7 +/- 1256778.0 (99% Confidence)
    Time taken: 1.195 seconds</span></pre>
 
-   <b>NOTE:</b> alpha-0.1.0 only supports lexographic ordering using the `orderby` operator. We will introduce numerical ordering in alpha-0.2.0.
+   <b>NOTE:</b> alpha-0.2.0 only supports lexographic ordering using the `orderby` operator. We will introduce numerical ordering in alpha-0.3.0.
 
 10. The hour "`20090506-120000`" seems to be a fairly typical interval.  Now let's see which project codes (roughly, which languages) contributed to this:
 
@@ -198,7 +198,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 
     Also try computing the true average on the original table.  You'll probably notice that the 99% confidence interval provided by BlinkDB doesn't cover the true answer.
 
-13. Let's investigate this a bit further.  The kind of sampling supported in alpha-0.1.0 (simple random sampling) typically works poorly on data that contains large, important outliers.  Let's check what the raw distribution of `page_views` looks like.  (You can also try this on `wikistats_sample_mem`; percentiles on samples are not officially supported yet, but unofficially they work quite well!)
+13. Let's investigate this a bit further.  The kind of sampling supported in alpha-0.2.0 (simple random sampling) typically works poorly on data that contains large, important outliers.  Let's check what the raw distribution of `page_views` looks like.  (You can also try this on `wikistats_sample_mem`; percentiles on samples are not officially supported yet, but unofficially they work quite well!)
 
     <pre class="prettyprint lang-sql">
     blinkdb> select percentile_approx(page_views, array(0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999)) as page_views_percentiles from wikistats_mem;
@@ -211,7 +211,7 @@ BlinkDB is in its alpha stage of development (the current release is alpha-0.1.0
 
     Most pages have only a few views, but there are some pages with a very large number of views.  If a sample misses one of these outliers, it will look very different from the original table, and accuracy of both approximations and confidence intervals will suffer.
 
-14. If you like, continue to explore the Wikipedia dataset.  BlinkDB alpha-0.1.0 supports the following approximate aggregation functions: `approx_sum`, `approx_count`, and `approx_avg`, with more to come soon.
+14. If you like, continue to explore the Wikipedia dataset.  BlinkDB alpha-0.2.0 supports the following approximate aggregation functions: `approx_sum`, `approx_count`, and `approx_avg`, with more to come soon.
 
 15. To exit BlinkDB, type the following at the BlinkDB command line (and don't forget the semicolon!).
 
