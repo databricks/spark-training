@@ -63,6 +63,7 @@ in the directory.
 <li><code>sbt</code>: Directory containing the SBT tool</li>
 <li><code>build.sbt</code>: SBT project file</li>
 <li><code>MovieLensALS.scala</code>: Main Scala program that you are going to edit, compile and run</li>
+<li><code>solution</code>: Directory containing the solution code</li>
 </ul>
 </div>
 
@@ -92,6 +93,7 @@ object MovieLensALS {
   def main(args: Array[String]) {
 
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
+    Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)	
 
     if (args.length != 1) {
       println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
@@ -133,7 +135,6 @@ object MovieLensALS {
     // clean up
 
     sc.stop();
-    System.exit(0)
   }
   
   /** Compute RMSE (Root Mean Squared Error). */
@@ -517,7 +518,7 @@ straightforward:
 </div>
 </div>
 
-The output should be
+The output should be similar to
 
 ~~~
 The best model improves the baseline by 20.96%.
@@ -535,3 +536,8 @@ the recommendations for you is training a matrix factorization model first and
 then augmenting the model using your ratings. If this sounds interesting to you,
 you can take a look at the implementation of MatrixFactorizationModel and see
 how to update the model for new users and new movies.
+
+## Solution code
+
+In case you want to see your recommendation first or the complete source code,
+we put the solution under `/root/machine-learning/scala/solution`.
