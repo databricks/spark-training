@@ -16,6 +16,7 @@ object MovieLensALS {
   def main(args: Array[String]) {
 
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
+    Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
 
     if (args.length != 1) {
       println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
@@ -57,7 +58,6 @@ object MovieLensALS {
     // clean up
 
     sc.stop();
-    System.exit(0)
   }
 
   /** Compute RMSE (Root Mean Squared Error). */
