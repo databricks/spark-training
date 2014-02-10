@@ -81,18 +81,24 @@ model.
 The goal of the GraphX project is to unify graph-parallel and data-parallel computation in one system with a single composable API.
 The GraphX API enables users to view data both as graphs and as collections (i.e., RDDs) without data movement or duplication. By incorporating recent advances in graph-parallel systems, GraphX is able to optimize the execution of graph operations.
 
-Prior to the release of GraphX, graph computation in Spark was expressed using Bagel, an implementation of Pregel.
+<!-- Prior to the release of GraphX, graph computation in Spark was expressed using Bagel, an implementation of Pregel.
 GraphX improves upon Bagel by exposing a richer property graph API, a more streamlined version of the Pregel abstraction, and system optimizations to improve performance and reduce memory overhead.
 While we plan to eventually deprecate Bagel, we will continue to support the [Bagel API][BagelAPI] and [Bagel programming guide][BagelGuide].
 However, we encourage Bagel users to explore the new GraphX API and comment on issues that may complicate the transition from Bagel.
 
 [BagelAPI]: http://spark.incubator.apache.org/docs/latest/api/bagel/index.html#org.apache.spark.bagel.Bagel$
-[BagelGuide]: http://spark.incubator.apache.org/docs/latest/bagel-programming-guide.html
+[BagelGuide]: http://spark.incubator.apache.org/docs/latest/bagel-programming-guide.html -->
 
 
 ## Introduction to the GraphX API
 
-To get started you first need to import GraphX.  Run the following in your Spark shell:
+To get started you first need to import GraphX.  Start the Spark-Shell (by running the following on the root node):
+
+<pre class="prettyprint lang-bsh">
+/root/spark/bin/spark-shell
+</pre>
+
+and paste the following in your Spark shell:
 
 <div class="codetabs">
 <div data-lang="scala">
@@ -103,14 +109,11 @@ import org.apache.spark.rdd.RDD
 </div>
 </div>
 
-Great! You have now "installed" GraphX.
-
 ### The Property Graph
 <a name="property_graph"></a>
 
-The [property graph][Graph] is a directed multigraph with properties attached to each vertex and edge.
-A directed multigraph is a directed graph with potentially multiple parallel edges sharing the same source and destination vertex.
-The ability to support parallel edges simplifies modeling scenarios where multiple relationships (e.g., co-worker and friend) can appear between the same vertices.
+The [property graph][Graph] is a directed multigraph (a directed graph with potentially multiple parallel edges sharing the same source and destination vertex) with properties attached to each vertex and edge.
+<!-- The ability to support parallel edges simplifies modeling scenarios where multiple relationships (e.g., co-worker and friend) can appear between the same vertices. -->
 Each vertex is keyed by a *unique* 64-bit long identifier (`VertexID`).
 Similarly, edges have corresponding source and destination vertex identifiers.
 The properties are stored as Scala/Java objects with each edge and vertex in the graph.
@@ -121,8 +124,8 @@ The properties are stored as Scala/Java objects with each edge and vertex in the
 Throughout the first half of this tutorial we will use the following toy property graph.
 While this is hardly <i>big data</i>, it provides an opportunity to learn about the graph data model and the GraphX API.
 In this example we have a small social network with users and their ages modeled as vertices and likes modeled as directed edges.
-In this fictional scenario users can like other users multiple times.
-
+<!-- In this fictional scenario users can like other users multiple times.
+ -->
 
 <p style="text-align: center;">
   <img src="img/social_graph.png"
@@ -161,10 +164,10 @@ val edgeArray = Array(
 </div>
 </div>
 
-In the above example we make use of the [`Edge`][Edge] class. Edges have a `srcId` and a `dstId` corresponding to the source and destination vertex identifiers.
+Here we use the [`Edge`][Edge] class. Edges have a `srcId` and a `dstId` corresponding to the source and destination vertex identifiers.
 In addition, the `Edge` class has an `attr` member which stores the edge property (in this case the number of likes).
 
-For example the following snippet makes an edge between `VertexId` 1 and 3 with property `works with`:
+<!-- For example the following snippet makes an edge between `VertexId` 1 and 3 with property `works with`:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -174,14 +177,16 @@ println(e.srcId + " " + e.attr + " " + e.dstId)
 ~~~
 </div>
 </div>
-
+ -->
 
 [Edge]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Edge
 
 Using `sc.parallelize` (introduced in the Spark tutorial) construct the following RDDs from the `vertexArray` and `edgeArray` variables.
 
+> Where possible we have tried to make hint code blocks editable. However it may be easier to paste code blocks into your favorite editor and work on them there.
+
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
 ~~~
 val vertexRDD: RDD[(Long, (String, Int))] = // Implement
 val edgeRDD: RDD[Edge[Int]] = // Implement
@@ -212,7 +217,7 @@ generators.
 Like RDDs, property graphs are immutable, distributed, and fault-tolerant.
 Changes to the values or structure of the graph are accomplished by producing a new graph with the desired changes.
 Note that substantial parts of the original graph (i.e. unaffected structure, attributes, and indices) are reused in the new graph.
-The graph is partitioned across the workers using vertex-partitioning heuristics.
+<!-- The graph is partitioned across the workers using vertex-partitioning heuristics. -->
 As with RDDs, each partition of the graph can be recreated on a different machine in the event of a failure.
 
 ### Graph Views
@@ -233,9 +238,13 @@ Charlie is 65
 Here is a hint:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
 ~~~
-graph.vertices.filter { /* implement */ }.collect.foreach { /* implement */ }
+graph.vertices.filter {
+  case (id, (name, age)) => /* implement */
+}.collect.foreach {
+  case (id, (name, age)) => /* implement */
+}
 ~~~
 <div class="solution" markdown="1">
 ~~~
@@ -252,22 +261,20 @@ for ((id,(name,age)) <- graph.vertices.filter { case (id,(name,age)) => age > 30
   println(s"$name is $age")
 }
 ~~~
+
+Here we use the new String Interpolation feature in Scala 2.10:
+
+~~~
+val name = "Joey"
+println(s"$name is ${ 3 * 10 }")
+~~~
 </div>
 </div>
 </div>
 
 In addition to the vertex and edge views of the property graph, GraphX also exposes a triplet view.
-The triplet view logically joins the vertex and edge properties yielding an `RDD[EdgeTriplet[VD, ED]]` containing instances of the [`EdgeTriplet`][EdgeTriplet] class. This *join* can be expressed in the following SQL expression:
-
-[EdgeTriplet]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.EdgeTriplet
-
-{% highlight sql %}
-SELECT src.id, dst.id, src.attr, e.attr, dst.attr
-FROM edges AS e LEFT JOIN vertices AS src JOIN vertices AS dst
-ON e.srcId = src.Id AND e.dstId = dst.Id
-{% endhighlight %}
-
-or graphically as:
+The triplet view logically joins the vertex and edge properties yielding an `RDD[EdgeTriplet[VD, ED]]` containing instances of the [`EdgeTriplet`][EdgeTriplet] class.
+This *join* can be expressed graphically as:
 
 <p style="text-align: center;">
   <img src="img/triplet.png"
@@ -276,6 +283,17 @@ or graphically as:
        width="65%" />
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
+
+<!-- in the following SQL expression:
+{% highlight sql %}
+SELECT src.id, dst.id, src.attr, e.attr, dst.attr
+FROM edges AS e LEFT JOIN vertices AS src JOIN vertices AS dst
+ON e.srcId = src.Id AND e.dstId = dst.Id
+{% endhighlight %}
+ -->
+
+[EdgeTriplet]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.EdgeTriplet
+
 
 The [`EdgeTriplet`][EdgeTriplet] class extends the [`Edge`][Edge] class by adding the `srcAttr` and `dstAttr` members which contain the source and destination properties respectively.
 
@@ -296,7 +314,7 @@ Ed likes Fran
 Here is a partial solution:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
 ~~~
 for (triplet <- graph.triplets.collect) {
  /**
@@ -314,13 +332,6 @@ for (triplet <- graph.triplets.collect) {
 for (triplet <- graph.triplets.collect) {
   println(s"${triplet.srcAttr._1} likes ${triplet.dstAttr._1}")
 }
-~~~
-
-Here we use a cool new String Interpolation feature in Scala 2.10:
-
-~~~
-val name = "Joey"
-println(s"$name is ${ 3 * 10 }")
 ~~~
 </div>
 </div>
@@ -468,7 +479,7 @@ Here we use the `outerJoinVertices` method of `Graph` which has the following (c
 </div>
 </div>
 
-It takes *two* argument lists.
+Notice that `outerJoinVertices` takes *two* argument lists.
 The first contains an `RDD` of vertex values and the second argument list takes a function from the id, attribute, and Optional matching value in the `RDD` to a new vertex value.
 Note that it is possible that the input `RDD` may not contain values for some of the vertices in the graph.
 In these cases the `Option` argument is empty and `optOutDeg.getOrElse(0)` returns 0.
@@ -564,7 +575,7 @@ Charlie is the oldest follower of Fran.
 </pre>
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
 ~~~
 userGraph.vertices.leftJoin(oldestFollower) { (id, user, optOldestFollower) =>
   /**
@@ -604,9 +615,9 @@ As an exercise, try finding the average follower age of the followers of each us
 <div class="solution" markdown="1">
 ~~~
 val averageAge: VertexRDD[Double] = userGraph.mapReduceTriplets[(Int, Double)](
-  // map function
+  // map function returns a tuple of (1, Age)
   edge => Iterator((edge.dstId, (1, edge.srcAttr.age.toDouble))),
-  // reduce function
+  // reduce function combines (sumOfFollowers, sumOfAge)
   (a, b) => ((a._1 + b._1), (a._2 + b._2))
   ).mapValues((id, p) => p._2 / p._1)
 
@@ -624,21 +635,40 @@ userGraph.vertices.leftJoin(averageAge) { (id, user, optAverageAge) =>
 
 ### Subgraph
 
-Suppose we want to find users in the above graph who are lonely so we can suggest new friends for them. The [subgraph][Graph.subgraph] operator takes vertex and edge predicates and returns the graph containing only the vertices that satisfy the vertex predicate (evaluate to true) and edges that satisfy the edge predicate *and connect vertices that satisfy the vertex predicate*.
+Suppose we want to study the community structure of users that are 30 or older.
+To support this type of analysis GraphX includes the [subgraph][Graph.subgraph] operator that takes vertex and edge predicates and returns the graph containing only the vertices that satisfy the vertex predicate (evaluate to true) and edges that satisfy the edge predicate *and connect vertices that satisfy the vertex predicate*.
 
-We can use the subgraph operator to consider only strong relationships with more than 2 likes. We do this by supplying an edge predicate only:
+In the following we restrict our graph to the users that are 30 or older.
 
 [Graph.subgraph]: http://spark.incubator.apache.org/docs/latest/api/graphx/index.html#org.apache.spark.graphx.Graph@subgraph((EdgeTriplet[VD,ED])⇒Boolean,(VertexId,VD)⇒Boolean):Graph[VD,ED]
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-val strongRelationships: Graph[(String, Int), Int] =
-  graph.subgraph(epred = (edge => edge.attr > 2))
+val olderGraph = userGraph.subgraph(vpred = (id, user) => user.age >= 30)
 ~~~
 </div>
 </div>
 
+Lets examine the communities in this restricted graph:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+// compute the connected components
+val cc = olderGraph.connectedComponents
+
+// display the component id of each user:
+olderGraph.vertices.leftJoin(cc.vertices) {
+  case (id, user, comp) => s"${user.name} is in component ${comp.get}"
+}.collect.foreach{ case (id, str) => println(str) }
+~~~
+</div>
+</div>
+
+Connected components are labeled (numbered) by the lowest vertex Id in that component.  Notice that by examining the subgraph we have disconnected David from the rest of his community.  Moreover his connections to the rest of the graph are through younger users.
+
+<!--
 As an exercise, use this subgraph to find lonely users who have no strong relationships (i.e., have degree 0 in the subgraph).
 
 <div class="codetabs">
@@ -654,7 +684,7 @@ lonely.collect.foreach(println(_))
 </div>
 </div>
 </div>
-
+ -->
 
 <!-- ### TODO: Reverse?
 ### TODO: MapEdges or MapVertices
@@ -809,7 +839,7 @@ We are also going to define a mapping from article title to vertex ID by hashing
 Finish implementing the following:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
 ~~~
 // Hash function to assign an Id to each article
 def pageHash(title: String): VertexId = {
