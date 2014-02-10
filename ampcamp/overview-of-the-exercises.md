@@ -9,8 +9,7 @@ navigation:
 These exercises are divided into sections designed to give a hands-on experience with various software components of the Berkeley Data Analytics Stack (BDAS).
 For Spark, we will walk you through using the Spark shell for interactive exploration of data. You have the choice of doing the exercises using Scala or using Python.
 For Shark, you will be using SQL in the Shark console to interactively explore the same data.
-For Spark Streaming, we will walk you through writing stand alone Spark programs in Scala to processing Twitter's sample stream of tweets.
-
+The advanced modules may use other data sets, such as Twitter data for Spark Streaming.
 
 ## Cluster Details
 Your cluster contains 6 m1.xlarge Amazon EC2 nodes.
@@ -28,6 +27,8 @@ Some of the more important ones are listed below:
    - `scala-app-template`: Template for standalone Spark programs written in Scala
    - `shark`: Shark installation
    - `spark`: Spark installation
+   - `machine-learning`: Root directory for machine learning module
+   - `blinkdb`: BlinkDB installation
 
 - Useful scripts/documentation:
    - `spark-ec2`: Suite of scripts to manage Spark on EC2
@@ -47,7 +48,7 @@ For stand-alone Spark programs, you will have to know the Spark cluster URL. You
     cat spark-ec2/cluster-url
 
 ## Dataset For Exploration
-Your HDFS cluster should come preloaded with 20GB of Wikipedia traffic statistics data obtained from http://aws.amazon.com/datasets/4182 .
+Among other datasets, your HDFS cluster should come preloaded with 20GB of Wikipedia traffic statistics data obtained from http://aws.amazon.com/datasets/4182 .
 To make the analysis feasible (within the short timeframe of the exercise), we took three days worth of data (May 5 to May 7, 2009; roughly 20G and 329 million entries).
 You can list the files:
 

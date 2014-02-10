@@ -3,7 +3,7 @@ layout: global
 title: Data Exploration Using BlinkDB
 categories: [module]
 navigation:
-  weight: 80
+  weight: 100
   show: false
 skip-chapter-toc: true
 ---
