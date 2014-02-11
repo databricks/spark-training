@@ -993,7 +993,7 @@ titleAndPrGraph.vertices.top(10) {
 Finally, let's find the most important page within the subgraph of Wikipedia that mentions Berkeley in the title:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 val berkeleyGraph = graph.subgraph(vpred = (v, t) => t.toLowerCase contains "berkeley")
 
