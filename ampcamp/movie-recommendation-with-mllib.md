@@ -73,7 +73,7 @@ The main file you are going to edit, compile, and run for the exercises is
 </div>
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 import java.util.Random
 
@@ -93,7 +93,7 @@ object MovieLensALS {
   def main(args: Array[String]) {
 
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
-    Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)	
+    Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
 
     if (args.length != 1) {
       println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
@@ -136,12 +136,12 @@ object MovieLensALS {
 
     sc.stop();
   }
-  
+
   /** Compute RMSE (Root Mean Squared Error). */
   def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], n: Long) = {
     // ...
   }
-  
+
   /** Elicitate ratings from command-line. */
   def elicitateRatings(movies: Seq[(Int, String)]) = {
     // ...
@@ -236,7 +236,7 @@ Now, let's make our first edit to add code to get a summary of the ratings.
     val numUsers = ratings.map(_._2.user).distinct.count
     val numMovies = ratings.map(_._2.product).distinct.count
 
-    println("Got " + numRatings + " ratings from " 
+    println("Got " + numRatings + " ratings from "
       + numUsers + " users on " + numMovies + " movies.")
 ~~~
 </div>
@@ -313,7 +313,7 @@ When you run the application, you should see prompt similar to the following:
 
 ~~~
 Please rate the following movie (1-5 (best), or 0 if not seen):
-Raiders of the Lost Ark (1981): 
+Raiders of the Lost Ark (1981):
 ~~~
 
 ##Splitting training data
@@ -368,7 +368,7 @@ ones are rank, lambda (regularization constant), and number of iterations. The
 `train` method of ALS we are going to use is defined as the following:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 object ALS {
 
@@ -404,7 +404,7 @@ selected and its RMSE on the test set is used as the final metric.
     for (rank <- ranks; lambda <- lambdas; numIter <- numIters) {
       val model = ALS.train(training, rank, numIter, lambda)
       val validationRmse = computeRmse(model, validation, numValidation)
-      println("RMSE (validation) = " + validationRmse + " for the model trained with rank = " 
+      println("RMSE (validation) = " + validationRmse + " for the model trained with rank = "
         + rank + ", lambda = " + lambda + ", and numIter = " + numIter + ".")
       if (validationRmse < bestValidationRmse) {
         bestModel = Some(model)
@@ -439,7 +439,7 @@ movies you haven't rated and calling the model's `predict` method to get
 predictions. Recall that `0` is the special user id assigned to you.
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 class MatrixFactorizationModel {
   def predict(userProducts: RDD[(Int, Int)]): RDD[Rating] = {
