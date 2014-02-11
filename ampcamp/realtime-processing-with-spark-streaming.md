@@ -34,7 +34,7 @@ Simple Build Tool, or SBT, is popular open-source a build tool for Scala and Jav
   - `java/TutorialHeler.java:` Java file containing a few helper functions
   - `java/ScalaHelper.java:` Scala file containing a few helper functions
 
-The main file you are going to edit, compile and run for the exercises is `Tutorial.scala` or `Tutorial.java`. It should look as follows:
+The main file you are going to edit, compile and run for the exercises is `Tutorial.scala` or `Tutorial.java`. NOTE: You'll need to change sparkUrl from what is in the template!. It should look as follows:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -53,7 +53,7 @@ object Tutorial {
     val sparkHome = "/root/spark"
 
     // URL of the Spark cluster
-    val sparkUrl = getSparkUrl()
+    val sparkUrl = "local[4]"
 
     // Location of the required JAR files
     val jarFile = "target/scala-2.10/tutorial_2.10-0.1-SNAPSHOT.jar"
@@ -86,7 +86,7 @@ public class Tutorial {
     String sparkHome = "/root/spark";
 
     // URL of the Spark cluster
-    String sparkUrl = TutorialHelper.getSparkUrl();
+    String sparkUrl = "local[4]";
 
     // Location of the required JAR files
     String jarFile = "target/scala-2.10/tutorial_2.10-0.1-SNAPSHOT.jar";
