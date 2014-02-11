@@ -72,8 +72,8 @@ table td, table th {
 </tr><tr>
   <td>Machine Learning</td>
   <td class="yes">yes</td>
-  <td class="no">yes</td>
-  <td class="no">yes</td>
+  <td class="no">no</td>
+  <td class="no">no</td>
 </tr><tr>
   <td>GraphX - Graph Analytics</td>
   <td class="yes">yes</td>
