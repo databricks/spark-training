@@ -4,16 +4,29 @@ function styleCode() {
   if (typeof disableStyleCode != "undefined") {
     return;
   }
+  $(".codetabs pre code").each(function() {
+    $(this).text($(this).text().trim());
+  });
   $(".codetabs pre code").parent().each(function() {
     if (!$(this).hasClass("prettyprint")) {
+      var editor = ace.edit(this);
+      editor.setTheme("ace/theme/chrome");
+      var editable = $(this).parent().data("editable") == true;
+      editor.setReadOnly(!editable);
+      editor.setOptions({
+            maxLines: 100
+      });
+      editor.getSession().setUseWrapMode(true);
       var lang = $(this).parent().data("lang");
-      if (lang == "python") {
-        lang = "py"
+      if (lang === 'python') {
+        editor.getSession().setMode('ace/mode/python');
+      } else if (lang === 'bash') {
+        editor.getSession().setMode('ace/mode/bash');
+      } else if (lang === 'scala') {
+        editor.getSession().setMode('ace/mode/scala');
+      } else if (lang === 'java') {
+        editor.getSession().setMode('ace/mode/java');
       }
-      if (lang == "bash") {
-        lang = "bsh"
-      }
-      $(this).addClass("prettyprint lang-"+lang+" linenums");
     }
   });
   console.log("runningPrettyPrint()")
