@@ -1,6 +1,7 @@
 import org.apache.spark.api.java.*;
 import org.apache.spark.api.java.function.*;
 import org.apache.spark.streaming.*;
+import org.apache.spark.streaming.twitter.*;
 import org.apache.spark.streaming.api.java.*;
 import twitter4j.*;
 import java.util.Arrays;
@@ -15,7 +16,7 @@ public class Tutorial {
     String sparkUrl = TutorialHelper.getSparkUrl();
 
     // Location of the required JAR files 
-    String jarFile = "target/scala-2.9.3/tutorial_2.9.3-0.1-SNAPSHOT.jar";
+    String jarFile = "target/scala-2.10/tutorial_2.10-0.1-SNAPSHOT.jar";
 
     // HDFS directory for checkpointing
     String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";

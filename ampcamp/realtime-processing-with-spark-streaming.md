@@ -42,6 +42,7 @@ The main file you are going to edit, compile and run for the exercises is `Tutor
 import org.apache.spark._
 import org.apache.spark.SparkContext._
 import org.apache.spark.streaming._
+import org.apache.spark.streaming.twitter._
 import org.apache.spark.streaming.StreamingContext._
 import TutorialHelper._
 
@@ -55,7 +56,7 @@ object Tutorial {
     val sparkUrl = getSparkUrl()
 
     // Location of the required JAR files
-    val jarFile = "target/scala-2.9.3/tutorial_2.9.3-0.1-SNAPSHOT.jar"
+    val jarFile = "target/scala-2.10/tutorial_2.10-0.1-SNAPSHOT.jar"
 
     // HDFS directory for checkpointing
     val checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/"
@@ -73,6 +74,7 @@ object Tutorial {
 import org.apache.spark.api.java.*;
 import org.apache.spark.api.java.function.*;
 import org.apache.spark.streaming.*;
++import org.apache.spark.streaming.twitter.*;
 import org.apache.spark.streaming.api.java.*;
 import twitter4j.*;
 import java.util.Arrays;
@@ -87,7 +89,7 @@ public class Tutorial {
     String sparkUrl = TutorialHelper.getSparkUrl();
 
     // Location of the required JAR files
-    String jarFile = "target/scala-2.9.3/tutorial_2.9.3-0.1-SNAPSHOT.jar";
+    String jarFile = "target/scala-2.10/tutorial_2.10-0.1-SNAPSHOT.jar";
 
     // HDFS directory for checkpointing
     String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
@@ -213,12 +215,12 @@ Here, we create a StreamingContext object by providing the Spark cluster URL, th
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val tweets = ssc.twitterStream()
+    val tweets = TwitterUtils.createStream(ssc, None)
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    JavaDStream<Status> tweets = ssc.twitterStream();
+    JavaDStream<Status> tweets = TwitterUtils.createStream(ssc);
 ~~~
 </div>
 </div>
@@ -271,11 +273,13 @@ Finally, we need to tell the context to start running the computation we have se
 <div data-lang="scala" markdown="1">
 ~~~
     ssc.start()
+    ssc.awaitTermination()
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
     ssc.start();
+    ssc.awaitTermination();
 ~~~
 </div>
 </div>
