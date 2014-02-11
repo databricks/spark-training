@@ -290,7 +290,7 @@ After saving `Tutorial.scala`, it can be run from the command prompt using the f
 
 <pre><code>sbt/sbt package run</code></pre>
 
-This command will automatically compile the `Tutorial` class and create a JAR file in `/root/streaming/[language]/target/scala-2.9.2/`. Finally, it will run the program. You should see output similar to the following on your screen:
+This command will automatically compile the `Tutorial` class and create a JAR file in `/root/streaming/[language]/target/scala-2.10/`. Finally, it will run the program. You should see output similar to the following on your screen:
 
 <pre class="nocode">
 -------------------------------------------

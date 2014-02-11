@@ -18,7 +18,7 @@ However, reading through that whole tutorial and trying the examples at the cons
 1. Launch the Scala console by typing:
 
    ~~~
-   scala
+   /root/scala-2.10.3/bin/scala
    ~~~
 
 1. Declare a list of integers as a variable called "myNumbers".
