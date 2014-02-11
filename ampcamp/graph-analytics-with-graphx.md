@@ -186,7 +186,7 @@ Using `sc.parallelize` (introduced in the Spark tutorial) construct the followin
 > Where possible we have tried to make hint code blocks editable. However it may be easier to paste code blocks into your favorite editor and work on them there.
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 val vertexRDD: RDD[(Long, (String, Int))] = // Implement
 val edgeRDD: RDD[Edge[Int]] = // Implement
@@ -238,7 +238,7 @@ Charlie is 65
 Here is a hint:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 graph.vertices.filter {
   case (id, (name, age)) => /* implement */
@@ -314,7 +314,7 @@ Ed likes Fran
 Here is a partial solution:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 for (triplet <- graph.triplets.collect) {
  /**
@@ -575,7 +575,7 @@ Charlie is the oldest follower of Fran.
 </pre>
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 userGraph.vertices.leftJoin(oldestFollower) { (id, user, optOldestFollower) =>
   /**
@@ -839,7 +839,7 @@ We are also going to define a mapping from article title to vertex ID by hashing
 Finish implementing the following:
 
 <div class="codetabs">
-<div data-lang="scala" markdown="1" onClick="this.contentEditable='true';">
+<div data-lang="scala" markdown="1" data-editable="true">
 ~~~
 // Hash function to assign an Id to each article
 def pageHash(title: String): VertexId = {
