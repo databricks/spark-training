@@ -165,7 +165,9 @@ a:hover code {
   vertical-align: middle;
 }
 #logo {
-  width: 70px;
+  width: 180px;
+  position: relative;
+  left: -50px;
   height: auto;
   display: inline-block;
   vertical-align: middle;
