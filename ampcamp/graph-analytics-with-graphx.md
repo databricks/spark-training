@@ -101,11 +101,11 @@ To get started you first need to import GraphX.  Start the Spark-Shell (by runni
 and paste the following in your Spark shell:
 
 <div class="codetabs">
-<div data-lang="scala">
-{% highlight scala %}
+<div data-lang="scala" markdown="1">
+~~~
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
-{% endhighlight %}
+~~~
 </div>
 </div>
 
@@ -140,8 +140,8 @@ Later we will demonstrate how to load real data.
 Paste the following code into the spark shell.
 
 <div class="codetabs">
-<div data-lang="scala">
-{% highlight scala %}
+<div data-lang="scala" markdown="1" data-editable="true">
+~~~
 val vertexArray = Array(
   (1L, ("Alice", 28)),
   (2L, ("Bob", 27)),
@@ -160,7 +160,7 @@ val edgeArray = Array(
   Edge(5L, 3L, 8),
   Edge(5L, 6L, 3)
   )
-{% endhighlight %}
+~~~
 </div>
 </div>
 
@@ -183,7 +183,7 @@ println(e.srcId + " " + e.attr + " " + e.dstId)
 
 Using `sc.parallelize` (introduced in the Spark tutorial) construct the following RDDs from the `vertexArray` and `edgeArray` variables.
 
-> Where possible we have tried to make hint code blocks editable. However it may be easier to paste code blocks into your favorite editor and work on them there.
+> We have made the code blocks editable so that you have space to compose your answer before pasting into the spark shell.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1" data-editable="true">
