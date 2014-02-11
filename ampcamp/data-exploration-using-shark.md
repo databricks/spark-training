@@ -43,14 +43,14 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
    <pre>FAILED: Error in metadata: AlreadyExistsException(message:Table wikistats already exists)
    FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask</pre>
 
-   To fix this, drop the table (`wikistats` or, introduced shortly, `wikistats_cached`), then create it again using the same command described above.  You can drop a table with:
+   To fix this, drop the table (`wikistats` or, introduced shortly, `wikistats_mem`), then create it again using the same command described above.  You can drop a table with:
    
    <pre>drop table wikistats;</pre>
 
-1. Let's create a table containing all English records and cache it in the cluster's memory. Shark automatically caches any table having a name with the suffix "`_cached`". While running the following command, you can revisit the Spark web UI (hosted at port 4040 on the master node) and click on the Storage tab to see a new cached dataset being created.
+1. Let's create a table containing all English records and cache it in the cluster's memory. Shark automatically caches any table having a name with the suffix "`_mem`". While running the following command, you can revisit the Spark web UI (hosted at port 4040 on the master node) and click on the Storage tab to see a new cached dataset being created.
 
    <pre class="prettyprint lang-sql">
-   shark> create table wikistats_cached as select * from wikistats where project_code="en";
+   shark> create table wikistats_mem TBLPROPERTIES('shark.cache'='MEMORY_ONLY') as select * from wikistats where project_code="en";
    <span class="nocode">
    ...
    Time taken: 127.5 seconds
@@ -59,7 +59,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 1. Do a simple count to get the number of English records. If you have some familiarity working with databases, note that we us the "`count(1)`" syntax here since in earlier versions of Hive, the more popular "`count(*)`" operation was not supported. The Hive syntax is described in detail in the <a href="https://cwiki.apache.org/confluence/display/Hive/GettingStarted" target="_blank">Hive Getting Started Guide</a>.
 
    <pre class="prettyprint lang-sql">
-   shark> select count(1) from wikistats_cached;
+   shark> select count(1) from wikistats_mem;
    <span class="nocode">
    ...
    122352588
@@ -69,7 +69,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 1. Output the total traffic to Wikipedia English pages for each hour between May 7 and May 9, with one line per hour.
 
    <pre class="prettyprint lang-sql">
-   shark> select dt, sum(page_views) from wikistats_cached group by dt;
+   shark> select dt, sum(page_views) from wikistats_mem group by dt;
    <span class="nocode">
    ...
    20090507-070000	6292754
@@ -84,7 +84,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <pre class="prettyprint lang-sql">
    shark> set mapred.reduce.tasks=50;
-   shark> select page_name, sum(page_views) as views from wikistats_cached group by page_name having views > 200000;
+   shark> select page_name, sum(page_views) as views from wikistats_mem group by page_name having views > 200000;
    <span class="nocode">
    ...
    index.html      310642
@@ -115,14 +115,14 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select count(distinct dt) from wikistats_cached;</pre>
+   select count(distinct dt) from wikistats_mem;</pre>
    </div>
 
 - How many hits are there on pages with Berkeley in the title throughout the entire period?
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select sum(page_views) from wikistats_cached where page_name like "%berkeley%";
+   select sum(page_views) from wikistats_mem where page_name like "%berkeley%";
    /* "%" in SQL is a wildcard matching all characters. */</pre>
    </div>
 
@@ -130,7 +130,7 @@ Now that we've had fun with Spark, let's try out Shark. Remember Shark is a larg
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">
-   select dt, sum(page_views) from wikistats_cached where dt like "20090506%" group by dt order by dt;</pre>
+   select dt, sum(page_views) from wikistats_mem where dt like "20090506%" group by dt order by dt;</pre>
    </div>
 
 To exit Shark, type the following at the Shark command line (and don't forget the semicolon!).
