@@ -25,4 +25,4 @@ The docs use:
   the less files into css will not run automatically when you save a .less file,
   you have to manually run `jekyll` or `jekyll --auto` again.
 
-Some of this code was adapted from the offical Scala documentation site.
+Some of this code was adapted from the official Scala documentation site.
