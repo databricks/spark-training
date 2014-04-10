@@ -5,7 +5,7 @@ next: logging-into-the-cluster.html
 title: Launching a Spark/Shark Cluster on EC2
 ---
 
-This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this [intro to AMIs](https://aws.amazon.com/amis/)).
+This section will walk you through the process of launching a small cluster using your own Amazon EC2 account and our scripts and AMI (New to AMIs? See this [intro to AMIs](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)).
 
 <p class="alert alert-warn" style="overflow:hidden;" markdown="1">
 <i class="icon-info-sign">    </i>
