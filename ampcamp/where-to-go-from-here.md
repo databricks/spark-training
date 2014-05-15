@@ -35,7 +35,7 @@ Find examples, documentation, downloads, research papers, news, and more using t
     - [AMP Camp 2](http://ampcamp.berkeley.edu/2)
     - [AMP Camp 3](http://ampcamp.berkeley.edu/3)
 - Subscribe to the [Spark mailing lists](http://spark.incubator.apache.org/mailing-lists.html)
-- The [Spark issue tracker](https://spark-project.atlassian.net/browse/SPARK)
+- The [Spark issue tracker](https://issues.apache.org/jira/browse/SPARK)
 - Various [Spark related articles on Quora](http://www.quora.com/Spark-Cluster-Computing)
 - Some Articles and blog posts related to Spark:
     - [Behind the Scenes of the First Spark Summit](http://strata.oreilly.com/2013/11/behind-the-scenes-of-the-first-spark-summit.html). On the O'Reilly Strata Blog, by Andy Konwinski, Nov 22, 2013
