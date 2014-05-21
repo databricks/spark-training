@@ -173,11 +173,11 @@ $ ....
 ### Application Programming Interface
 
 After using command line to interact with Tachyon, you can also use its API. We have several sample
-[applications](https://github.com/amplab/tachyon/tree/master/src/main/java/tachyon/examples).
-For example, [BasicOperations.java](https://github.com/amplab/tachyon/blob/master/src/main/java/tachyon/examples/BasicOperations.java)
+[applications](https://github.com/amplab/tachyon/tree/master/main/src/main/java/tachyon/examples).
+For example, [BasicOperations.java](https://github.com/amplab/tachyon/blob/master/main/src/main/java/tachyon/examples/BasicOperations.java)
 shows how to user file create, write, and read operations.
 
-You have put these into our script, you can simple use the following command to run this sample
+You have put these into our script, you can simply use the following command to run this sample
 program. The following command runs [BasicOperations.java], and also verifies Tachyon's
 installation.
 
