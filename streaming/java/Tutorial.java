@@ -1,3 +1,4 @@
+import org.apache.spark.*;
 import org.apache.spark.api.java.*;
 import org.apache.spark.api.java.function.*;
 import org.apache.spark.streaming.*;
@@ -9,14 +10,6 @@ import scala.Tuple2;
 
 public class Tutorial {
   public static void main(String[] args) throws Exception {
-    // Location of the Spark directory 
-    String sparkHome = "/root/spark";
-    
-    // URL of the Spark cluster
-    String sparkUrl = TutorialHelper.getSparkUrl();
-
-    // Location of the required JAR files 
-    String jarFile = "target/scala-2.10/tutorial_2.10-0.1-SNAPSHOT.jar";
 
     // HDFS directory for checkpointing
     String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";

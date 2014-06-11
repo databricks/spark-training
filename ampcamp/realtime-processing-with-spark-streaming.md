@@ -49,15 +49,6 @@ import TutorialHelper._
 object Tutorial {
   def main(args: Array[String]) {
 
-    // Location of the Spark directory
-    val sparkHome = "/root/spark"
-
-    // URL of the Spark cluster
-    val sparkUrl = "local[4]"
-
-    // Location of the required JAR files
-    val jarFile = "target/scala-2.10/tutorial_2.10-0.1-SNAPSHOT.jar"
-
     // HDFS directory for checkpointing
     val checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/"
 
@@ -71,10 +62,11 @@ object Tutorial {
 </div>
 <div data-lang="java" markdown="1">
 ~~~
+import org.apache.spark.*;
 import org.apache.spark.api.java.*;
 import org.apache.spark.api.java.function.*;
 import org.apache.spark.streaming.*;
-+import org.apache.spark.streaming.twitter.*;
+import org.apache.spark.streaming.twitter.*;
 import org.apache.spark.streaming.api.java.*;
 import twitter4j.*;
 import java.util.Arrays;
@@ -82,14 +74,6 @@ import scala.Tuple2;
 
 public class Tutorial {
   public static void main(String[] args) throws Exception {
-    // Location of the Spark directory
-    String sparkHome = "/root/spark";
-
-    // URL of the Spark cluster
-    String sparkUrl = "local[4]";
-
-    // Location of the required JAR files
-    String jarFile = "target/scala-2.10/tutorial_2.10-0.1-SNAPSHOT.jar";
 
     // HDFS directory for checkpointing
     String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
@@ -199,13 +183,12 @@ This object serves as the main entry point for all Spark Streaming functionality
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val ssc = new StreamingContext(sparkUrl, "Tutorial", Seconds(1), sparkHome, Seq(jarFile))
+    val ssc = new StreamingContext(new SparkConf(), Seconds(1))
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    JavaStreamingContext ssc = new JavaStreamingContext(
-      sparkUrl, "Tutorial", new Duration(1000), sparkHome, new String[]{jarFile});
+    JavaStreamingContext ssc = new JavaStreamingContext(new SparkConf(), new Duration(1000));
 ~~~
 </div>
 </div>
@@ -288,9 +271,26 @@ __Note that all DStream operations must be done before calling this statement.__
 
 After saving `Tutorial.scala`, it can be run from the command prompt using the following command (from within the `/root/streaming/[language]` directory).
 
-<pre><code>sbt/sbt package run</code></pre>
+<pre><code>sbt/sbt assembly</code></pre>
 
-This command will automatically compile the `Tutorial` class and create a JAR file in `/root/streaming/[language]/target/scala-2.10/`. Finally, it will run the program. You should see output similar to the following on your screen:
+This command will compile the `Tutorial` class and create a JAR file in `/root/streaming/[language]/target/scala-2.10/`. 
+
+Finally, the program can be run as using the `spark-submit` script. At the command line, run
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+  /root/spark/bin/spark-submit --master `cat /root/spark-ec2/cluster-url` --class Tutorial /root/streaming/scala/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
+</pre>
+</div>
+<div data-lang="java" markdown="1">
+<pre class="prettyprint lang-bsh">
+  /root/spark/bin/spark-submit --master `cat /root/spark-ec2/cluster-url` --class Tutorial /root/streaming/java/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
+</pre>
+</div>
+</div>
+
+You will soon find a sample of the received tweets beeing printed on the screen (can take 10 seconds or so before it start appearing).
 
 <pre class="nocode">
 -------------------------------------------
