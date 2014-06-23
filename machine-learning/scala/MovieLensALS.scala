@@ -25,16 +25,10 @@ object MovieLensALS {
 
     // set up environment
 
-    val jarFile = "target/scala-2.10/movielens-als_2.10-0.0.jar"
-    val sparkHome = "/root/spark"
-    val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
     val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
     val conf = new SparkConf()
-      .setMaster(master)
-      .setSparkHome(sparkHome)
       .setAppName("MovieLensALS")
       .set("spark.executor.memory", "8g")
-      .setJars(Seq(jarFile))
     val sc = new SparkContext(conf)
 
     // load ratings and movie titles
