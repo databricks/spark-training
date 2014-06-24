@@ -19,8 +19,9 @@ object MovieLensALS {
     Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
 
     if (args.length != 1) {
-      println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
-      exit(1)
+      println("Usage: /root/spark/bin/spark-submit --master `cat ~/spark-ec2/cluster-url` "+
+        "--class MovieLensALS target/scala-2.10/movielens-als-assembly-0.0.jar movieLensHomeDir")
+      sys.exit(1)
     }
 
     // set up environment
