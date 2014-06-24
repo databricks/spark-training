@@ -56,15 +56,15 @@ if __name__ == "__main__":
 
     numRatings = ratings.count()
     numUsers = ratings.map(lambda r: r[1].user).distinct().count()
-    numMovies = ratings.map(lambda r: r[1].product).distinct.count()
+    numMovies = ratings.map(lambda r: r[1].product).distinct().count()
 
     print "Got %d ratings from %d users on %d movies"%(numRatings, numUsers, numMovies)
 
     # sample a subset of most rated movies for rating elicitation
 
-    mostRatedMovieIds = ratings.map(lambda r: r[1].product).countByValue.toSeq.sortBy(lambda x: - x[1]).take(50).map(lambda x: x[0])
+    mostRatedMovieIds = ratings.map(lambda r: r[1].product).countByValue().toSeq().sortBy(lambda x: - x[1]).take(50).map(lambda x: x[0])
     random.seed(0)
-    selectedMovies = mostRatedMovieIds.filter(lambda x: random.random() < 0.2).map(lambda x: (x, movies[x])).toSeq
+    selectedMovies = mostRatedMovieIds.filter(lambda x: random.random() < 0.2).map(lambda x: (x, movies[x])).toSeq()
 
     # elicitate ratings
 
@@ -75,9 +75,9 @@ if __name__ == "__main__":
     # last digit of the timestamp, add myRatings to train, and cache them
 
     numPartitions = 20
-    training = ratings.filter(lambda x: x[0] < 6).values().union(myRatingsRDD).repartition(numPartitions).persist
-    validation = ratings.filter(lambda x: x[0] >= 6 and x[0] < 8).values().repartition(numPartitions).persist
-    test = ratings.filter(lambda x: x[0] >= 8).values.persist
+    training = ratings.filter(lambda x: x[0] < 6).values().union(myRatingsRDD).repartition(numPartitions).persist()
+    validation = ratings.filter(lambda x: x[0] >= 6 and x[0] < 8).values().repartition(numPartitions).persist()
+    test = ratings.filter(lambda x: x[0] >= 8).values().persist()
 
     numTraining = training.count()
     numValidation = validation.count()
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     print "Training: %d, validation: %d, test: %d"%(numTraining, numValidation, numTest)
 
-    
+
 
     
 
