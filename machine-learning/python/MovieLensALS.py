@@ -42,7 +42,9 @@ if __name__ == "__main__":
         sys.exit(1)
     
     masterHostname = open("/root/spark-ec2/masters").read().strip()
-    conf = (SparkConf().setAppName("MovieLensALS").set("spark.executor.memory", "8g"))
+    conf = SparkConf()
+    conf.setAppName("MovieLensALS")
+    conf.set("spark.executor.memory", "8g")
     sc = SparkContext(conf = conf, pyFiles=['Rating.py'])
 
     movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + sys.argv[1]
@@ -62,9 +64,9 @@ if __name__ == "__main__":
 
     # sample a subset of most rated movies for rating elicitation
 
-    mostRatedMovieIds = ratings.map(lambda r: r[1].product).countByValue().items().sortBy(lambda x: - x[1]).take(50).map(lambda x: x[0])
+    mostRatedMovieIds = [x[0] for x in sorted(ratings.map(lambda r: r[1].product).countByValue().items(), key=lambda x: - x[1])[:50]]
     random.seed(0)
-    selectedMovies = mostRatedMovieIds.filter(lambda x: random.random() < 0.2).map(lambda x: (x, movies[x])).items()
+    selectedMovies = [(x, movies[x]) for x in mostRatedMovieIds if random.random < 0.2]
 
     # elicitate ratings
 
