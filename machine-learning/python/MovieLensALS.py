@@ -3,12 +3,7 @@ import sys
 import numpy as np
 
 from pyspark import SparkConf, SparkContext
-
-class Rating:
-    def __init__(self, user, product, rating):
-        self.user = user
-        self.product = product
-        self.rating = rating
+from Rating import Rating
 
 def parseRatings(line):
     fields = line.split("::")
@@ -27,8 +22,8 @@ if __name__ == "__main__":
         sys.exit(1)
     
     masterHostname = open("/root/spark-ec2/masters").read().strip()
-    conf = SparkConf().setAppName("MovieLensALS").set("spark.executor.memory", "8g")
-    sc = SparkContext(conf)
+    conf = (SparkConf().setAppName("MovieLensALS").set("spark.executor.memory", "8g"))
+    sc = SparkContext(conf = conf)
 
     movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + sys.argv[1]
 
@@ -40,4 +35,4 @@ if __name__ == "__main__":
 
 
     numRatings = ratings.count()
-    println("Got [" + numRatings + "] ratings.")
+    print "Got [" + numRatings + "] ratings."
