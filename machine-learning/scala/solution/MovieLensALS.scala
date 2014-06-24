@@ -192,7 +192,7 @@ object MovieLensALS {
       }
     }
     if(ratings.isEmpty) {
-      error("No rating provided!")
+      sys.error("No rating provided!")
     } else {
       ratings
     }

@@ -1,6 +1,6 @@
 import os
 import sys
-import numpy as np
+import random
 
 from pyspark import SparkConf, SparkContext
 from Rating import Rating
@@ -13,6 +13,26 @@ def parseMovies(line):
     fields = line.split("::")
     return int(fields[0]), fields[1]
 
+def elicitateRatings(movies):
+    prompt = "Please rate the following movie (1-5 (best), or 0 if not seen):"
+    print prompt
+    ratings = list()
+    for movie in movies:
+        valid = False
+        while not valid:
+            r = raw_input()
+            if r < 0 or r > 5:
+                print prompt
+            else:
+                valid = True
+                if r > 0:
+                    ratings.append(Rating(0, movie, r))
+    if len(ratings) == 0:
+        raise RuntimeError("No rating provided")
+    else:
+        return ratings
+
+
 # Add any new functions you need here
 
 if __name__ == "__main__":
@@ -23,7 +43,7 @@ if __name__ == "__main__":
     
     masterHostname = open("/root/spark-ec2/masters").read().strip()
     conf = (SparkConf().setAppName("MovieLensALS").set("spark.executor.memory", "8g"))
-    sc = SparkContext(conf = conf)
+    sc = SparkContext(conf = conf, pyFiles=['Rating.py'])
 
     movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + sys.argv[1]
 
@@ -35,4 +55,39 @@ if __name__ == "__main__":
 
 
     numRatings = ratings.count()
-    print "Got [" + numRatings + "] ratings."
+    numUsers = ratings.map(lambda r: r[1].user).distinct().count()
+    numMovies = ratings.map(lambda r: r[1].product).distinct.count()
+
+    print "Got %d ratings from %d users on %d movies"%(numRatings, numUsers, numMovies)
+
+    # sample a subset of most rated movies for rating elicitation
+
+    mostRatedMovieIds = ratings.map(lambda r: r[1].product).countByValue.toSeq.sortBy(lambda x: - x[1]).take(50).map(lambda x: x[0])
+    random.seed(0)
+    selectedMovies = mostRatedMovieIds.filter(lambda x: random.random() < 0.2).map(lambda x: (x, movies[x])).toSeq
+
+    # elicitate ratings
+
+    myRatings = elicitateRatings(selectedMovies)
+    myRatingsRDD = sc.parallelize(myRatings, 1)
+
+    # split ratings into train (60%), validation (20%), and test (20%) based on the 
+    # last digit of the timestamp, add myRatings to train, and cache them
+
+    numPartitions = 20
+    training = ratings.filter(lambda x: x[0] < 6).values().union(myRatingsRDD).repartition(numPartitions).persist
+    validation = ratings.filter(lambda x: x[0] >= 6 and x[0] < 8).values().repartition(numPartitions).persist
+    test = ratings.filter(lambda x: x[0] >= 8).values.persist
+
+    numTraining = training.count()
+    numValidation = validation.count()
+    numTest = test.count()
+
+    print "Training: %d, validation: %d, test: %d"%(numTraining, numValidation, numTest)
+
+    
+
+    
+
+
+
