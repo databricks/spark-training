@@ -62,9 +62,9 @@ if __name__ == "__main__":
 
     # sample a subset of most rated movies for rating elicitation
 
-    mostRatedMovieIds = ratings.map(lambda r: r[1].product).countByValue().toSeq().sortBy(lambda x: - x[1]).take(50).map(lambda x: x[0])
+    mostRatedMovieIds = ratings.map(lambda r: r[1].product).countByValue().items().sortBy(lambda x: - x[1]).take(50).map(lambda x: x[0])
     random.seed(0)
-    selectedMovies = mostRatedMovieIds.filter(lambda x: random.random() < 0.2).map(lambda x: (x, movies[x])).toSeq()
+    selectedMovies = mostRatedMovieIds.filter(lambda x: random.random() < 0.2).map(lambda x: (x, movies[x])).items()
 
     # elicitate ratings
 
