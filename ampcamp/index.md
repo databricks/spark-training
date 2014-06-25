@@ -23,7 +23,7 @@ The tutorial begins with a set of introductory excercises which should be done _
 
 1. [Scala](introduction-to-the-scala-shell.html) - a quick crashcourse on the Scala language and command line interface.
 2. [Spark](data-exploration-using-spark.html) [(project homepage)](http://spark.incubator.apache.org) - a fast cluster compute engine.
-3. [Shark](data-exploration-using-shark.html) [(project homepage)](http://shark.cs.berkeley.edu) - a SQL layer on top of Spark.
+3. [Spark SQL](data-exploration-using-spark-sql.html) [(programming guide)](http://spark.apache.org/docs/latest/sql-programming-guide.html) - a SQL layer on top of Spark.
 
 ## Advanced Exercises
 These can be done _**in any order**_ according to your interests.
@@ -62,8 +62,10 @@ table td, table th {
   <td class="no">no</td>
   <td class="yes">yes</td>
 </tr><tr>
-  <td>Shark Interactive</td>
-  <td colspan="3" class="yes">All SQL</td>
+  <td>Spark SQL Interactive</td>
+  <td class="yes">yes</td>
+  <td class="no">no</td>
+  <td class="yes">yes</td>
 </tr><tr>
   <td>Spark Streaming</td>
   <td class="yes">yes</td>
