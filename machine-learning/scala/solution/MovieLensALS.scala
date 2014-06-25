@@ -26,7 +26,7 @@ object MovieLensALS {
     val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
     val conf = new SparkConf()
       .setAppName("MovieLensALS")
-      .set("spark.executor.memory", "8g")
+      .set("spark.executor.memory", "2g")
     val sc = new SparkContext(conf)
 
     // load ratings and movie titles
@@ -54,7 +54,7 @@ object MovieLensALS {
 
     // load ratings
 
-    val myRatings = loadRatings()
+    val myRatings = loadPersonalRatings()
     val myRatingsRDD = sc.parallelize(myRatings, 1)
 
     // split ratings into train (60%), validation (20%), and test (20%) based on the 
@@ -148,8 +148,8 @@ object MovieLensALS {
     math.sqrt(predictionsAndRatings.map(x => (x._1 - x._2) * (x._1 - x._2)).reduce(_ + _) / n)
   }
 
-  /** Load ratings from file. */
-  def loadRatings(): Seq[Rating] = {
+  /** Load personal ratings from file. */
+  def loadPersonalRatings(): Seq[Rating] = {
     var ratings = List[Rating]()
     for (line <- Source.fromFile("../userRatings/userRatings.txt").getLines()) {
       val ls = line.split(",")

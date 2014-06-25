@@ -24,7 +24,7 @@ def toRatings(rdd):
     return rdd.map(lambda x: Rating(x[0], x[1], x[2]))
 
 # Load ratings from file
-def loadRatings():
+def loadPersonalRatings():
     ratings = []
     f = open('../userRatings/userRatings.txt', 'r')
     for line in f.readlines():
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     masterHostname = open("/root/spark-ec2/masters").read().strip()
     conf = SparkConf()
     conf.setAppName("MovieLensALS")
-    conf.set("spark.executor.memory", "8g")
+    conf.set("spark.executor.memory", "2g")
     sc = SparkContext(conf = conf, pyFiles=['Rating.py'])
 
     movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + sys.argv[1]
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     # load ratings
 
-    myRatings = loadRatings()
+    myRatings = loadPersonalRatings()
     myRatingsRDD = sc.parallelize(myRatings, 1)
 
     # split ratings into train (60%), validation (20%), and test (20%) based on the 
