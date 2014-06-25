@@ -14,7 +14,7 @@ prompt = "Please rate the following movie (1-5 (best), or 0 if not seen):"
 print prompt
 overwrite = False
 for line in f.readlines():
-    ls = line.strip()split(",")
+    ls = line.strip().split(",")
     if len(ls) == 3 and not overwrite:
         r = raw_input("Looks like you've already rated the movies. Overwrite ratings? (y/N)")
         if r[0] == "N":
