@@ -19,14 +19,12 @@ object MovieLensALS {
     Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
 
     if (args.length != 1) {
-      println("Usage: /root/spark/bin/spark-submit --master `cat ~/spark-ec2/cluster-url` "+
-        "--class MovieLensALS target/scala-2.10/movielens-als-assembly-0.0.jar movieLensHomeDir")
+      println("Usage: /path/to/spark/bin/spark-submit --class MovieLensALS /path/to/assembly-jar movieLensHomeDir")
       sys.exit(1)
     }
 
     // set up environment
 
-    val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
     val conf = new SparkConf()
       .setAppName("MovieLensALS")
       .set("spark.executor.memory", "2g")
@@ -34,7 +32,7 @@ object MovieLensALS {
 
     // load ratings and movie titles
 
-    val movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + args(0)
+    val movieLensHomeDir = args(0)
 
     val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map { line =>
       val fields = line.split("::")

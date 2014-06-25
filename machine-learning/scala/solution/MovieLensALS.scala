@@ -17,13 +17,12 @@ object MovieLensALS {
     Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)	
 
     if (args.length != 1) {
-      println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
+      println("Usage: /path/to/spark/bin/spark-submit --class MovieLensALS /path/to/assembly-jar movieLensHomeDir")
       sys.exit(1)
     }
 
     // set up environment
 
-    val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
     val conf = new SparkConf()
       .setAppName("MovieLensALS")
       .set("spark.executor.memory", "2g")
@@ -31,7 +30,7 @@ object MovieLensALS {
 
     // load ratings and movie titles
 
-    val movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + args(0)
+    val movieLensHomeDir = args(0)
 
     val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map { line =>
       val fields = line.split("::")
@@ -60,7 +59,7 @@ object MovieLensALS {
     // split ratings into train (60%), validation (20%), and test (20%) based on the 
     // last digit of the timestamp, add myRatings to train, and cache them
 
-    val numPartitions = 20
+    val numPartitions = 4
     val training = ratings.filter(x => x._1 < 6)
                           .values
                           .union(myRatingsRDD)
