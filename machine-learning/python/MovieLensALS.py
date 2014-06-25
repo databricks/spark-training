@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     print "Movies recommended for you:"
     for i in xrange(len(recommendations)):
-        print u"%d: "%i + u"%s"%movies[recommendations[i].product]
+        print ("%d: %s"%(i, movies[recommendations[i].product])).encode('ascii', 'ignore')
 
 
     # clean up
