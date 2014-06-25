@@ -73,12 +73,13 @@ Since all of the exercises are based on Twitter's sample tweet stream, it is nec
 
     ![New application confirmation](img/twitter3.png)
 
-4. Finally, the page should look like the following. Note the API key + secret, 
-   and the Access Token and Access Token Secert.
+4. Finally, the page should look like the following. Notice the API Key, API Secret, Access Token and Access Token Secret.
+   We are going to use these 4 keys in the next section. After you have finished this tutorial, you can delete all these 
+   keys by following the instructions at the end of the tutorial.
 
     ![OAuth details](img/twitter4.png)
 
-5.  We are going to use these 4 values in the next section. After you have finished this tutorial, you can delete all these keys by following the instructions at the end of the tutorial.
+5. 
 
 
 ## First Spark Streaming program
