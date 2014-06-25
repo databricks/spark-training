@@ -111,7 +111,7 @@ if __name__ == "__main__":
     bestNumIter = -1
 
     for rank, lmbda, numIter in product(ranks, lambdas, numIters):
-        model = ALS.train(flattenRating(training), rank, numIter, lmbda)
+        model = ALS.train(flattenRatings(training), rank, numIter, lmbda)
         validationRmse = computeRmse(model, validation, numValidation)
         print "RMSE (validation) = %f for the model trained with " % (rank) +\
               "rank = %d, lambda = %.1f, and numIter = %d." % (validationRmse, lmbda, numIter)
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     print "Movies recommended for you:"
     for i in xrange(len(recommendations)):
-        print "%d: %s" % (i, movies[recommendations[i].product])
+        print u"%d: "%i + u"%s"%movies[recommendations[i].product]
 
 
     # clean up
