@@ -1,8 +1,11 @@
-import os
 import sys
-import random
+
+from itertools import product
+from math import sqrt
+from operator import add
 
 from pyspark import SparkConf, SparkContext
+from pyspark.mllib.recommendation import ALS
 from Rating import Rating
 
 def parseRatings(line):
@@ -13,24 +16,26 @@ def parseMovies(line):
     fields = line.split("::")
     return int(fields[0]), fields[1]
 
-def elicitateRatings(movies):
-    prompt = "Please rate the following movie (1-5 (best), or 0 if not seen):"
-    print prompt
-    ratings = list()
-    for movie in movies:
-        valid = False
-        while not valid:
-            r = raw_input()
-            if r < 0 or r > 5:
-                print prompt
-            else:
-                valid = True
-                if r > 0:
-                    ratings.append(Rating(0, movie, r))
+# Load ratings from file
+def loadRatings():
+    ratings = []
+    f = open('../userRatings/userRatings.txt', 'r')
+    for line in f.readlines():
+        ls = line.strip().split(",")
+        if len(ls) == 3:
+            ratings.append(Rating(0, int(ls[0]), float(ls[2])))
     if len(ratings) == 0:
-        raise RuntimeError("No rating provided")
+        raise RuntimeError("No ratings provided.")
     else:
         return ratings
+
+# Compute RMSE (Root Mean Squared Error)
+def computeRmse(model, data, n):
+    predictions = model.predict(data.map(lambda x: (x.user, x.product)))
+    predictionsAndRatings = predictions.map(lambda x: ((x.user, x.product), x.rating))\
+                                       .join(data.map(lambda x: ((x.user, x.product), x.rating)))\
+                                       .values()
+    return sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1])**2).reduce(add) / float(n))
 
 
 # Add any new functions you need here
@@ -55,30 +60,30 @@ if __name__ == "__main__":
     movies = dict(sc.textFile(movieLensHomeDir + "/movies.dat").map( \
              lambda line: parseMovies(line)).collect())
 
-
     numRatings = ratings.count()
     numUsers = ratings.map(lambda r: r[1].user).distinct().count()
     numMovies = ratings.map(lambda r: r[1].product).distinct().count()
 
     print "Got %d ratings from %d users on %d movies"%(numRatings, numUsers, numMovies)
 
-    # sample a subset of most rated movies for rating elicitation
+    # load ratings
 
-    mostRatedMovieIds = [x[0] for x in sorted(ratings.map(lambda r: r[1].product).countByValue().items(), key=lambda x: - x[1])[:50]]
-    random.seed(0)
-    selectedMovies = [(x, movies[x]) for x in mostRatedMovieIds if random.random < 0.2]
-
-    # elicitate ratings
-
-    myRatings = elicitateRatings(selectedMovies)
+    myRatings = loadRatings()
     myRatingsRDD = sc.parallelize(myRatings, 1)
 
     # split ratings into train (60%), validation (20%), and test (20%) based on the 
     # last digit of the timestamp, add myRatings to train, and cache them
 
     numPartitions = 20
-    training = ratings.filter(lambda x: x[0] < 6).values().union(myRatingsRDD).repartition(numPartitions).persist()
-    validation = ratings.filter(lambda x: x[0] >= 6 and x[0] < 8).values().repartition(numPartitions).persist()
+    training = ratings.filter(lambda x: x[0] < 6)\
+                      .values()\
+                      .union(myRatingsRDD)\
+                      .repartition(numPartitions).persist()
+
+    validation = ratings.filter(lambda x: x[0] >= 6 and x[0] < 8)\
+                        .values()\
+                        .repartition(numPartitions).persist()
+
     test = ratings.filter(lambda x: x[0] >= 8).values().persist()
 
     numTraining = training.count()
@@ -87,9 +92,52 @@ if __name__ == "__main__":
 
     print "Training: %d, validation: %d, test: %d"%(numTraining, numValidation, numTest)
 
+    # train models and evaluate them on the validation set
+
+    ranks = [8, 12]
+    lambdas = [0.1, 10.0]
+    numIters = [10, 20]
+    bestModel = None
+    bestValidationRmse = float("inf")
+    bestRank = 0
+    bestLambda = -1.0
+    bestNumIter = -1
+
+    for rank, lmbda, numIter in product(ranks, lambdas, numIters):
+        model = ALS.train(training, rank, numIter, lmbda)
+        validationRmse = computeRmse(model, validation, numValidation)
+        print "RMSE (validation) = %f for the model trained with rank = %d, lambda = %0.1f, " +\
+              "and numIter = %d."%(validationRmse, rank, lmbda, numIter)
+        if (validationRmse < bestValidationRmse):
+            bestModel = model
+            bestValidationRmse = validationRmse
+            bestRank = rank
+            bestLambda = lmbda
+            bestNumIter = numIter
+
+    testRmse = computeRmse(bestModel, test, numTest)
+
+    # evaluate the best model on the test set
+
+    print "The best model was trained with rank = %d and lambda = %0.1f, and numIter = %d," +\
+          "and its RMSE on the test set is %f."%(bestRank, bestLambda, bestNumIter, testRmse)
+
+    meanRating = training.union(validation).map(lambda x: x.rating).mean()
+    baselineRmse = sqrt(test.map(lambda x: (meanRating - x.rating)**2).reduce(add) / numTest)
+    improvement = (baselineRmse - testRmse) / baselineRmse * 100
+    print "The best model improves the baseline by %0.2f%."%improvement
+
+    # make personalized recommendations
+    myRatedMovieIds = set([x.product for x in myRatings])
+    candidates = sc.parallelize([m for m in movies if m not in myRatedMovieIds])
+    recommendations = sorted(bestModel.predict(candidates.map(lambda x: (0, x))).collect(), key=lambda x: - x.rating)[:50]
+
+    print "Movies recommended for you:"
+    for (i in xrange(len(recommendations))):
+        print "%d: %s"%(i, movies[recommendations[i].product])
 
 
+    # clean up
+
+    sc.stop()
     
-
-
-

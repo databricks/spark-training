@@ -1,5 +1,3 @@
-import java.util.Random
-
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
 
@@ -20,7 +18,7 @@ object MovieLensALS {
 
     if (args.length != 1) {
       println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
-      exit(1)
+      sys.exit(1)
     }
 
     // set up environment
@@ -54,22 +52,9 @@ object MovieLensALS {
     println("Got " + numRatings + " ratings from "
       + numUsers + " users on " + numMovies + " movies.")
 
-    // sample a subset of most rated movies for rating elicitation
+    // load ratings
 
-    val mostRatedMovieIds = ratings.map(_._2.product) // extract movie ids
-                                   .countByValue      // count ratings per movie
-                                   .toSeq             // convert map to Seq
-                                   .sortBy(- _._2)    // sort by rating count
-                                   .take(50)          // take 50 most rated
-                                   .map(_._1)         // get their ids
-    val random = new Random(0)
-    val selectedMovies = mostRatedMovieIds.filter(x => random.nextDouble() < 0.2)
-                                          .map(x => (x, movies(x)))
-                                          .toSeq
-
-    // elicitate ratings
-
-    val myRatings = elicitateRatings(selectedMovies)
+    val myRatings = loadRatings()
     val myRatingsRDD = sc.parallelize(myRatings, 1)
 
     // split ratings into train (60%), validation (20%), and test (20%) based on the 
@@ -151,7 +136,7 @@ object MovieLensALS {
 
     // clean up
 
-    sc.stop();
+    sc.stop()
   }
 
   /** Compute RMSE (Root Mean Squared Error). */
@@ -162,39 +147,21 @@ object MovieLensALS {
                                            .values
     math.sqrt(predictionsAndRatings.map(x => (x._1 - x._2) * (x._1 - x._2)).reduce(_ + _) / n)
   }
-  
-  /** Elicitate ratings from command-line. */
-  def elicitateRatings(movies: Seq[(Int, String)]) = {
-    val prompt = "Please rate the following movie (1-5 (best), or 0 if not seen):"
-    println(prompt)
-    val ratings = movies.flatMap { x =>
-      var rating: Option[Rating] = None
-      var valid = false
-      while (!valid) {
-        print(x._2 + ": ")
-        try {
-          val r = Console.readInt
-          if (r < 0 || r > 5) {
-            println(prompt)
-          } else {
-            valid = true
-            if (r > 0) {
-              rating = Some(Rating(0, x._1, r))
-            }
-          }
-        } catch {
-          case e: Exception => println(prompt)
-        }
-      }
-      rating match {
-        case Some(r) => Iterator(r)
-        case None => Iterator.empty
+
+  /** Load ratings from file. */
+  def loadRatings(): Seq[Rating] = {
+    var ratings = List[Rating]()
+    for (line <- Source.fromFile("../userRatings/userRatings.txt").getLines()) {
+      val ls = line.split(",")
+      if (ls.size == 3) {
+        val rating = new Rating(0, line.split(",")(0).toInt, line.split(",")(2).toDouble)
+        ratings ::= rating
       }
     }
-    if(ratings.isEmpty) {
-      sys.error("No rating provided!")
+    if (ratings.size == 0) {
+      sys.error("No ratings provided.")
     } else {
-      ratings
+      ratings.toSeq
     }
   }
 }

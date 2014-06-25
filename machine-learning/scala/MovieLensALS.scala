@@ -52,7 +52,7 @@ object MovieLensALS {
 
     // clean up
 
-    sc.stop();
+    sc.stop()
   }
 
   /** Compute RMSE (Root Mean Squared Error). */
@@ -64,38 +64,20 @@ object MovieLensALS {
     math.sqrt(predictionsAndRatings.map(x => (x._1 - x._2) * (x._1 - x._2)).reduce(_ + _) / n)
   }
   
-  /** Elicitate ratings from command-line. */
-  def elicitateRatings(movies: Seq[(Int, String)]) = {
-    val prompt = "Please rate the following movie (1-5 (best), or 0 if not seen):"
-    println(prompt)
-    val ratings = movies.flatMap { x =>
-      var rating: Option[Rating] = None
-      var valid = false
-      while (!valid) {
-        print(x._2 + ": ")
-        try {
-          val r = Console.readInt
-          if (r < 0 || r > 5) {
-            println(prompt)
-          } else {
-            valid = true
-            if (r > 0) {
-              rating = Some(Rating(0, x._1, r))
-            }
-          }
-        } catch {
-          case e: Exception => println(prompt)
-        }
-      }
-      rating match {
-        case Some(r) => Iterator(r)
-        case None => Iterator.empty
+  /** Load ratings from file. */
+  def loadRatings(): Seq[Rating] = {
+    var ratings = List[Rating]()
+    for (line <- Source.fromFile("../userRatings/userRatings.txt").getLines()) {
+      val ls = line.split(",")
+      if (ls.size == 3) {
+        val rating = new Rating(0, line.split(",")(0).toInt, line.split(",")(2).toDouble)
+        ratings ::= rating
       }
     }
-    if(ratings.isEmpty) {
-      error("No rating provided!")
+    if (ratings.size == 0) {
+      sys.error("No ratings provided.")
     } else {
-      ratings
+      ratings.toSeq
     }
   }
 }
