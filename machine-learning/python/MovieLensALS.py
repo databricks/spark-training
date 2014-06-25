@@ -17,6 +17,12 @@ def parseMovies(line):
     fields = line.split("::")
     return int(fields[0]), fields[1]
 
+def flattenRatings(ratingsRDD):
+    return ratingsRDD.map(lambda x: (x.user, x.product, x.rating))
+
+def toRatings(rdd):
+    return rdd.map(lambda x: Rating(x[0], x[1], x[2]))
+
 # Load ratings from file
 def loadRatings():
     ratings = []
@@ -36,7 +42,7 @@ def computeRmse(model, data, n):
     predictionsAndRatings = predictions.map(lambda x: ((x[0], x[1]), x[2]))\
                                        .join(data.map(lambda x: ((x.user, x.product), x.rating)))\
                                        .values()
-    return sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1])**2).reduce(add) / float(n))
+    return sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(n))
 
 
 # Add any new functions you need here
@@ -105,10 +111,10 @@ if __name__ == "__main__":
     bestNumIter = -1
 
     for rank, lmbda, numIter in product(ranks, lambdas, numIters):
-        model = ALS.train(training.map(lambda x: (x.user, x.product, x.rating)), rank, numIter, lmbda)
+        model = ALS.train(flattenRating(training), rank, numIter, lmbda)
         validationRmse = computeRmse(model, validation, numValidation)
-        print "RMSE (validation) = %f for the model trained with rank = %d,"%(validationRmse, rank) +\
-              " lambda = %.1f, and numIter = %d."%(lmbda, numIter)
+        print "RMSE (validation) = %f for the model trained with " % (rank) +\
+              "rank = %d, lambda = %.1f, and numIter = %d." % (validationRmse, lmbda, numIter)
         if (validationRmse < bestValidationRmse):
             bestModel = model
             bestValidationRmse = validationRmse
@@ -120,23 +126,23 @@ if __name__ == "__main__":
 
     # evaluate the best model on the test set
 
-    print "The best model was trained with rank = %d and lambda = %.1f, "%(bestRank, bestLambda) +\
-          "and numIter = %d, and its RMSE on the test set is %f."%(bestNumIter, testRmse)
+    print "The best model was trained with rank = %d and lambda = %.1f, " % (bestRank, bestLambda) +\
+          "and numIter = %d, and its RMSE on the test set is %f." % (bestNumIter, testRmse)
 
     meanRating = training.union(validation).map(lambda x: x.rating).mean()
-    baselineRmse = sqrt(test.map(lambda x: (meanRating - x.rating)**2).reduce(add) / numTest)
+    baselineRmse = sqrt(test.map(lambda x: (meanRating - x.rating) ** 2).reduce(add) / numTest)
     improvement = (baselineRmse - testRmse) / baselineRmse * 100
-    print "The best model improves the baseline by %.2f%."%improvement
+    print "The best model improves the baseline by %.2f" % (improvement) + "%."
 
     # make personalized recommendations
     myRatedMovieIds = set([x.product for x in myRatings])
     candidates = sc.parallelize([m for m in movies if m not in myRatedMovieIds])
-    recommendations = sorted(bestModel.predictAll(candidates.map(lambda x: (0, x)))\
-                                      .collect(), key=lambda x: - x.rating)[:50]
+    recommendations = sorted(toRatings(bestModel.predictAll(candidates.map(lambda x: (0, x))))\
+                                                .collect(), key=lambda x: - x.rating)[:50]
 
     print "Movies recommended for you:"
     for i in xrange(len(recommendations)):
-        print "%d: %s"%(i, movies[recommendations[i].product])
+        print "%d: %s" % (i, movies[recommendations[i].product])
 
 
     # clean up
