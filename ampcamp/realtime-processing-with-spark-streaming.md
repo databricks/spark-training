@@ -14,88 +14,32 @@ This section will first introduce you to the basic system setup of the standalon
 
 ### System Setup
 
-We use a modified version of the Scala standalone project template introduced in the [Running Standalone Spark Programs](data-exploration-using-spark.html#running-standalone-spark-programs) section for the next exercise. In your AMI, this has been setup in `/root/streaming/`. You should find the following items in the directory.
+We use a modified version of the Scala standalone project template introduced in the [Running Standalone Spark Programs](data-exploration-using-spark.html#running-standalone-spark-programs) section for the next exercise. This has been setup in `[USB root directory]/streaming/`. You should find the following items in the directory.
 
 <div class="sidebar">
 <p style="font-size:1.2em"><b>What is SBT?</b></p>
-Simple Build Tool, or SBT, is popular open-source a build tool for Scala and Java projects, written in Scala. Currently, Spark can be built using SBT or Maven, while Spark Streaming an Shark can be built with SBT only. Read more about SBT at <a href="https://github.com/harrah/xsbt/wiki" target="_blank">its Github page</a>.
+Simple Build Tool, or SBT, is popular open-source a build tool for Scala and Java projects. Read more about SBT at <a href="https://github.com/harrah/xsbt/wiki" target="_blank">its Github page</a>.
 </div>
 
-- `twitter.txt:` File containing Twitter authentication details
 - For Scala users
-  - `scala/sbt:` Directory containing the SBT tool
   - `scala/build.sbt:` SBT project file
   - `scala/Tutorial.scala:` Main Scala program that you are going to edit, compile and run
   - `scala/TutorialHelper.scala:` Scala file containing few helper functions for `Tutorial.scala`
 - For Java users
-  - `java/sbt:` Directory containing the SBT tool
   - `java/build.sbt:` SBT project file
   - `java/Tutorial.java` Main Java program that you are going to edit, compile and run
   - `java/TutorialHeler.java:` Java file containing a few helper functions
   - `java/ScalaHelper.java:` Scala file containing a few helper functions
 
-The main file you are going to edit, compile and run for the exercises is `Tutorial.scala` or `Tutorial.java`. NOTE: You'll need to change sparkUrl from what is in the template!. It should look as follows:
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-import org.apache.spark._
-import org.apache.spark.SparkContext._
-import org.apache.spark.streaming._
-import org.apache.spark.streaming.twitter._
-import org.apache.spark.streaming.StreamingContext._
-import TutorialHelper._
-
-object Tutorial {
-  def main(args: Array[String]) {
-
-    // HDFS directory for checkpointing
-    val checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/"
-
-    // Configure Twitter credentials using twitter.txt
-    TutorialHelper.configureTwitterCredentials()
-
-    // Your code goes here
-  }
-}
-~~~
-</div>
-<div data-lang="java" markdown="1">
-~~~
-import org.apache.spark.*;
-import org.apache.spark.api.java.*;
-import org.apache.spark.api.java.function.*;
-import org.apache.spark.streaming.*;
-import org.apache.spark.streaming.twitter.*;
-import org.apache.spark.streaming.api.java.*;
-import twitter4j.*;
-import java.util.Arrays;
-import scala.Tuple2;
-
-public class Tutorial {
-  public static void main(String[] args) throws Exception {
-
-    // HDFS directory for checkpointing
-    String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
-
-    // Twitter credentials from login.txt
-    TutorialHelper.configureTwitterCredentials()
-
-    // Your code goes here
-  }
-}
-~~~
-</div>
-</div>
 
 For your convenience, we have added a couple of helper function to get the parameters that the exercises need.
 
-- `getSparkUrl()` is a helper function that fetches the Spark cluster URL from the file `/root/spark-ec2/cluster-url`.
+- `getCheckpointDirectory()` is a helper function that figures out the checkpoint directory that Spark Streaming should use.
 - `configureTwitterCredential()` is another helper function that configures Twitter's authentication detail using the file `/root/streaming/twitter.txt`. This is explained further in the next section.
 
 ### Twitter Credential Setup
 
-Since all of the exercises are based on Twitter's sample tweet stream, it is necessary to configure OAuth authentication with a Twitter account. To do this, you will need to setup a consumer key+secret pair and an access token+secret pair using a Twitter account. Please follow the instructions below to setup these temporary access keys with your Twitter account. These instructions will not require you to provide your Twitter username/password. You will only be required to provide the consumer key and access token pairs that you will generate, which you can easily destroy once you have finished the tutorial. So, your Twitter account will not be compromised in any way.
+Since all of the exercises are based on Twitter's sample tweet stream, it is necessary to configure authentication with a Twitter account. To do this, you will need to setup a consumer key+secret pair and an access token+secret pair using a Twitter account. Please follow the instructions below to setup these temporary access keys with your Twitter account. These instructions will not require you to provide your Twitter username/password. You will only be required to provide the consumer key and access token pairs that you will generate, which you can easily destroy once you have finished the tutorial. So, your Twitter account will not be compromised in any way.
 
 1. Open this <a href="https://dev.twitter.com/apps" target="_blank">link</a>.
    This page lists the set of Twitter-based applications that you own and have
@@ -106,104 +50,138 @@ Since all of the exercises are based on Twitter's sample tweet stream, it is nec
    below. Provide the required fields. The __Name__ of the application must be
    globally unique, so using your Twitter username as a prefix to the name
    should ensure that. For example, set it as [your-twitter-handle]-test. For
-   the __Description__ , anything is fine. For the __Website__ , similarly, any
+   the __Description__ , anything longer than 10 characters is fine. 
+   For the __Website__ , similarly, any
    website is fine, but ensure that it is a fully-formed URL with the prefix
-   http:// . Then, click on the "Yes, I agree" checkbox below the __Developer
+   <em>http://</em> . Then, click on the "Yes, I agree" checkbox below the __Developer
    Rules of the Road__ . Finally, fill in the CAPTCHA and click on the blue
    "Create your Twitter application" button.
 
-    ![Setting up new application](img/oauth-2.png)
+    ![Setting up new application](img/twitter1.png)
 
 2. Once you have created the application, you will be presented with
-   a confirmation page similar to the one shown below. You should be able to
-   see the consumer key and the consumer secret that have been generated. To
-   generate the access token and the access token secret, click on the blue
-   "Create my access token" button at the bottom of the page (lower green arrow
+   a confirmation page similar to the one shown below. Click on the 
+   __API Key__ tab.
+     ![Setting up new application](img/twitter2.png)
+ 
+3. You should be able to
+   see the API key and the API secret that have been generated. To
+   generate the access token and the access token secret, click on the 
+   "Create my access token" button at the bottom of the page (marked in red
    in the figure below). Note that there will be a small green confirmation at
    the top of the page saying that the token has been generated.
 
-    ![New application confirmation](img/oauth-3.png)
+    ![New application confirmation](img/twitter3.png)
 
-3. To get all of the keys and secrets required for authentication, click on the
-   _OAuth Tool_ tab in the top menu on the page (upper green arrow in the
-   previous figure). You will be presented with a page similar to the one shown
-   below:
+4. Finally, the page should look like the following. Note the API key + secret, 
+   and the Access Token and Access Token Secert.
 
-    ![OAuth details](img/oauth-4.png)
+    ![OAuth details](img/twitter4.png)
 
-4. Finally, update the twitter configuration file using your favorite text editor:
-
-       cd /root/streaming/
-       vim twitter.txt
-
-    You should see the follow template of = separated key-value pairs already setup.
-
-       consumerKey =
-       consumerSecret =
-       accessToken =
-       accessTokenSecret =
-
-    Please copy the values from the previous webpage into this appropriate keys in this file. After copying, it should look something like the following:
-
-       consumerKey = z25xt02zcaadf12 ...
-       consumerSecret = gqc9uAkjla13 ...
-       accessToken = 8mitfTqDrgAzasd ...
-       accessTokenSecret = 479920148 ...
-
-    Please double-check that the right values have been assigned to the right keys. Save the file and proceed to writing your first Spark Streaming program.
-5.  **Once you have finished this tutorial (not now!)**, you can go back to the <a href="https://dev.twitter.com/apps" target="_blank">starting page</a> and delete the application you have created. To do this click on the application, and then click on _Delete_ as shown by the arrow below. This will automatically invalidate the tokens.
-
-    ![Delete application](img/oauth-5.png)
+5.  We are going to use these 4 values in the next section. After you have finished this tutorial, you can delete all these keys by following the instructions at the end of the tutorial.
 
 
 ## First Spark Streaming program
-Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the
-`Tutorial` class and open it with a text editor.
+Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the file
+`Tutorial.scala` (in `[USB root directory]/streaming/scala/`) or `Tutorial.java` and edit it with a text editor.
+
+The file contains the following template code to help you out.
 
 <div class="codetabs">
-<div data-lang="scala">
-<pre class="prettyprint lang-bsh">
-cd /root/streaming/scala/
-vim Tutorial.scala
-</pre>
+<div data-lang="scala" markdown="1">
+~~~
+object Tutorial {
+  def main(args: Array[String]) {
+
+    // Checkpoint directory
+    val checkpointDir = TutorialHelper.getCheckpointDirectory()
+
+    // Configure Twitter credentials
+    val apiKey = ""
+    val apiSecret = ""
+    val accessToken = ""
+    val accessTokenSecret = ""
+    TutorialHelper.configureTwitterCredentials(apiKey, apiSecret, accessToken, accessTokenSecret)
+
+    // Your code goes here
+
+  }
+}
+~~~
 </div>
-<div data-lang="java">
-<pre class="prettyprint lang-bsh">
-cd /root/streaming/java/
-vim Tutorial.java
-</pre>
+<div data-lang="java" markdown="1">
+~~~
+public class Tutorial {
+  public static void main(String[] args) throws Exception {
+
+    // Checkpoint directory
+    String checkpointDir = TutorialHelper.getCheckpointDirectory();
+
+    // Configuring Twitter credentials
+    String apiKey = ""
+    String apiSecret = ""
+    String accessToken = ""
+    String accessTokenSecret = ""
+    TutorialHelper.configureTwitterCredentials(apiKey, apiSecret, accessToken, accessTokenSecret);
+
+    // Your code goes here
+
+  }
+}
+~~~
 </div>
 </div>
 
-The cluster machines have both vim and emacs installed for editing. Alternatively, you can use your favorite text editor locally and then copy-paste content using vim or emacs before running it.
+First let's add the authentication keys that you generated in the previous step. After entering the keys
+in the corresponding strings, your file should look something like this. 
 
-To express any Spark Streaming computation, a StreamingContext object needs to be created.
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+~~~
+val apiKey = "NJba5XGDPXWNkR5TkIC5yN7p8"
+val apiSecret = "te7SMATtK3Z143Ywh25LpABkdmq6Cdv1ShYz2bOUgALP5xNBBm"
+val accessToken = "479920148-Szmnf2MXKfAz3K3voIuRHyau82aOdfeinGtfyDZZ"
+val accessTokenSecret = "2BtiPuEgSDMFOMtUJ9DtuLS5Q2Q9FJoJ0DdI6KJhZK099"
+~~~
+</div>
+<div data-lang="java" markdown="1">
+~~~
+String apiKey = "NJba5XGDPXWNkR5TkIC5yN7p8";
+String apiSecret = "te7SMATtK3Z143Ywh25LpABkdmq6Cdv1ShYz2bOUgALP5xNBBm";
+String accessToken = "479920148-Szmnf2MXKfAz3K3voIuRHyau82aOdfeinGtfyDZZ";
+String accessTokenSecret = "2BtiPuEgSDMFOMtUJ9DtuLS5Q2Q9FJoJ0DdI6KJhZK099";
+~~~
+</div>
+</div>
+
+
+To express any Spark Streaming computation, a `StreamingContext` object needs to be created.
 This object serves as the main entry point for all Spark Streaming functionality.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val ssc = new StreamingContext(new SparkConf(), Seconds(1))
+val ssc = new StreamingContext(new SparkConf(), Seconds(1))
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    JavaStreamingContext ssc = new JavaStreamingContext(new SparkConf(), new Duration(1000));
+JavaStreamingContext ssc = new JavaStreamingContext(new SparkConf(), new Duration(1000));
 ~~~
 </div>
 </div>
 
-Here, we create a StreamingContext object by providing the Spark cluster URL, the batch duration we'd like to use for streams, the Spark home directory, and the list of JAR files that are necessary to run the program. "Tutorial" is a unique name given to this application to identify it the Spark's web UI. We elect for a batch duration of 1 second. Next, we use this context to create a stream of tweets:
+Here, we created a StreamingContext object by providing a Spark configuration, and the batch duration we'd like to use for streams. Next, we use this context to create a stream of tweets:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val tweets = TwitterUtils.createStream(ssc, None)
+val tweets = TwitterUtils.createStream(ssc, None)
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    JavaDStream<Status> tweets = TwitterUtils.createStream(ssc);
+JavaDStream<Status> tweets = TwitterUtils.createStream(ssc);
 ~~~
 </div>
 </div>
@@ -213,18 +191,18 @@ The object `tweets` is a DStream of tweet statuses. More specifically, it is con
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val statuses = tweets.map(status => status.getText())
-    statuses.print()
+val statuses = tweets.map(status => status.getText())
+statuses.print()
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    JavaDStream<String> statuses = tweets.map(
-      new Function<Status, String>() {
-        public String call(Status status) { return status.getText(); }
-      }
-    );
-    statuses.print();
+JavaDStream<String> statuses = tweets.map(
+  new Function<Status, String>() {
+    public String call(Status status) { return status.getText(); }
+  }
+);
+statuses.print();
 ~~~
 </div>
 </div>
@@ -235,17 +213,17 @@ operation on `tweets` maps each Status object to its text to create a new
 context to print first 10 records in each RDD in a DStream, which in this case
 are 1 second batches of received status texts.
 
-We also need to set an HDFS for periodic checkpointing of the intermediate data.
+We also need to set the directory for periodic checkpointing of the intermediate data.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    ssc.checkpoint(checkpointDir)
+ssc.checkpoint(checkpointDir)
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    ssc.checkpoint(checkpointDir);
+ssc.checkpoint(checkpointDir);
 ~~~
 </div>
 </div>
@@ -255,42 +233,53 @@ Finally, we need to tell the context to start running the computation we have se
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    ssc.start()
-    ssc.awaitTermination()
+ssc.start()
+ssc.awaitTermination()
 ~~~
 </div>
 <div data-lang="java" markdown="1">
 ~~~
-    ssc.start();
-    ssc.awaitTermination();
+ssc.start();
+ssc.awaitTermination();
 ~~~
 </div>
 </div>
 
 __Note that all DStream operations must be done before calling this statement.__
 
-After saving `Tutorial.scala`, it can be run from the command prompt using the following command (from within the `/root/streaming/[language]` directory).
+After saving `Tutorial.scala`, let us compile the code. To do this, follow these instructions.
+__Make sure you replace `[USB root directory]` in the following instructions with your actual USB root directory path.__
 
-<pre><code>sbt/sbt assembly</code></pre>
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+In the console, make sure you are in the directory: [USB root directory]/streaming/scala .
+`[USB root directory]/sbt/sbt assembly`
+This command will compile the `Tutorial` class and create a JAR file in `[USB root directory]/streaming/scala/target/scala-2.10/`. 
+</div>
+<div data-lang="java" markdown="1">
+In the console, make sure you are in the directory: [USB root directory]/streaming/java .
+`[USB root directory]/sbt/sbt assembly`
+This command will compile the `Tutorial` class and create a JAR file in `[USB root directory]/streaming/java/target/scala-2.10/`. 
+</div>
+</div>
 
-This command will compile the `Tutorial` class and create a JAR file in `/root/streaming/[language]/target/scala-2.10/`. 
-
-Finally, the program can be run as using the `spark-submit` script. At the command line, run
+Finally, the program can be executed as using the `spark-submit` script. At the command line, run the following. Again, __make sure you replace `[USB root directory]` with your actual USB root directory path.__
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-  /root/spark/bin/spark-submit --master `cat /root/spark-ec2/cluster-url` --class Tutorial /root/streaming/scala/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
+[USB root directory]/spark/bin/spark-submit --class Tutorial [USB root directory]/streaming/scala/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
 </pre>
 </div>
 <div data-lang="java" markdown="1">
 <pre class="prettyprint lang-bsh">
-  /root/spark/bin/spark-submit --master `cat /root/spark-ec2/cluster-url` --class Tutorial /root/streaming/java/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
+[USB root directory]/spark/bin/spark-submit --class Tutorial [USB root directory]/streaming/java/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
 </pre>
 </div>
 </div>
 
-You will soon find a sample of the received tweets beeing printed on the screen (can take 10 seconds or so before it start appearing).
+You will soon find a sample of the received tweets beeing printed on the screen (can take 10 seconds or so before it start appearing). If you don't find this, 
+take a look at the FAQ in the next section. Use `Ctrl + c`, to stop the application.
 
 <pre class="nocode">
 -------------------------------------------
@@ -328,49 +317,55 @@ Baz? ?eyler yar??ma ya da reklam konusu olmamal? d???ncesini yenemiyorum.
 ...
 </pre>
 
-To stop the application, use `Ctrl + c` .
 
-__FAQ__: If you see an exception that looks like the following, it means that one of the token / keys were not specified in the configuration file twitter.txt. Please verify that you have set them appropriately as instructed earlier.
+
+### Frequently Asked Questions
+
+__FAQ 1__ : If you see an exception that looks like the following, it means that one of the token / keys has not been set in the Twitter configuration. 
 
 <pre class="nocode">
-[error] (run-main) java.lang.Exception: Error parsing configuration file - incorrectly formatted line [consumerKey =]
-java.lang.Exception: Error parsing configuration file - incorrectly formatted line [consumerKey =]
-at TutorialHelper$$anonfun$2.apply(TutorialHelper.scala:24)
-at TutorialHelper$$anonfun$2.apply(TutorialHelper.scala:21)
+Configuring Twitter OAuth
+Exception in thread "main" java.lang.Exception: Error setting authentication - value for apiKey not set
+  at TutorialHelper$$anonfun$configureTwitterCredentials$1.apply(TutorialHelper.scala:21)
+  at TutorialHelper$$anonfun$configureTwitterCredentials$1.apply(TutorialHelper.scala:19)
+
 </pre>
 
+Please verify that you have set all the configurations keys correctly as instructed earlier.
 
 
 
-__FAQ__: If you see the following message, it means that the authentication with Twitter failed. Please verify whether the Twitter consumer key+secret and access token+secret has been set correctly in the configuration file `twitter.txt` as instructed earlier. 
+__FAQ 2__: If you see the following message, it means that the authentication with Twitter failed.
 
 <pre class="nocode">
-13/02/04 23:41:57 INFO streaming.NetworkInputTracker: De-registered receiver for network stream 0 with message 401:Authentication credentials (https://dev.twitter.com/pages/auth) were missing or incorrect. Ensure that you have set valid consumer key/secret, access token/secret, and the system clock is in sync.
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;
-&lt;title&gt;Error 401 Unauthorized&lt;/title&gt;
+  Authentication credentials (https://dev.twitter.com/pages/auth) were missing or incorrect. Ensure that you have set valid consumer key/secret, access token/secret, and the system clock is in sync.
+&lt;html&gt;\n&lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;\n&lt;title&gt;Error 401 Unauthorized&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;h2&gt;HTTP ERROR: 401&lt;/h2&gt;
 &lt;p&gt;Problem accessing '/1.1/statuses/sample.json?stall_warnings=true'. Reason:
 &lt;pre&gt;    Unauthorized&lt;/pre&gt;
-
-
-
 &lt;/body&gt;
 &lt;/html&gt;
 
-
 Relevant discussions can be found on the Internet at:
-    http://www.google.co.jp/search?q=d0031b0b or
-    http://www.google.co.jp/search?q=1db75513
+  http://www.google.co.jp/search?q=d0031b0b or
+  http://www.google.co.jp/search?q=1db75513
 TwitterException{exceptionCode=[d0031b0b-1db75513], statusCode=401, message=null, code=-1, retryAfter=-1, rateLimitStatus=null, version=3.0.3}
+  at twitter4j.internal.http.HttpClientImpl.request(HttpClientImpl.java:177)
+  at twitter4j.internal.http.HttpClientWrapper.request(HttpClientWrapper.java:61)
+  at twitter4j.internal.http.HttpClientWrapper.get(HttpClientWrapper.java:89)
+  at twitter4j.TwitterStreamImpl.getSampleStream(TwitterStreamImpl.java:176)
+  at twitter4j.TwitterStreamImpl$4.getStream(TwitterStreamImpl.java:164)
+  at twitter4j.TwitterStreamImpl$TwitterStreamConsumer.run(TwitterStreamImpl.java:462)
+
 </pre>
 
+Please verify that you have set all the configurations keys correctly (double check with the Twitter website) as instructed earlier.
 
 
-## Further exercises
+
+## Further Exercises
 Next, let's try something more interesting, say, try printing the 10 most popular hashtags in the last 5 minutes. These next steps explain the set of the DStream operations required to achieve our goal. As mentioned before, the operations explained in the next steps must be added in the program before `ssc.start()`. After every step, you can see the contents of new DStream you created by using the `print()` operation and running Tutorial in the same way as explained earlier (that is, `sbt/sbt package run`).
 
 1. __Get the stream of hashtags from the stream of tweets__:
@@ -381,27 +376,27 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    <div data-lang="scala" markdown="1">
 
    ~~~
-       val words = statuses.flatMap(status => status.split(" "))
-       val hashtags = words.filter(word => word.startsWith("#"))
+   val words = statuses.flatMap(status => status.split(" "))
+   val hashtags = words.filter(word => word.startsWith("#"))
    ~~~
 
    </div>
    <div data-lang="java" markdown="1">
 
    ~~~
-      JavaDStream<String> words = statuses.flatMap(
-        new FlatMapFunction<String, String>() {
-          public Iterable<String> call(String in) {
-            return Arrays.asList(in.split(" "));
-          }
-        }
-      );
+   JavaDStream<String> words = statuses.flatMap(
+     new FlatMapFunction<String, String>() {
+       public Iterable<String> call(String in) {
+         return Arrays.asList(in.split(" "));
+       }
+     }
+   );
 
-      JavaDStream<String> hashTags = words.filter(
-        new Function<String, Boolean>() {
-          public Boolean call(String word) { return word.startsWith("#"); }
-        }
-      );
+   JavaDStream<String> hashTags = words.filter(
+     new Function<String, Boolean>() {
+       public Boolean call(String word) { return word.startsWith("#"); }
+     }
+   );
    ~~~
 
    </div>
@@ -434,8 +429,8 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    <div data-lang="scala" markdown="1">
 
    ~~~
-       val counts = hashtags.map(tag => (tag, 1))
-                            .reduceByKeyAndWindow(_ + _, _ - _, Seconds(60 * 5), Seconds(1))
+   val counts = hashtags.map(tag => (tag, 1))
+                        .reduceByKeyAndWindow(_ + _, _ - _, Seconds(60 * 5), Seconds(1))
    ~~~
 
    The `_ + _` and `_ - _` are Scala shorthands for specifying functions to add and subtract two numbers. `Seconds(60 * 5)` specifies
@@ -445,24 +440,24 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    <div data-lang="java" markdown="1">
 
    ~~~
-      JavaPairDStream<String, Integer> tuples = hashTags.map(
-         new PairFunction<String, String, Integer>() {
-           public Tuple2<String, Integer> call(String in) {
-             return new Tuple2<String, Integer>(in, 1);
-           }
-         }
-       );
+   JavaPairDStream<String, Integer> tuples = hashTags.mapToPair(
+     new PairFunction<String, String, Integer>() {
+       public Tuple2<String, Integer> call(String in) {
+         return new Tuple2<String, Integer>(in, 1);
+       }
+     }
+   );
 
-       JavaPairDStream<String, Integer> counts = tuples.reduceByKeyAndWindow(
-         new Function2<Integer, Integer, Integer>() {
-           public Integer call(Integer i1, Integer i2) { return i1 + i2; }
-         },
-         new Function2<Integer, Integer, Integer>() {
-           public Integer call(Integer i1, Integer i2) { return i1 - i2; }
-         },
-         new Duration(60 * 5 * 1000),
-         new Duration(1 * 1000)
-       );
+   JavaPairDStream<String, Integer> counts = tuples.reduceByKeyAndWindow(
+     new Function2<Integer, Integer, Integer>() {
+       public Integer call(Integer i1, Integer i2) { return i1 + i2; }
+     },
+     new Function2<Integer, Integer, Integer>() {
+       public Integer call(Integer i1, Integer i2) { return i1 - i2; }
+     },
+     new Duration(60 * 5 * 1000),
+     new Duration(1 * 1000)
+   );
    ~~~
 
    There are two functions that are being defined for adding and subtracting the counts. `new Duration(60 * 5 * 1000)`
@@ -503,41 +498,41 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    <div class="codetabs">
    <div data-lang="scala" markdown="1">
    ~~~
-       val sortedCounts = counts.map { case(tag, count) => (count, tag) }
-                                .transform(rdd => rdd.sortByKey(false))
-       sortedCounts.foreach(rdd =>
-         println("\nTop 10 hashtags:\n" + rdd.take(10).mkString("\n")))
+   val sortedCounts = counts.map { case(tag, count) => (count, tag) }
+                            .transform(rdd => rdd.sortByKey(false))
+   sortedCounts.foreach(rdd =>
+     println("\nTop 10 hashtags:\n" + rdd.take(10).mkString("\n")))
    ~~~
    </div>
    <div data-lang="java" markdown="1">
    ~~~
-      JavaPairDStream<Integer, String> swappedCounts = counts.map(
-        new PairFunction<Tuple2<String, Integer>, Integer, String>() {
-          public Tuple2<Integer, String> call(Tuple2<String, Integer> in) {
-            return in.swap();
-          }
+    JavaPairDStream<Integer, String> swappedCounts = counts.mapToPair(
+      new PairFunction<Tuple2<String, Integer>, Integer, String>() {
+        public Tuple2<Integer, String> call(Tuple2<String, Integer> in) {
+          return in.swap();
         }
-      );
+      }
+    );
 
-      JavaPairDStream<Integer, String> sortedCounts = swappedCounts.transform(
-        new Function<JavaPairRDD<Integer, String>, JavaPairRDD<Integer, String>>() {
-          public JavaPairRDD<Integer, String> call(JavaPairRDD<Integer, String> in) throws Exception {
-            return in.sortByKey(false);
-          }
-        });
-
-      sortedCounts.foreach(
-        new Function<JavaPairRDD<Integer, String>, Void> () {
-          public Void call(JavaPairRDD<Integer, String> rdd) {
-            String out = "\nTop 10 hashtags:\n";
-            for (Tuple2<Integer, String> t: rdd.take(10)) {
-              out = out + t.toString() + "\n";
-            }
-            System.out.println(out);
-            return null;
-          }
+    JavaPairDStream<Integer, String> sortedCounts = swappedCounts.transform(
+      new Function<JavaPairRDD<Integer, String>, JavaPairRDD<Integer, String>>() {
+        public JavaPairRDD<Integer, String> call(JavaPairRDD<Integer, String> in) throws Exception {
+          return in.sortByKey(false);
         }
-      );
+      });
+
+    sortedCounts.foreach(
+      new Function<JavaPairRDD<Integer, String>, Void> () {
+        public Void call(JavaPairRDD<Integer, String> rdd) {
+          String out = "\nTop 10 hashtags:\n";
+          for (Tuple2<Integer, String> t: rdd.take(10)) {
+            out = out + t.toString() + "\n";
+          }
+          System.out.println(out);
+          return null;
+        }
+      }
+   );
    ~~~
    </div>
    </div>
@@ -567,7 +562,11 @@ Next, let's try something more interesting, say, try printing the 10 most popula
    collect them together at the driver and then find the top 10 hashtags among them.
    We leave this as an exercise for the reader to try.
 
-4. __Further Reference__: 
 
-    For a more detailed explanations of the streaming API, checkout the [Streaming Programming Guide](http://spark.incubator.apache.org/docs/latest/streaming-programming-guide.html). 
-    For the full streaming API, checkout the [Java/Scala](http://spark.incubator.apache.org/docs/latest/api/streaming/index.html#spark.streaming.DStream) API docs.
+## Wrapping Up
+
+To delete the keys, you can go back to the <a href="https://dev.twitter.com/apps" target="_blank">starting page</a> and delete the application you have created. To do this click on the application, 
+and then click on red _Delete Application_ button in the bottom of the page.
+
+For a more detailed explanations of the streaming API, checkout the [Streaming Programming Guide](http://spark.incubator.apache.org/docs/latest/streaming-programming-guide.html). 
+For the full streaming API, checkout the [Java/Scala](http://spark.incubator.apache.org/docs/latest/api/streaming/index.html#spark.streaming.DStream) API docs.

@@ -9,33 +9,21 @@ import sys.process.stringSeqToProcess
 
 object TutorialHelper {
   Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
-  Logger.getLogger("org.apache.spark.streaming.NetworkInputTracker").setLevel(Level.INFO)
+  Logger.getLogger("org.apache.spark.storage.BlockManager").setLevel(Level.ERROR)
     
   /** Configures the Oauth Credentials for accessing Twitter */
-  def configureTwitterCredentials() {
-    val file = new File("../twitter.txt")
-    if (!file.exists) {
-      throw new Exception("Could not find configuration file " + file)
-    }
-    val lines = Source.fromFile(file.toString).getLines.filter(_.trim.size > 0).toSeq
-    val pairs = lines.map(line => {
-      val splits = line.split("=")
-      if (splits.size != 2) {
-        throw new Exception("Error parsing configuration file - incorrectly formatted line [" + line + "]")
-      }
-      (splits(0).trim(), splits(1).trim())
-    })
-    val map = new HashMap[String, String] ++= pairs
-    val configKeys = Seq("consumerKey", "consumerSecret", "accessToken", "accessTokenSecret")
+  def configureTwitterCredentials(apiKey: String, apiSecret: String, accessToken: String, accessTokenSecret: String) {
+    val configs = new HashMap[String, String] ++= Seq(
+      "apiKey" -> apiKey, "apiSecret" -> apiSecret, "accessToken" -> accessToken, "accessTokenSecret" -> accessTokenSecret)
     println("Configuring Twitter OAuth")
-    configKeys.foreach(key => {
-        if (!map.contains(key)) {
-          throw new Exception("Error setting OAuth authenticaion - value for " + key + " not found")
+    configs.foreach{ case(key, value) => 
+        if (value.trim.isEmpty) {
+          throw new Exception("Error setting authentication - value for " + key + " not set")
         }
-        val fullKey = "twitter4j.oauth." + key
-        System.setProperty(fullKey, map(key))
-        println("\tProperty " + fullKey + " set as " + map(key)) 
-    })
+        val fullKey = "twitter4j.oauth." + key.replace("api", "consumer")
+        System.setProperty(fullKey, value.trim)
+        println("\tProperty " + fullKey + " set as [" + value.trim + "]") 
+    }
     println()
   }
 
@@ -53,18 +41,14 @@ object TutorialHelper {
   }
 
   /** Returns the HDFS URL */
-  def getHdfsUrl(): String = {
+  def getCheckpointDirectory(): String = {
     try {
       val name : String = Seq("bash", "-c", "curl -s http://169.254.169.254/latest/meta-data/hostname") !! ;
       println("Hostname = " + name)
-      "hdfs://" + name.trim + ":9000"
+      "hdfs://" + name.trim + ":9000/checkpoint/"
     } catch {
       case e: Exception => {
-        if (new File("../local").exists) {
-          "."
-        } else {
-          throw e
-        }
+        "./checkpoint/"
       }
     }
   }

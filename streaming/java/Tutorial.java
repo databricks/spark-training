@@ -11,13 +11,18 @@ import scala.Tuple2;
 public class Tutorial {
   public static void main(String[] args) throws Exception {
 
-    // HDFS directory for checkpointing
-    String checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/";
+    // Checkpoint directory 
+    String checkpointDir = TutorialHelper.getCheckpointDirectory();
 
-    // Configuring Twitter credentials from twitter.txt
-    TutorialHelper.configureTwitterCredentials();
+    // Configuring Twitter credentials 
+    String apiKey = "";
+    String apiSecret = "";
+    String accessToken = "";
+    String accessTokenSecret = "";
+    TutorialHelper.configureTwitterCredentials(apiKey, apiSecret, accessToken, accessTokenSecret);
 
     // Your code goes here
+
   }
 }
 

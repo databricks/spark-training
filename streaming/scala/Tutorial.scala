@@ -8,13 +8,18 @@ import TutorialHelper._
 object Tutorial {
   def main(args: Array[String]) {
     
-    // HDFS directory for checkpointing
-    val checkpointDir = TutorialHelper.getHdfsUrl() + "/checkpoint/" 
+    // Checkpoint directory
+    val checkpointDir = TutorialHelper.getCheckpointDirectory()
 
-    // Configure Twitter credentials using twitter.txt
-    TutorialHelper.configureTwitterCredentials()
-    
+    // Configure Twitter credentials
+    val apiKey = ""
+    val apiSecret = ""
+    val accessToken = ""
+    val accessTokenSecret = ""
+    TutorialHelper.configureTwitterCredentials(apiKey, apiSecret, accessToken, accessTokenSecret)
+
     // Your code goes here
+
   }
 }
 

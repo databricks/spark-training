@@ -9,6 +9,8 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-streaming-twitter" % "1.0.0"
 )
 
+resourceDirectory in Compile := baseDirectory.value / "resources"
+
 assemblySettings
 
 mergeStrategy in assembly := {

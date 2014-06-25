@@ -12,43 +12,33 @@ import java.lang.*;
 class TutorialHelper {
   static {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
-    Logger.getLogger("org.apache.spark.streaming.NetworkInputTracker").setLevel(Level.INFO);
+    Logger.getLogger("org.apache.spark.storage.BlockManager").setLevel(Level.ERROR);
   }
 
-  static void configureTwitterCredentials() throws Exception {
-    File file = new File("../twitter.txt");
-    if (!file.exists()) {
-      throw new Exception("Could not find configuration file " + file);
-    }
-    List<String> lines = readLines(file);
-    HashMap<String, String> map = new HashMap<String, String>();
-    for (int i = 0; i < lines.size(); i++) {
-      String line  = lines.get(i);
-      String[] splits = line.split("=");
-      if (splits.length != 2) {
-        throw new Exception("Error parsing configuration file - incorrectly formatted line [" + line + "]");
+  static void configureTwitterCredentials(String apiKey, String apiSecret, String accessToken, String accessTokenSecret) throws Exception {
+    HashMap<String, String> configs = new HashMap<String, String>();
+    configs.put("apiKey", apiKey);
+    configs.put("apiSecret", apiSecret);
+    configs.put("accessToken", accessToken);
+    configs.put("accessTokenSecret", accessTokenSecret);
+
+    Object[] keys = configs.keySet().toArray();
+    for (int k = 0; k < keys.length; k++) {
+      String key = keys[k].toString();
+      String value = configs.get(key).trim();
+      if (value.isEmpty()) {
+        throw new Exception("Error setting authentication - value for " + key + " not set");
       }
-      map.put(splits[0].trim(), splits[1].trim());
-    }
-    String[] configKeys = { "consumerKey", "consumerSecret", "accessToken", "accessTokenSecret" };
-    for (int k = 0; k < configKeys.length; k++) {
-      String key = configKeys[k];
-      String value = map.get(key);
-      if (value == null) {
-        throw new Exception("Error setting OAuth authentication - value for " + key + " not found");
-      } else if (value.length() == 0) {
-        throw new Exception("Error setting OAuth authentication - value for " + key + " is empty");
-      }
-      String fullKey = "twitter4j.oauth." + key;
+      String fullKey = "twitter4j.oauth." + key.replace("api", "consumer");
       System.setProperty(fullKey, value);
-      System.out.println("\tProperty " + fullKey + " set as " + value);
+      System.out.println("\tProperty " + key + " set as [" + value + "]");
     }
     System.out.println();
   }
 
   /** Returns the HDFS URL */
-  static String getHdfsUrl() throws Exception {
-    return ScalaHelper.getHdfsUrl(); 
+  static String getCheckpointDirectory() throws Exception {
+    return ScalaHelper.getCheckpointDirectory(); 
   }
 
   /** Returns the Spark URL */
