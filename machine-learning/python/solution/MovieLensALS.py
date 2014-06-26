@@ -4,38 +4,38 @@ import sys
 import itertools
 from math import sqrt
 from operator import add
+from os.path import join, isfile, dirname
 
 from pyspark import SparkConf, SparkContext
 from pyspark.mllib.recommendation import ALS
 
-from Rating import Rating
-
 def parseRating(line):
-    fields = line.split("::")
-    return long(fields[3]) % 10, Rating(int(fields[0]), int(fields[1]), float(fields[2]))
+    """
+    Parses a rating record in MovieLens format userId::movieId::rating::timestamp .
+    """
+    fields = line.strip().split("::")
+    return long(fields[3]) % 10, (int(fields[0]), int(fields[1]), float(fields[2]))
 
 def parseMovie(line):
-    fields = line.split("::")
+    """
+    Parses a movie record in MovieLens format movieId::movieTitle .
+    """
+    fields = line.strip().split("::")
     return int(fields[0]), fields[1]
-
-def flattenRatings(ratingsRDD):
-    return ratingsRDD.map(lambda x: (x.user, x.product, x.rating))
-
-def toRatings(rdd):
-    return rdd.map(lambda x: Rating(x[0], x[1], x[2]))
 
 def loadPersonalRatings():
     """
-    Load ratings from file.
+    Load personal ratings from file.
     """
-    ratings = []
-    f = open('../userRatings/userRatings.txt', 'r')
-    for line in f.readlines():
-        ls = line.strip().split(",")
-        if len(ls) == 3:
-            ratings.append(Rating(0, int(ls[0]), float(ls[2])))
-    if len(ratings) == 0:
-        raise RuntimeError("No ratings provided.")
+    ratingsFile = join(dirname(dirname(__file__)), "personalRatings.txt")
+    if not isfile(ratingsFile):
+        print "Please first run bin/rateMovies to generate your personal ratings."
+        sys.exit(1)
+    f = open(ratingsFile, 'r')
+    ratings = [parseRating(line)[1] for line in f]
+    f.close()
+    if not ratings:
+        raise RuntimeError("No personal ratings provided.")
     else:
         return ratings
 
@@ -43,47 +43,50 @@ def computeRmse(model, data, n):
     """
     Compute RMSE (Root Mean Squared Error).
     """
-    predictions = model.predictAll(data.map(lambda x: (x.user, x.product)))
+    predictions = model.predictAll(data.map(lambda x: (x[0], x[1])))
     predictionsAndRatings = predictions.map(lambda x: ((x[0], x[1]), x[2])) \
-      .join(data.map(lambda x: ((x.user, x.product), x.rating))) \
+      .join(data.map(lambda x: ((x[0], x[1]), x[2]))) \
       .values()
     return sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(n))
 
 if __name__ == "__main__":
     if (len(sys.argv) != 2):
-        print "Usage: /path/to/spark/bin/spark-submit MovieLensALS.py movieLensHomeDir"
+        print "Usage: /path/to/spark/bin/spark-submit --driver-memory 2g MovieLensALS.py movieLensDataDir"
         sys.exit(1)
 
+    # load personal ratings
+    myRatings = loadPersonalRatings()
+        
     # set up environment
-
-    conf = SparkConf()
-    conf.setAppName("MovieLensALS")
-    conf.set("spark.executor.memory", "2g")
-    sc = SparkContext(conf=conf, pyFiles=['Rating.py'])
+    conf = SparkConf() \
+      .setAppName("MovieLensALS") \
+      .set("spark.executor.memory", "2g")
+    sc = SparkContext(conf=conf)
 
     # load ratings and movie titles
 
     movieLensHomeDir = sys.argv[1]
 
-    ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map(parseRating)
+    # ratings is an RDD of (last digit of timestamp, (userId, movieId, rating))
+    ratings = sc.textFile(join(movieLensHomeDir, "ratings.dat")).map(parseRating)
 
-    movies = dict(sc.textFile(movieLensHomeDir + "/movies.dat").map(parseMovie).collect())
+    # movies is an RDD of (movieId, movieTitle)
+    movies = dict(sc.textFile(join(movieLensHomeDir, "movies.dat")).map(parseMovie).collect())
 
     numRatings = ratings.count()
-    numUsers = ratings.values().map(lambda r: r.user).distinct().count()
-    numMovies = ratings.values().map(lambda r: r.product).distinct().count()
+    numUsers = ratings.values().map(lambda r: r[0]).distinct().count()
+    numMovies = ratings.values().map(lambda r: r[1]).distinct().count()
 
     print "Got %d ratings from %d users on %d movies." % (numRatings, numUsers, numMovies)
-
-    # load personal ratings
-
-    myRatings = loadPersonalRatings()
-    myRatingsRDD = sc.parallelize(myRatings, 1)
 
     # split ratings into train (60%), validation (20%), and test (20%) based on the 
     # last digit of the timestamp, add myRatings to train, and cache them
 
+    # training, validation, test are all RDDs of (userId, movieId, rating)
+
     numPartitions = 4
+    myRatingsRDD = sc.parallelize(myRatings, 1)
+    
     training = ratings.filter(lambda x: x[0] < 6) \
       .values() \
       .union(myRatingsRDD) \
@@ -115,7 +118,7 @@ if __name__ == "__main__":
     bestNumIter = -1
 
     for rank, lmbda, numIter in itertools.product(ranks, lambdas, numIters):
-        model = ALS.train(flattenRatings(training), rank, numIter, lmbda)
+        model = ALS.train(training, rank, numIter, lmbda)
         validationRmse = computeRmse(model, validation, numValidation)
         print "RMSE (validation) = %f for the model trained with " % validationRmse + \
               "rank = %d, lambda = %.1f, and numIter = %d." % (rank, lmbda, numIter)
@@ -129,24 +132,25 @@ if __name__ == "__main__":
     testRmse = computeRmse(bestModel, test, numTest)
 
     # evaluate the best model on the test set
-
     print "The best model was trained with rank = %d and lambda = %.1f, " % (bestRank, bestLambda) \
       + "and numIter = %d, and its RMSE on the test set is %f." % (bestNumIter, testRmse)
 
-    meanRating = training.union(validation).map(lambda x: x.rating).mean()
-    baselineRmse = sqrt(test.map(lambda x: (meanRating - x.rating) ** 2).reduce(add) / numTest)
+    # compare the best model with a naive baseline that always returns the mean rating
+    meanRating = training.union(validation).map(lambda x: x[2]).mean()
+    baselineRmse = sqrt(test.map(lambda x: (meanRating - x[2]) ** 2).reduce(add) / numTest)
     improvement = (baselineRmse - testRmse) / baselineRmse * 100
     print "The best model improves the baseline by %.2f" % (improvement) + "%."
 
     # make personalized recommendations
-    myRatedMovieIds = set([x.product for x in myRatings])
+
+    myRatedMovieIds = set([x[1] for x in myRatings])
     candidates = sc.parallelize([m for m in movies if m not in myRatedMovieIds])
-    predictions = toRatings(bestModel.predictAll(candidates.map(lambda x: (0, x)))).collect()
-    recommendations = sorted(predictions, key=lambda x: x.rating, reverse=True)[:50]
+    predictions = bestModel.predictAll(candidates.map(lambda x: (0, x))).collect()
+    recommendations = sorted(predictions, key=lambda x: x[2], reverse=True)[:50]
 
     print "Movies recommended for you:"
     for i in xrange(len(recommendations)):
-        print ("%2d: %s" % (i + 1, movies[recommendations[i].product])).encode('ascii', 'ignore')
+        print ("%2d: %s" % (i + 1, movies[recommendations[i][1]])).encode('ascii', 'ignore')
 
     # clean up
     sc.stop()
