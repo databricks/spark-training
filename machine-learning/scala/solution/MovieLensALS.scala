@@ -51,7 +51,7 @@ object MovieLensALS {
     println("Got " + numRatings + " ratings from "
       + numUsers + " users on " + numMovies + " movies.")
 
-    // load ratings
+    // load personal ratings
 
     val myRatings = loadPersonalRatings()
     val myRatingsRDD = sc.parallelize(myRatings, 1)
@@ -64,12 +64,12 @@ object MovieLensALS {
                           .values
                           .union(myRatingsRDD)
                           .repartition(numPartitions)
-                          .persist
+                          .cache
     val validation = ratings.filter(x => x._1 >= 6 && x._1 < 8)
                             .values
                             .repartition(numPartitions)
-                            .persist
-    val test = ratings.filter(x => x._1 >= 8).values.persist
+                            .cache
+    val test = ratings.filter(x => x._1 >= 8).values.cache
 
     val numTraining = training.count
     val numValidation = validation.count
