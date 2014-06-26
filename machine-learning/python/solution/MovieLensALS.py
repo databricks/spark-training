@@ -23,19 +23,19 @@ def parseMovie(line):
     fields = line.strip().split("::")
     return int(fields[0]), fields[1]
 
-def loadPersonalRatings():
+def loadRatings(ratingsFile):
     """
-    Load personal ratings from file.
+    Load ratings from file.
     """
-    ratingsFile = join(dirname(dirname(__file__)), "personalRatings.txt")
     if not isfile(ratingsFile):
-        print "Please first run bin/rateMovies to generate your personal ratings."
+        print "File %s does not exist." % ratingsFile
         sys.exit(1)
     f = open(ratingsFile, 'r')
     ratings = [parseRating(line)[1] for line in f]
     f.close()
     if not ratings:
-        raise RuntimeError("No personal ratings provided.")
+        print "No ratings provided."
+        sys.exit(1)
     else:
         return ratings
 
@@ -50,19 +50,21 @@ def computeRmse(model, data, n):
     return sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(n))
 
 if __name__ == "__main__":
-    if (len(sys.argv) != 2):
-        print "Usage: /path/to/spark/bin/spark-submit --driver-memory 2g MovieLensALS.py movieLensDataDir"
+    if (len(sys.argv) != 3):
+        print "Usage: /path/to/spark/bin/spark-submit --driver-memory 2g " + \
+          "MovieLensALS.py movieLensDataDir personalRatingsFile"
         sys.exit(1)
 
-    # load personal ratings
-    myRatings = loadPersonalRatings()
-        
     # set up environment
     conf = SparkConf() \
       .setAppName("MovieLensALS") \
       .set("spark.executor.memory", "2g")
     sc = SparkContext(conf=conf)
 
+    # load personal ratings
+    myRatings = loadPersonalRatings(sys.argv[2])
+    myRatingsRDD = sc.parallelize(myRatings, 1)
+    
     # load ratings and movie titles
 
     movieLensHomeDir = sys.argv[1]
@@ -85,8 +87,6 @@ if __name__ == "__main__":
     # training, validation, test are all RDDs of (userId, movieId, rating)
 
     numPartitions = 4
-    myRatingsRDD = sc.parallelize(myRatings, 1)
-    
     training = ratings.filter(lambda x: x[0] < 6) \
       .values() \
       .union(myRatingsRDD) \
