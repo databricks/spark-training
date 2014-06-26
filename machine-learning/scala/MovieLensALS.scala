@@ -46,7 +46,7 @@ object MovieLensALS {
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 
-    val movies = sc.textFile(movieLensHomeDir + "/movies.dat").map { line =>
+    val movies = sc.textFile(new File(movieLensHomeDir + "movies.dat").toString).map { line =>
       val fields = line.split("::")
       // format: (movieId, movieName)
       (fields(0).toInt, fields(1))
