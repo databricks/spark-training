@@ -8,7 +8,7 @@ from os.path import isfile
 
 if isfile('tmp.txt'):
     remove('tmp.txt')
-f = open('userRatings.txt', 'r')
+f = open('../personalRatings.txt', 'r')
 h = open('tmp.txt', 'w')
 
 prompt = "Please rate the following movie (1-5 (best), or 0 if not seen):"
@@ -34,5 +34,5 @@ for line in f.readlines():
 f.close()
 h.close()
 
-remove('userRatings.txt')
-move('tmp.txt', 'userRatings.txt')
+remove('../personalRatings.txt')
+move('tmp.txt', 'personalRatings.txt')
