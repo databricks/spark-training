@@ -4,38 +4,38 @@ import sys
 import itertools
 from math import sqrt
 from operator import add
+from os.path import join, isfile, dirname
 
 from pyspark import SparkConf, SparkContext
 from pyspark.mllib.recommendation import ALS
 
-from Rating import Rating
-
 def parseRating(line):
-    fields = line.split("::")
-    return long(fields[3]) % 10, Rating(int(fields[0]), int(fields[1]), float(fields[2]))
+    """
+    Parses a rating record in MovieLens format userId::movieId::rating::timestamp .
+    """
+    fields = line.strip().split("::")
+    return long(fields[3]) % 10, (int(fields[0]), int(fields[1]), float(fields[2]))
 
 def parseMovie(line):
-    fields = line.split("::")
+    """
+    Parses a movie record in MovieLens format movieId::movieTitle .
+    """
+    fields = line.strip().split("::")
     return int(fields[0]), fields[1]
 
-def flattenRatings(ratingsRDD):
-    return ratingsRDD.map(lambda x: (x.user, x.product, x.rating))
-
-def toRatings(rdd):
-    return rdd.map(lambda x: Rating(x[0], x[1], x[2]))
-
-def loadPersonalRatings():
+def loadRatings(ratingsFile):
     """
     Load ratings from file.
     """
-    ratings = []
-    f = open('../userRatings/userRatings.txt', 'r')
-    for line in f.readlines():
-        ls = line.strip().split(",")
-        if len(ls) == 3:
-            ratings.append(Rating(0, int(ls[0]), float(ls[2])))
-    if len(ratings) == 0:
-        raise RuntimeError("No ratings provided.")
+    if not isfile(ratingsFile):
+        print "File %s does not exist." % ratingsFile
+        sys.exit(1)
+    f = open(ratingsFile, 'r')
+    ratings = [parseRating(line)[1] for line in f]
+    f.close()
+    if not ratings:
+        print "No ratings provided."
+        sys.exit(1)
     else:
         return ratings
 
@@ -43,34 +43,39 @@ def computeRmse(model, data, n):
     """
     Compute RMSE (Root Mean Squared Error).
     """
-    predictions = model.predictAll(data.map(lambda x: (x.user, x.product)))
+    predictions = model.predictAll(data.map(lambda x: (x[0], x[1])))
     predictionsAndRatings = predictions.map(lambda x: ((x[0], x[1]), x[2])) \
-      .join(data.map(lambda x: ((x.user, x.product), x.rating))) \
+      .join(data.map(lambda x: ((x[0], x[1]), x[2]))) \
       .values()
     return sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(n))
 
 if __name__ == "__main__":
-    if (len(sys.argv) != 2):
-        print "Usage: /path/to/spark/bin/spark-submit MovieLensALS.py movieLensHomeDir"
+    if (len(sys.argv) != 3):
+        print "Usage: /path/to/spark/bin/spark-submit --driver-memory 2g " + \
+          "MovieLensALS.py movieLensDataDir personalRatingsFile"
         sys.exit(1)
 
     # set up environment
+    conf = SparkConf() \
+      .setAppName("MovieLensALS") \
+      .set("spark.executor.memory", "2g")
+    sc = SparkContext(conf=conf)
 
-    conf = SparkConf()
-    conf.setAppName("MovieLensALS")
-    conf.set("spark.executor.memory", "2g")
-    sc = SparkContext(conf=conf, pyFiles=['Rating.py'])
-
+    # load personal ratings
+    myRatings = loadPersonalRatings(sys.argv[2])
+    myRatingsRDD = sc.parallelize(myRatings, 1)
+    
     # load ratings and movie titles
 
     movieLensHomeDir = sys.argv[1]
 
-    ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map(parseRating)
+    # ratings is an RDD of (last digit of timestamp, (userId, movieId, rating))
+    ratings = sc.textFile(join(movieLensHomeDir, "ratings.dat")).map(parseRating)
 
-    movies = dict(sc.textFile(movieLensHomeDir + "/movies.dat").map(parseMovie).collect())
+    # movies is an RDD of (movieId, movieTitle)
+    movies = dict(sc.textFile(join(movieLensHomeDir, "movies.dat")).map(parseMovie).collect())
 
     # your code here
-
+    
     # clean up
-
     sc.stop()
