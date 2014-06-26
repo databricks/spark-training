@@ -689,7 +689,7 @@ whether they look good to you.
 
     print "Movies recommended for you:"
     for i in xrange(len(recommendations)):
-        print ("%2d: %s" % (i, movies[recommendations[i].product])).encode('ascii', 'ignore')
+        print ("%2d: %s" % (i + 1, movies[recommendations[i].product])).encode('ascii', 'ignore')
 ~~~
 </div>
 </div>
