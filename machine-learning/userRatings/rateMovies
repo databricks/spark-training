@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+
+import sys
+from tempfile import mkstemp
+from shutil import move
+from os import remove, close
+from os.path import isfile
+
+if isfile('tmp.txt'):
+    remove('tmp.txt')
+f = open('userRatings.txt', 'r')
+h = open('tmp.txt', 'w')
+
+prompt = "Please rate the following movie (1-5 (best), or 0 if not seen):"
+print prompt
+overwrite = False
+for line in f.readlines():
+    ls = line.strip().split(",")
+    if len(ls) == 3 and not overwrite:
+        r = raw_input("Looks like you've already rated the movies. Overwrite ratings? (y/N)")
+        if r[0] == "N":
+            sys.exit()
+        else:
+            overwrite = True
+    valid = False
+    while not valid:
+        r = input(ls[1] + ":")
+        if r < 0 or r > 5:
+            print prompt
+        else:
+            valid = True
+            h.write("%s,%s,%d\n" % (ls[0], ls[1], r))
+
+f.close()
+h.close()
+
+remove('userRatings.txt')
+move('tmp.txt', 'userRatings.txt')
