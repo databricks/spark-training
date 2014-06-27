@@ -101,7 +101,7 @@ TODO: UPDATE INSTRUCTIONS ON FEEDBACK
 
 If you are attending Spark Training in person, you should have a USB key containing training material. After loading the USB key, you should perform the following steps:
 
-1. Rename the USB key from <code>NO NAME</code> to <code>SparkTraining</code> 
+1. Rename the USB key from <code>NO NAME</code> to <code>SparkSummit</code> 
 
 <p class="alert alert-warn">
 <i class="icon-info-sign">    </i>
