@@ -46,7 +46,7 @@ object MovieLensALS {
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 
-    val movies = sc.textFile(new File(movieLensHomeDir + "movies.dat").toString).map { line =>
+    val movies = sc.textFile(new File(movieLensHomeDir, "movies.dat").toString).map { line =>
       val fields = line.split("::")
       // format: (movieId, movieName)
       (fields(0).toInt, fields(1))
@@ -155,7 +155,7 @@ object MovieLensALS {
     val ratings = lines.map { line =>
       val fields = line.split("::")
       Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble)
-    }
+    }.filter(_.rating > 0.0)
     if (ratings.isEmpty) {
       sys.error("No ratings provided.")
     } else {

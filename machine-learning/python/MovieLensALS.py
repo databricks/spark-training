@@ -31,7 +31,7 @@ def loadRatings(ratingsFile):
         print "File %s does not exist." % ratingsFile
         sys.exit(1)
     f = open(ratingsFile, 'r')
-    ratings = [parseRating(line)[1] for line in f]
+    ratings = filter(lambda r: r[2] > 0, [parseRating(line)[1] for line in f])
     f.close()
     if not ratings:
         print "No ratings provided."
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     sc = SparkContext(conf=conf)
 
     # load personal ratings
-    myRatings = loadPersonalRatings(sys.argv[2])
+    myRatings = loadRatings(sys.argv[2])
     myRatingsRDD = sc.parallelize(myRatings, 1)
     
     # load ratings and movie titles
