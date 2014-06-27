@@ -10,9 +10,9 @@ navigation:
 In this chapter, we will use MLlib to make personalized movie recommendations
 tailored *for you*. We will work with 10 million ratings from 72,000 users on
 10,000 movies, collected by [MovieLens](http://movielens.umn.edu/).  This
-dataset is pre-loaded in the HDFS on your cluster in `/movielens/large`. For
+dataset is pre-loaded in your USB drive under `/data/movielens/large`. For
 quick testing of your code, you may want to use a smaller dataset under
-`/movielens/medium`, which contains 1 million ratings from 6000 users on 4000
+`/data/movielens/medium`, which contains 1 million ratings from 6000 users on 4000
 movies.
 
 ##Data set
@@ -49,38 +49,73 @@ these latent factors.
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
+##Rating elicitation
+
+To make recommendation *for you*, we are going to learn your taste by asking you
+to rate a few movies. We have selected a small set of movies that have received the most
+ratings from users in the MovieLens dataset. You can rate those movies by running `bin/rateMoives`:
+
+~~~
+python bin/rateMovies
+~~~
+
+When you run the script, you should see prompt similar to the following:
+
+~~~
+Please rate the following movie (1-5 (best), or 0 if not seen):
+Toy Story (1995):
+~~~
+
+After you're done rating the movies, we save your ratings in `personalRatings.txt` in the MovieLens format,
+where a special user id `0` is assigned to you.
+
+`rateMovies` allows you to re-rate the movies if you'd like to see how your ratings affect your recommendations.
+
 ##Setup
 
-We will be using a standalone project template for this exercise. In your AMI,
-this has been setup in `/root/machine-learning/scala/`. You should find the following items
-in the directory.
+We will be using a standalone project template for this exercise. 
 
 <div class="codetabs">
-<div data-lang="scala">
 
+<div data-lang="scala">
 <div class="prettyprint" style="margin-bottom:10px">
 <ul style="margin-bottom:0px">
-<li><code>sbt</code>: Directory containing the SBT tool</li>
+In the training USB drive, this has been setup in <code>machine-learning/scala/</code>.<br>
+You should find the following items in the directory:
 <li><code>build.sbt</code>: SBT project file</li>
 <li><code>MovieLensALS.scala</code>: Main Scala program that you are going to edit, compile and run</li>
 <li><code>solution</code>: Directory containing the solution code</li>
 </ul>
 </div>
+</div>
 
-The main file you are going to edit, compile, and run for the exercises is
-<code>MovieLensALS.scala</code>. It should look as follows:
+<div data-lang="python">
+<div class="prettyprint" style="margin-bottom:10px">
+<ul style="margin-bottom:0px">
+  In the training USB drive, this has been setup in <code>machine-learning/python/</code>.<br>
+You should find the following items in the directory:
+<li><code>MovieLensALS.py</code>: Main Python program that you are going to edit, compile and run</li>
+<li><code>solution</code>: Directory containing the solution code</li>
+</ul>
 </div>
 </div>
+
+</div>
+
+The following is the main file you are going to edit, compile, and run.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1" data-editable="true">
+
+<div style="margin-bottom:10px"><code>MovieLensALS.scala</code> should look as follows:</div>
+
 ~~~
-import java.util.Random
+import java.io.File
+
+import scala.io.Source
 
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
-
-import scala.io.Source
 
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
@@ -95,59 +130,132 @@ object MovieLensALS {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
     Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
 
-    if (args.length != 1) {
-      println("Usage: sbt/sbt package \"run movieLensHomeDir\"")
-      exit(1)
+    if (args.length != 2) {
+      println("Usage: /path/to/spark/bin/spark-submit --driver-memory 2g --class MovieLensALS " +
+        "target/scala-*/movielens-als-ssembly-*.jar movieLensHomeDir personalRatingsFile")
+      sys.exit(1)
     }
 
     // set up environment
 
-    val jarFile = "target/scala-2.10/movielens-als_2.10-0.0.jar"
-    val sparkHome = "/root/spark"
-    val master = Source.fromFile("/root/spark-ec2/cluster-url").mkString.trim
-    val masterHostname = Source.fromFile("/root/spark-ec2/masters").mkString.trim
     val conf = new SparkConf()
-      .setMaster(master)
-      .setSparkHome(sparkHome)
       .setAppName("MovieLensALS")
-      .set("spark.executor.memory", "8g")
-      .setJars(Seq(jarFile))
+      .set("spark.executor.memory", "2g")
     val sc = new SparkContext(conf)
+
+    // load personal ratings
+
+    val myRatings = loadRatings(args(1))
+    val myRatingsRDD = sc.parallelize(myRatings, 1)
 
     // load ratings and movie titles
 
-    val movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + args(0)
+    val movieLensHomeDir = args(0)
 
-    val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map { line =>
+    val ratings = sc.textFile(new File(movieLensHomeDir, "ratings.dat").toString).map { line =>
       val fields = line.split("::")
       // format: (timestamp % 10, Rating(userId, movieId, rating))
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 
-    val movies = sc.textFile(movieLensHomeDir + "/movies.dat").map { line =>
+    val movies = sc.textFile(new File(movieLensHomeDir + "movies.dat").toString).map { line =>
       val fields = line.split("::")
       // format: (movieId, movieName)
       (fields(0).toInt, fields(1))
-    }.collect.toMap
+    }.collect().toMap
 
     // your code here
 
     // clean up
-
-    sc.stop();
+    sc.stop()
   }
 
   /** Compute RMSE (Root Mean Squared Error). */
-  def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], n: Long) = {
+  def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], n: Long): Double = {
     // ...
   }
 
-  /** Elicitate ratings from command-line. */
-  def elicitateRatings(movies: Seq[(Int, String)]) = {
+  /** Load ratings from file. */
+  def loadRatings(path: String): Seq[Rating] = {
     // ...
   }
 }
 ~~~
+
+</div>
+
+<div data-lang="python" markdown="1" data-editable="true">
+
+<div style="margin-bottom:10px"><code>MovieLensALS.py</code> should look as follows:</div>
+
+~~~
+#!/usr/bin/env python
+
+import sys
+import itertools
+from math import sqrt
+from operator import add
+from os.path import join, isfile, dirname
+
+from pyspark import SparkConf, SparkContext
+from pyspark.mllib.recommendation import ALS
+
+def parseRating(line):
+    """
+    Parses a rating record in MovieLens format userId::movieId::rating::timestamp .
+    """
+    # ...
+
+def parseMovie(line):
+    """
+    Parses a movie record in MovieLens format movieId::movieTitle .
+    """
+    # ...
+
+def loadRatings(ratingsFile):
+    """
+    Load ratings from file.
+    """
+    # ...
+
+def computeRmse(model, data, n):
+    """
+    Compute RMSE (Root Mean Squared Error).
+    """
+    # ...
+
+if __name__ == "__main__":
+    if (len(sys.argv) != 3):
+        print "Usage: /path/to/spark/bin/spark-submit --driver-memory 2g " + \
+          "MovieLensALS.py movieLensDataDir personalRatingsFile"
+        sys.exit(1)
+
+    # set up environment
+    conf = SparkConf() \
+      .setAppName("MovieLensALS") \
+      .set("spark.executor.memory", "2g")
+    sc = SparkContext(conf=conf)
+
+    # load personal ratings
+    myRatings = loadPersonalRatings(sys.argv[2])
+    myRatingsRDD = sc.parallelize(myRatings, 1)
+    
+    # load ratings and movie titles
+
+    movieLensHomeDir = sys.argv[1]
+
+    # ratings is an RDD of (last digit of timestamp, (userId, movieId, rating))
+    ratings = sc.textFile(join(movieLensHomeDir, "ratings.dat")).map(parseRating)
+
+    # movies is an RDD of (movieId, movieTitle)
+    movies = dict(sc.textFile(join(movieLensHomeDir, "movies.dat")).map(parseMovie).collect())
+
+    # your code here
+    
+    # clean up
+    sc.stop()
+~~~
+
 </div>
 </div>
 
@@ -156,24 +264,29 @@ cluster itself, then we'll start adding code to the template. Locate the
 `MovieLensALS` class and open it with a text editor.
 
 <div class="codetabs">
+
 <div data-lang="scala">
 <pre class="prettyprint lang-bsh">
-cd /root/machine-learning/scala
-vim MovieLensALS.scala  # If you don't know vim, you can use emacs or nano
+cd machine-learning/scala
+vim MovieLensALS.scala  # Or your editor of choice
 </pre>
 </div>
+
+<div data-lang="python">
+<pre class="prettyprint lang-bsh">
+cd machine-learning/python
+vim MovieLensALS.py  # Or your editor of choice
+</pre>
 </div>
 
-The cluster machines have vim, emacs, and nano installed for
-editing. Alternatively, you can use your favorite text editor locally and then
-copy-paste content into vim, emacs, or nano before running it.
+</div>
 
 For any Spark computation, we first create a SparkConf object and use it to
-create a Spark context object. For Scala or Java programs, we do that by
-providing the Spark cluster URL, the Spark home directory, and the JAR file that
-will be generated when we compile our program. For Python programs, we only need
-to provide the Spark cluster URL. Finally, we also name our program
-"MovieLensALS" to identify it in Spark's web UI.
+create a SparkContext object. Since we will be using spark-submit to execute the 
+programs in this tutorial (more on spark-submit in the next section), we only need to 
+configure the executor memory allocation and give the program a name, e.g. "MovieLensALS", to
+identify it in Spark's web UI. In local mode, the web UI can be access at [`localhost:4040`](http://localhost:4040) during 
+the execution of a program.
 
 This is what it looks like in our template code:
 
@@ -181,12 +294,17 @@ This is what it looks like in our template code:
 <div data-lang="scala" markdown="1">
 ~~~
     val conf = new SparkConf()
-      .setMaster(master)
-      .setSparkHome(sparkHome)
       .setAppName("MovieLensALS")
-      .set("spark.executor.memory", "8g")
-      .setJars(Seq(jarFile))
+      .set("spark.executor.memory", "2g")
     val sc = new SparkContext(conf)
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
+    conf = SparkConf() \
+      .setAppName("MovieLensALS") \
+      .set("spark.executor.memory", "2g")
+    sc = SparkContext(conf=conf)
 ~~~
 </div>
 </div>
@@ -195,19 +313,29 @@ Next, the code uses the SparkContext to read in ratings. Recall that the rating
 file is a text file with "`::`" as the delimiter. The code parses each line to
 create a RDD for ratings that contains `(Int, Rating)` pairs. We only keep the
 last digit of the timestamp as a random key. The `Rating` class is a wrapper
-around tuple `(user: Int, product: Int, rating: Double)` defined in
-`org.apache.spark.mllib.recommendation` package.
+around the tuple `(user: Int, product: Int, rating: Double)`.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val movieLensHomeDir = "hdfs://" + masterHostname + ":9000" + args(0)
+    val movieLensHomeDir = args(0)
 
     val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map { line =>
       val fields = line.split("::")
       // format: (timestamp % 10, Rating(userId, movieId, rating))
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
+    def parseRating(line):
+        fields = line.split("::")
+        return long(fields[3]) % 10, Rating(int(fields[0]), int(fields[1]), float(fields[2]))
+
+    movieLensHomeDir = sys.argv[1]
+
+    ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map(parseRating)
 ~~~
 </div>
 </div>
@@ -225,6 +353,15 @@ title map.
     }.collect.toMap
 ~~~
 </div>
+<div data-lang="python" markdown="1">
+~~~
+    def parseMovie(line):
+      fields = line.split("::")
+      return int(fields[0]), fields[1]
+
+    movies = dict(sc.textFile(movieLensHomeDir + "/movies.dat").map(parseMovie).collect())
+~~~
+</div>
 </div>
 
 Now, let's make our first edit to add code to get a summary of the ratings.
@@ -240,86 +377,63 @@ Now, let's make our first edit to add code to get a summary of the ratings.
       + numUsers + " users on " + numMovies + " movies.")
 ~~~
 </div>
+<div data-lang="python" markdown="1">
+~~~
+    numRatings = ratings.count()
+    numUsers = ratings.values().map(lambda r: r.user).distinct().count()
+    numMovies = ratings.values().map(lambda r: r.product).distinct().count()
+
+    print "Got %d ratings from %d users on %d movies." % (numRatings, numUsers, numMovies)
+~~~
+</div>
 </div>
 
 ##Running the program
 
 Before we compute movie recommendations, here is a quick reminder on how you can
-run the program at any point during this exercise. Save the `MovieLensALS`
-file run the following commands:
+run the program at any point during this exercise. As mentioned above, we will use `spark-submit`
+to execute your program in local mode for this tutorial. 
+
+Starting with Spark 1.0,
+`spark-submit` is the recommended way for running Spark applications, both on clusters and locally
+in standalone mode.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-cd /root/machine-learning/scala
-# change the folder name from "medium" to "large" to run on the large data set
-sbt/sbt package "run /movielens/medium"
-</pre>
+cd machine-learning/scala
 
-This command will compile the `MovieLensALS` class and create a JAR file in
-`/root/machine-learning/scala/target/scala-2.10/`. Finally, it will run the program. You
-should see output similar to the following on your screen:
+# The following command compiles the <code>MovieLensALS</code> class 
+# and creates a jar file in <code>machine-learning/scala/target/scala-2.10/</code>
+sbt/sbt assembly
+
+# change the folder name from "medium" to "large" to run on the large data set
+/path/to/spark/bin/spark-submit --class MovieLensALS target/scala-2.10/movielens-als-assembly-0.1.jar /path/to/movielens/medium ../personalRatings.txt
+</pre>
+</div>
+
+<div data-lang="python" markdown="1">
+<pre class="prettyprint lang-bsh">
+cd machine-learning/python
+
+# change the folder name from "medium" to "large" to run on the large data set
+/path/to/spark/bin/spark-submit MovieLensALS.py /path/to/movielens/medium ../personalRatings.txt
+</pre>
+</div>
 
 </div>
+
+You should see output similar to the following on your screen:
 
 <pre>
 Got 1000209 ratings from 6040 users on 3706 movies.
 </pre>
 
-</div>
-
-##Rating elicitation
-
-To make recommendation *for you*, we are going to learn your taste by asking you
-to rate a few movies. The movies should be popular ones to increase the chance
-of receiving ratings from you. To do this, we need to count ratings received for
-each movie and sort movies by rating counts. Then, take the top, e.g., 50, most
-rated movies and sample a small subset for rating elicitation.
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
-~~~
-    val mostRatedMovieIds = ratings.map(_._2.product) // extract movie ids
-                                   .countByValue      // count ratings per movie
-                                   .toSeq             // convert map to Seq
-                                   .sortBy(- _._2)    // sort by rating count
-                                   .take(50)          // take 50 most rated
-                                   .map(_._1)         // get their ids
-    val random = new Random(0)
-    val selectedMovies = mostRatedMovieIds.filter(x => random.nextDouble() < 0.2)
-                                          .map(x => (x, movies(x)))
-                                          .toSeq
-~~~
-</div>
-</div>
-</div>
-
-Then for each of the selected movies, we will ask you to give a rating (1-5) or
-0 if you have never watched this movie. The method `eclicitateRatings` returns
-your ratings, where you receive a special user id `0`. The ratings are converted
-to a `RDD[Rating]` instance via `sc.parallelize`.
-
-<div class="codetabs">
-<div data-lang="scala" markdown="1">
-~~~
-    val myRatings = elicitateRatings(selectedMovies)
-    val myRatingsRDD = sc.parallelize(myRatings)
-~~~
-</div>
-</div>
-
-When you run the application, you should see prompt similar to the following:
-
-~~~
-Please rate the following movie (1-5 (best), or 0 if not seen):
-Raiders of the Lost Ark (1981):
-~~~
-
 ##Splitting training data
 
 We will use MLlib's `ALS` to train a `MatrixFactorizationModel`, which takes a
-`RDD[Rating]` object as input. ALS has training parameters such as rank for
+`RDD[Rating]` object as input in Scala and `RDD[(user, product, rating)]` in Python. 
+ALS has training parameters such as rank for
 matrix factors and regularization constants. To determine a good combination of
 the training parameters, we split the data into three non-overlapping subsets,
 named training, test, and validation, based on the last digit of the timestamp,
@@ -327,29 +441,52 @@ and cache them. We will train multiple models based on the training set, select
 the best model on the validation set based on RMSE (Root Mean Squared Error),
 and finally evaluate the best model on the test set. We also add your ratings to
 the training set to make recommendations for you. We hold the training,
-validation, and test sets in memory by calling `persist` because we need to
+validation, and test sets in memory by calling `cache` because we need to
 visit them multiple times.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val numPartitions = 20
+    val numPartitions = 4
     val training = ratings.filter(x => x._1 < 6)
-                          .values
-                          .union(myRatingsRDD)
-                          .repartition(numPartitions)
-                          .persist
+      .values
+      .union(myRatingsRDD)
+      .repartition(numPartitions)
+      .cache()
     val validation = ratings.filter(x => x._1 >= 6 && x._1 < 8)
-                            .values
-                            .repartition(numPartitions)
-                            .persist
-    val test = ratings.filter(x => x._1 >= 8).values.persist
+      .values
+      .repartition(numPartitions)
+      .cache()
+    val test = ratings.filter(x => x._1 >= 8).values.cache()
 
-    val numTraining = training.count
-    val numValidation = validation.count
-    val numTest = test.count
+    val numTraining = training.count()
+    val numValidation = validation.count()
+    val numTest = test.count()
 
     println("Training: " + numTraining + ", validation: " + numValidation + ", test: " + numTest)
+~~~
+</div>
+<div data-lang="python" markdown="1">
+~~~
+    numPartitions = 4
+    training = ratings.filter(lambda x: x[0] < 6) \
+      .values() \
+      .union(myRatingsRDD) \
+      .repartition(numPartitions) \
+      .cache()
+
+    validation = ratings.filter(lambda x: x[0] >= 6 and x[0] < 8) \
+      .values() \
+      .repartition(numPartitions) \
+      .cache()
+
+    test = ratings.filter(lambda x: x[0] >= 8).values().cache()
+
+    numTraining = training.count()
+    numValidation = validation.count()
+    numTest = test.count()
+
+    print "Training: %d, validation: %d, test: %d" % (numTraining, numValidation, numTest)
 ~~~
 </div>
 </div>
@@ -379,6 +516,15 @@ object ALS {
 }
 ~~~
 </div>
+<div data-lang="python" markdown="1" data-editable="true">
+~~~
+class ALS(object):
+
+    def train(cls, ratings, rank, iterations=5, lambda_=0.01, blocks=-1):
+        # ...
+        return MatrixFactorizationModel(sc, mod)
+~~~
+</div>
 </div>
 
 Ideally, we want to try a large number of combinations of them in order to find
@@ -391,7 +537,7 @@ selected and its RMSE on the test set is used as the final metric.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
+<div data-lang="scala" class="solution" markdown="1">
 ~~~
     val ranks = List(8, 12)
     val lambdas = List(0.1, 10.0)
@@ -422,6 +568,38 @@ selected and its RMSE on the test set is used as the final metric.
 ~~~
 </div>
 </div>
+<div data-lang="python" markdown="1">
+<div data-lang="python" class="solution" markdown="1">
+~~~
+    ranks = [8, 12]
+    lambdas = [0.1, 10.0]
+    numIters = [10, 20]
+    bestModel = None
+    bestValidationRmse = float("inf")
+    bestRank = 0
+    bestLambda = -1.0
+    bestNumIter = -1
+
+    for rank, lmbda, numIter in itertools.product(ranks, lambdas, numIters):
+        model = ALS.train(training, rank, numIter, lmbda)
+        validationRmse = computeRmse(model, validation, numValidation)
+        print "RMSE (validation) = %f for the model trained with " % validationRmse + \
+              "rank = %d, lambda = %.1f, and numIter = %d." % (rank, lmbda, numIter)
+        if (validationRmse < bestValidationRmse):
+            bestModel = model
+            bestValidationRmse = validationRmse
+            bestRank = rank
+            bestLambda = lmbda
+            bestNumIter = numIter
+
+    testRmse = computeRmse(bestModel, test, numTest)
+
+    # evaluate the best model on the test set
+    print "The best model was trained with rank = %d and lambda = %.1f, " % (bestRank, bestLambda) \
+      + "and numIter = %d, and its RMSE on the test set is %f." % (bestNumIter, testRmse)
+~~~
+</div>
+</div>
 </div>
 
 Spark might take a minute or two to train the models. You should see the
@@ -436,7 +614,7 @@ The best model was trained using rank 8 and lambda 10.0, and its RMSE on test is
 As the last part of our tutorial, let's take a look at what movies our model
 recommends for you. This is done by generating `(0, movieId)` pairs for all
 movies you haven't rated and calling the model's `predict` method to get
-predictions. Recall that `0` is the special user id assigned to you.
+predictions. `0` is the special user id assigned to you.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1" data-editable="true">
@@ -448,6 +626,16 @@ class MatrixFactorizationModel {
 }
 ~~~
 </div>
+<div data-lang="python" markdown="1" data-editable="true">
+~~~
+class MatrixFactorizationModel(object):
+    def predictAll(self, usersProducts):
+        # ...
+        return RDD(self._java_model.predict(usersProductsJRDD._jrdd),
+                   self._context, RatingDeserializer())
+
+~~~
+</div>
 </div>
 
 After we get all predictions, let us list the top 50 recommendations and see
@@ -455,15 +643,15 @@ whether they look good to you.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
+<div data-lang="scala" class="solution" markdown="1">
 ~~~
     val myRatedMovieIds = myRatings.map(_.product).toSet
     val candidates = sc.parallelize(movies.keys.filter(!myRatedMovieIds.contains(_)).toSeq)
     val recommendations = bestModel.get
-                                   .predict(candidates.map((0, _)))
-                                   .collect
-                                   .sortBy(-_.rating)
-                                   .take(50)
+      .predict(candidates.map((0, _)))
+      .collect()
+      .sortBy(- _.rating)
+      .take(50)
 
     var i = 1
     println("Movies recommended for you:")
@@ -471,6 +659,20 @@ whether they look good to you.
       println("%2d".format(i) + ": " + movies(r.product))
       i += 1
     }
+~~~
+</div>
+</div>
+<div data-lang="python" markdown="1">
+<div data-lang="python" class="solution" markdown="1">
+~~~
+    myRatedMovieIds = set([x[1] for x in myRatings])
+    candidates = sc.parallelize([m for m in movies if m not in myRatedMovieIds])
+    predictions = bestModel.predictAll(candidates.map(lambda x: (0, x))).collect()
+    recommendations = sorted(predictions, key=lambda x: x[2], reverse=True)[:50]
+
+    print "Movies recommended for you:"
+    for i in xrange(len(recommendations)):
+        print ("%2d: %s" % (i + 1, movies[recommendations[i][1]])).encode('ascii', 'ignore')
 ~~~
 </div>
 </div>
@@ -506,13 +708,24 @@ straightforward:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-<div class="solution" markdown="1">
+<div data-lang="scala"  class="solution" markdown="1">
 ~~~
     val meanRating = training.union(validation).map(_.rating).mean
-    val baselineRmse = math.sqrt(test.map(x => (meanRating - x.rating) * (meanRating - x.rating))
-                                     .reduce(_ + _) / numTest)
+    val baselineRmse = 
+      math.sqrt(test.map(x => (meanRating - x.rating) * (meanRating - x.rating)).mean)
     val improvement = (baselineRmse - testRmse) / baselineRmse * 100
     println("The best model improves the baseline by " + "%1.2f".format(improvement) + "%.")
+~~~
+</div>
+</div>
+
+<div data-lang="python" markdown="1">
+<div data-lang="python"  class="solution" markdown="1">
+~~~
+    meanRating = training.union(validation).map(lambda x: x[2]).mean()
+    baselineRmse = sqrt(test.map(lambda x: (meanRating - x[2]) ** 2).reduce(add) / numTest)
+    improvement = (baselineRmse - testRmse) / baselineRmse * 100
+    print "The best model improves the baseline by %.2f" % (improvement) + "%."
 ~~~
 </div>
 </div>
@@ -540,4 +753,14 @@ how to update the model for new users and new movies.
 ## Solution code
 
 In case you want to see your recommendation first or the complete source code,
-we put the solution under `/root/machine-learning/scala/solution`.
+we put the solution under 
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<code>machine-learning/scala/solution</code>
+</div>
+
+<div data-lang="python" markdown="1">
+<code>machine-learning/python/solution</code>
+</div>
+</div>
