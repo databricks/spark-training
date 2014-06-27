@@ -69,7 +69,11 @@ Toy Story (1995):
 After you're done rating the movies, we save your ratings in `personalRatings.txt` in the MovieLens format,
 where a special user id `0` is assigned to you.
 
-`rateMovies` allows you to re-rate the movies if you'd like to see how your ratings affect your recommendations.
+`rateMovies` allows you to re-rate the movies if you'd like to see how your ratings affect your
+recommendations.
+
+If you don't have python installed, please copy `personalRatings.txt.template` to
+`personalRatings.txt` and replace `?`s with your ratings.
 
 ##Setup
 
@@ -158,7 +162,7 @@ object MovieLensALS {
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
     }
 
-    val movies = sc.textFile(new File(movieLensHomeDir + "movies.dat").toString).map { line =>
+    val movies = sc.textFile(new File(movieLensHomeDir, "movies.dat").toString).map { line =>
       val fields = line.split("::")
       // format: (movieId, movieName)
       (fields(0).toInt, fields(1))
@@ -237,7 +241,7 @@ if __name__ == "__main__":
     sc = SparkContext(conf=conf)
 
     # load personal ratings
-    myRatings = loadPersonalRatings(sys.argv[2])
+    myRatings = loadRatings(sys.argv[2])
     myRatingsRDD = sc.parallelize(myRatings, 1)
     
     # load ratings and movie titles
@@ -320,7 +324,7 @@ around the tuple `(user: Int, product: Int, rating: Double)`.
 ~~~
     val movieLensHomeDir = args(0)
 
-    val ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map { line =>
+    val ratings = sc.textFile(new File(movieLensHomeDir, "ratings.dat").toString).map { line =>
       val fields = line.split("::")
       // format: (timestamp % 10, Rating(userId, movieId, rating))
       (fields(3).toLong % 10, Rating(fields(0).toInt, fields(1).toInt, fields(2).toDouble))
@@ -329,13 +333,10 @@ around the tuple `(user: Int, product: Int, rating: Double)`.
 </div>
 <div data-lang="python" markdown="1">
 ~~~
-    def parseRating(line):
-        fields = line.split("::")
-        return long(fields[3]) % 10, Rating(int(fields[0]), int(fields[1]), float(fields[2]))
-
     movieLensHomeDir = sys.argv[1]
 
-    ratings = sc.textFile(movieLensHomeDir + "/ratings.dat").map(parseRating)
+    # ratings is an RDD of (last digit of timestamp, (userId, movieId, rating))
+    ratings = sc.textFile(join(movieLensHomeDir, "ratings.dat")).map(parseRating)
 ~~~
 </div>
 </div>
@@ -346,7 +347,7 @@ title map.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 ~~~
-    val movies = sc.textFile(movieLensHomeDir + "/movies.dat").map { line =>
+    val movies = sc.textFile(new File(movieLensHomeDir, "movies.dat").toString).map { line =>
       val fields = line.split("::")
       // format: (movieId, movieName)
       (fields(0).toInt, fields(1))
@@ -359,7 +360,7 @@ title map.
       fields = line.split("::")
       return int(fields[0]), fields[1]
 
-    movies = dict(sc.textFile(movieLensHomeDir + "/movies.dat").map(parseMovie).collect())
+    movies = dict(sc.textFile(join(movieLensHomeDir, "movies.dat")).map(parseMovie).collect())
 ~~~
 </div>
 </div>
