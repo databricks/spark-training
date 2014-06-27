@@ -105,7 +105,7 @@ If you are attending Spark Training in person, you should have a USB key contain
 
 <p class="alert alert-warn">
 <i class="icon-info-sign">    </i>
-For the rest of this training session, all command-line instructions assume that the terminal is in the <code>SparkTraining</code> directory.
+For the rest of this training session, all command-line instructions assume that the terminal is in the <code>SparkSummit</code> directory.
 </p>
 
 
