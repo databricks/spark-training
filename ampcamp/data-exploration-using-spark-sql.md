@@ -135,7 +135,22 @@ scala> sqlContext.sql("SELECT username, COUNT(*) AS cnt FROM wikiData WHERE user
 </div>
 </div>
 
-- How many pages does the text of the article contain the word "california":
+__NOTE: java.lang.OutOfMemoryError__ : If you see a `java.lang.OutOfMemoryError`, you will need to restart the Spark shell with the following command line option:
+
+<div class="codetabs">
+<div data-lang="scala" markdown="1">
+<pre class="prettyprint lang-bsh">
+usb/$ spark/bin/spark-shell --driver-memory 1G</pre>
+</div>
+<div data-lang="python" markdown="1">
+<pre class="prettyprint lang-bsh">
+usb/$ spark/bin/pyspark --driver-memory 1G</pre>
+</div>
+</div>
+
+This increases the amount of memory allocated for the Spark driver. Since we are running Spark in local mode, all operations are performed by the driver, so the driver memory is all the memory Spark has to work with.
+
+- How many articles contain the word "california"?
 
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">SELECT COUNT(*) FROM wikiData WHERE text LIKE '%california%'</pre>
