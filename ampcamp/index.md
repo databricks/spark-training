@@ -101,26 +101,22 @@ TODO: UPDATE INSTRUCTIONS ON FEEDBACK
 
 If you are attending Spark Training in person, you should have a USB key containing training material. After loading the USB key, you should perform the following steps:
 
-1. Rename the USB key from <code>NO NAME</code> to <code>SparkTraining</code> 
+1) Rename the USB key from <code>NO NAME</code> to <code>SparkSummit</code> 
 
 <p class="alert alert-warn">
 <i class="icon-info-sign">    </i>
-For the rest of this training session, all command-line instructions assume that the terminal is in the <code>SparkTraining</code> directory.
+For the rest of this training session, all command-line instructions assume that the terminal is in the <code>SparkSummit</code> directory.
 </p>
 
+2) Check your setup by building a toy application. To do this, run the following commands:
 
-
-2. Check your setup by building a toy application. To do this, run the following commands:
-
-   ~~~
-cd simple-app
-../sbt/sbt package
-../spark/bin/spark-submit \
-  --class "SimpleApp" \
-  --master local[*] \
-  target/scala-2.10/simple-project_2.10-1.0.jar
-   ~~~
-
+<pre class="prettyprint lang-bsh">
+$ cd simple-app
+$ ../sbt/sbt package
+$ ../spark/bin/spark-submit --class "SimpleApp" --master local[*] target/scala-2.10/simple-project_2.10-1.0.jar
+2014-06-27 15:40:44.788 java[15324:1607] Unable to load realm info from SCDynamicStore
+Lines with a: 73, Lines with b: 35
+</pre>
 
 <p class="alert alert-warn">
 <i class="icon-info-sign">    </i>
