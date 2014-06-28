@@ -135,7 +135,7 @@ object MovieLensALS {
     Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
 
     if (args.length != 2) {
-      println("Usage: /path/to/spark/bin/spark-submit --driver-memory 2g --class MovieLensALS " +
+      println("Usage: [USB root directory]/spark/bin/spark-submit --driver-memory 2g --class MovieLensALS " +
         "target/scala-*/movielens-als-ssembly-*.jar movieLensHomeDir personalRatingsFile")
       sys.exit(1)
     }
@@ -230,7 +230,7 @@ def computeRmse(model, data, n):
 
 if __name__ == "__main__":
     if (len(sys.argv) != 3):
-        print "Usage: /path/to/spark/bin/spark-submit --driver-memory 2g " + \
+        print "Usage: [USB root directory]/spark/bin/spark-submit --driver-memory 2g " + \
           "MovieLensALS.py movieLensDataDir personalRatingsFile"
         sys.exit(1)
 
@@ -263,8 +263,7 @@ if __name__ == "__main__":
 </div>
 </div>
 
-Let's first take a closer look at our template code in a text editor on the
-cluster itself, then we'll start adding code to the template. Locate the
+Let's first take a closer look at our template code in a text editor, then we'll start adding code to the template. Locate the
 `MovieLensALS` class and open it with a text editor.
 
 <div class="codetabs">
@@ -381,8 +380,8 @@ Now, let's make our first edit to add code to get a summary of the ratings.
 <div data-lang="python" markdown="1">
 ~~~
     numRatings = ratings.count()
-    numUsers = ratings.values().map(lambda r: r.user).distinct().count()
-    numMovies = ratings.values().map(lambda r: r.product).distinct().count()
+    numUsers = ratings.values().map(lambda r: r[0]).distinct().count()
+    numMovies = ratings.values().map(lambda r: r[1]).distinct().count()
 
     print "Got %d ratings from %d users on %d movies." % (numRatings, numUsers, numMovies)
 ~~~
@@ -406,10 +405,10 @@ cd machine-learning/scala
 
 # The following command compiles the <code>MovieLensALS</code> class 
 # and creates a jar file in <code>machine-learning/scala/target/scala-2.10/</code>
-sbt/sbt assembly
+[USB root directory]/sbt/sbt assembly
 
 # change the folder name from "medium" to "large" to run on the large data set
-/path/to/spark/bin/spark-submit --class MovieLensALS target/scala-2.10/movielens-als-assembly-0.1.jar /path/to/movielens/medium ../personalRatings.txt
+[USB root directory]/spark/bin/spark-submit --class MovieLensALS target/scala-2.10/movielens-als-assembly-0.1.jar [USB root directory]/data/movielens/medium/ ../personalRatings.txt
 </pre>
 </div>
 
@@ -418,7 +417,7 @@ sbt/sbt assembly
 cd machine-learning/python
 
 # change the folder name from "medium" to "large" to run on the large data set
-/path/to/spark/bin/spark-submit MovieLensALS.py /path/to/movielens/medium ../personalRatings.txt
+[USB root directory]/spark/bin/spark-submit MovieLensALS.py [USB root directory]/data/movielens/medium/ ../personalRatings.txt
 </pre>
 </div>
 
@@ -541,7 +540,7 @@ selected and its RMSE on the test set is used as the final metric.
 <div data-lang="scala" class="solution" markdown="1">
 ~~~
     val ranks = List(8, 12)
-    val lambdas = List(0.1, 10.0)
+    val lambdas = List(1.0, 10.0)
     val numIters = List(10, 20)
     var bestModel: Option[MatrixFactorizationModel] = None
     var bestValidationRmse = Double.MaxValue
@@ -573,7 +572,7 @@ selected and its RMSE on the test set is used as the final metric.
 <div data-lang="python" class="solution" markdown="1">
 ~~~
     ranks = [8, 12]
-    lambdas = [0.1, 10.0]
+    lambdas = [1.0, 10.0]
     numIters = [10, 20]
     bestModel = None
     bestValidationRmse = float("inf")
