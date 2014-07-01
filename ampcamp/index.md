@@ -37,7 +37,7 @@ These can be done _**in any order**_ according to your interests.
   <li><a href="data-exploration-using-spark-sql.html">Spark SQL</a> <a href="http://spark.apache.org/docs/latest/sql-programming-guide.html">(programming guide)</a> - Use the Spark shell to write interactive SQL queries.</li>
   <li><a href="realtime-processing-with-spark-streaming.html">Spark Streaming</a> <a href="http://spark.apache.org/docs/latest/streaming-programming-guide.html">(programming guide)</a> - Process a sample of Twitter tweet streams.</li>
   <li><a href="movie-recommendation-with-mllib.html">Machine Learning with MLlib</a> <a href="http://spark.apache.org/docs/latest/mllib-guide.html">(programming guide)</a> - Build a movie recommender with Spark.</li>
-  <li><a href="graph-analytics-with-graphx.html">Graph Analytics with GraphX</a> <a href="http://spark.apache.org/docs/latest/graphx-programming-guide.html">(programming guide)</a> - Explore graph-structured data and graph algorithms. (note: this exercise is significantly longer than the rest.)</li>
+  <li><a href="graph-analytics-with-graphx.html">Graph Analytics with GraphX</a> <a href="http://spark.apache.org/docs/latest/graphx-programming-guide.html">(programming guide)</a> - Explore graph-structured data and graph algorithms. (note: this exercise is significantly longer than the other exercises.)</li>
 </ol>
 
 
@@ -101,17 +101,17 @@ TODO: UPDATE INSTRUCTIONS ON FEEDBACK
 
 If you are attending Spark Training in person, you should have a USB key containing training material. After loading the USB key, you should perform the following steps:
 
-1) Rename the USB key from <code>NO NAME</code> to <code>SparkSummit</code> 
+1) Rename the USB key from '<code>NO NAME</code>' to '<code>usb</code>'. 
 
 <p class="alert alert-warn">
 <i class="icon-info-sign">    </i>
-For the rest of this training session, all command-line instructions assume that the terminal is in the <code>SparkSummit</code> directory.
+Throughout the training exercises, all command-line instructions of the form '<code>usb/$</code>'  refer to a terminal that is in the <code>usb</code> directory.  Moreover, [usb root directory] refers to the full path to this directory. 
 </p>
 
 2) Check your setup by building a toy application. To do this, run the following commands:
 
 <pre class="prettyprint lang-bsh">
-$ cd simple-app
+usb/$ cd simple-app
 $ ../sbt/sbt package
 $ ../spark/bin/spark-submit --class "SimpleApp" --master local[*] target/scala-2.10/simple-project_2.10-1.0.jar
 2014-06-27 15:40:44.788 java[15324:1607] Unable to load realm info from SCDynamicStore
@@ -122,6 +122,13 @@ Lines with a: 73, Lines with b: 35
 <i class="icon-info-sign">    </i>
 If you do not have a USB key or cannot get the simple app to build, then ask a TA.
 </p>
+
+
+3) Download and extract additional material not contained in the USB key by running the following commands: 
+
+<pre class="prettyprint lang-bsh">
+$ FILL IN COMMANDS!
+</pre>
 
 
 <!--If you are participating in the exercises from a remote location, you will want

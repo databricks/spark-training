@@ -49,11 +49,11 @@ these latent factors.
   <!-- Images are downsized intentionally to improve quality on retina displays -->
 </p>
 
-##Rating elicitation
+##Create training examples
 
 To make recommendation *for you*, we are going to learn your taste by asking you
 to rate a few movies. We have selected a small set of movies that have received the most
-ratings from users in the MovieLens dataset. You can rate those movies by running `bin/rateMoives`:
+ratings from users in the MovieLens dataset. You can rate those movies by running `bin/rateMovies`:
 
 ~~~
 python bin/rateMovies
@@ -135,7 +135,7 @@ object MovieLensALS {
     Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
 
     if (args.length != 2) {
-      println("Usage: [USB root directory]/spark/bin/spark-submit --driver-memory 2g --class MovieLensALS " +
+      println("Usage: [usb root directory]/spark/bin/spark-submit --driver-memory 2g --class MovieLensALS " +
         "target/scala-*/movielens-als-ssembly-*.jar movieLensHomeDir personalRatingsFile")
       sys.exit(1)
     }
@@ -230,7 +230,7 @@ def computeRmse(model, data, n):
 
 if __name__ == "__main__":
     if (len(sys.argv) != 3):
-        print "Usage: [USB root directory]/spark/bin/spark-submit --driver-memory 2g " + \
+        print "Usage: [usb root directory]/spark/bin/spark-submit --driver-memory 2g " + \
           "MovieLensALS.py movieLensDataDir personalRatingsFile"
         sys.exit(1)
 
@@ -270,14 +270,14 @@ Let's first take a closer look at our template code in a text editor, then we'll
 
 <div data-lang="scala">
 <pre class="prettyprint lang-bsh">
-cd machine-learning/scala
+usb/$ cd machine-learning/scala
 vim MovieLensALS.scala  # Or your editor of choice
 </pre>
 </div>
 
 <div data-lang="python">
 <pre class="prettyprint lang-bsh">
-cd machine-learning/python
+usb/$ cd machine-learning/python
 vim MovieLensALS.py  # Or your editor of choice
 </pre>
 </div>
@@ -401,23 +401,23 @@ in standalone mode.
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-cd machine-learning/scala
+usb/$ cd machine-learning/scala
 
 # The following command compiles the <code>MovieLensALS</code> class 
 # and creates a jar file in <code>machine-learning/scala/target/scala-2.10/</code>
-[USB root directory]/sbt/sbt assembly
+[usb root directory]/sbt/sbt assembly
 
 # change the folder name from "medium" to "large" to run on the large data set
-[USB root directory]/spark/bin/spark-submit --class MovieLensALS target/scala-2.10/movielens-als-assembly-0.1.jar [USB root directory]/data/movielens/medium/ ../personalRatings.txt
+[usb root directory]/spark/bin/spark-submit --class MovieLensALS target/scala-2.10/movielens-als-assembly-0.1.jar [usb root directory]/data/movielens/medium/ ../personalRatings.txt
 </pre>
 </div>
 
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
-cd machine-learning/python
+usb/$ cd machine-learning/python
 
 # change the folder name from "medium" to "large" to run on the large data set
-[USB root directory]/spark/bin/spark-submit MovieLensALS.py [USB root directory]/data/movielens/medium/ ../personalRatings.txt
+[usb root directory]/spark/bin/spark-submit MovieLensALS.py [usb root directory]/data/movielens/medium/ ../personalRatings.txt
 </pre>
 </div>
 
