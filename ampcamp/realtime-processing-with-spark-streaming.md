@@ -22,13 +22,13 @@ This section will first introduce you to the basic system setup of the standalon
 
 ### System Setup
 
-<p class="alert alert-warn">
-<i class="icon-info-sign">    </i>
-Download and unzip the following zip file in your `[usb root
-directory]` directory: <a href="https://github.com/databricks/training/raw/sparkSummit2014/streaming/streaming_download.zip" target="_blank">streaming.zip</a></p>
-
 You should find the following items in the directory `[usb root
 directory]/streaming/`.
+
+<p class="alert alert-warn">
+<i class="icon-info-sign">    </i>
+If you can't find the streaming directory, download and unzip the following zip file in your `[usb root
+directory]` directory: <a href="https://github.com/databricks/training/raw/sparkSummit2014/streaming/streaming_download.zip" target="_blank">streaming.zip</a></p>
 
 <div class="sidebar">
 <p style="font-size:1.2em"><b>What is SBT?</b></p>
