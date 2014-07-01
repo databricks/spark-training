@@ -22,6 +22,11 @@ This section will first introduce you to the basic system setup of the standalon
 
 ### System Setup
 
+<p class="alert alert-warn">
+<i class="icon-info-sign">    </i>
+Download and unzip the following zip file in your `[usb root
+directory]` directory: <a href="https://github.com/databricks/training/tree/sparkSummit2014/streaming/streaming.zip" target="_blank">streaming.zip</a></p>
+
 You should find the following items in the directory `[usb root
 directory]/streaming/`.
 
@@ -164,7 +169,7 @@ String accessTokenSecret = "2BtiPuEgSDMFOMtUJ9DtuLS5Q2Q9FJoJ0DdI6KJhZK099";
 
 
 To express any Spark Streaming computation, a `StreamingContext` object needs to be created.
-This object serves as the main entry point for all Spark Streaming functionality.
+This object serves as the main entry point for all Spark Streaming functionality. For the rest of this exercise, insert the code samples after "//Your Code goes here" placeholder. 
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -261,12 +266,12 @@ __Make sure you replace `[usb root directory]` in the following instructions wit
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 In the console, make sure you are in the directory: [usb root directory]/streaming/scala .
-`[usb root directory]/sbt/sbt assembly`
+`../../sbt/sbt assembly`
 This command will compile the `Tutorial` class and create a JAR file in `[usb root directory]/streaming/scala/target/scala-2.10/`. 
 </div>
 <div data-lang="java" markdown="1">
 In the console, make sure you are in the directory: [usb root directory]/streaming/java .
-`[usb root directory]/sbt/sbt assembly`
+`../../sbt/sbt assembly`
 This command will compile the `Tutorial` class and create a JAR file in `[usb root directory]/streaming/java/target/scala-2.10/`. 
 </div>
 </div>
@@ -276,12 +281,12 @@ Finally, the program can be executed as using the `spark-submit` script. At the 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-[usb root directory]/spark/bin/spark-submit --class Tutorial [usb root directory]/streaming/scala/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
+../../spark/bin/spark-submit --class Tutorial ../../streaming/scala/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
 </pre>
 </div>
 <div data-lang="java" markdown="1">
 <pre class="prettyprint lang-bsh">
-[usb root directory]/spark/bin/spark-submit --class Tutorial [usb root directory]/streaming/java/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
+../../spark/bin/spark-submit --class Tutorial ../../streaming/java/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
 </pre>
 </div>
 </div>
