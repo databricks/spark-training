@@ -126,8 +126,10 @@ If you do not have a USB key or cannot get the simple app to build, then ask a T
 
 3) Download and extract additional material not contained in the USB key by running the following commands: 
 
+note: for beta-testers, please download the machine-learning and streaming folders from https://github.com/databricks/training and place them in the USB root directory.
+
 <pre class="prettyprint lang-bsh">
-$ FILL IN COMMANDS!
+$ REPLACE WITH REAL COMMANDS ONCE WE PUT TARBALL ON WEBSITE!
 </pre>
 
 
