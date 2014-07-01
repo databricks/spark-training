@@ -25,7 +25,7 @@ This section will first introduce you to the basic system setup of the standalon
 <p class="alert alert-warn">
 <i class="icon-info-sign">    </i>
 Download and unzip the following zip file in your `[usb root
-directory]` directory: <a href="https://github.com/databricks/training/tree/sparkSummit2014/streaming/streaming.zip" target="_blank">streaming.zip</a></p>
+directory]` directory: <a href="https://github.com/databricks/training/raw/sparkSummit2014/streaming/streaming_download.zip" target="_blank">streaming.zip</a></p>
 
 You should find the following items in the directory `[usb root
 directory]/streaming/`.
