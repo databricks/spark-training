@@ -3,3 +3,7 @@ markdown: kramdown
 title: Hands-on Exercises
 exclude: [README.md, tachyon.md, blinkdb.md, logging-into-the-cluster.md, overview-of-the-exercises.md, where-to-go-from-here.md, less]
 organizers-email: "training-organizers@spark-summit.org"
+kramdown:
+  use_coderay: true
+  coderay:
+    coderay_line_numbers: ''

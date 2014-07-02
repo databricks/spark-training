@@ -374,7 +374,7 @@ Now, let's make our first edit to add code to get a summary of the ratings.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-~~~python
+~~~
     val numRatings = ratings.count
     val numUsers = ratings.map(_._2.user).distinct.count
     val numMovies = ratings.map(_._2.product).distinct.count
