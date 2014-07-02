@@ -198,7 +198,7 @@ object MovieLensALS {
 
 <div style="margin-bottom:10px"><code>MovieLensALS.py</code> should look as follows:</div>
 
-~~~
+~~~python
 #!/usr/bin/env python
 
 import sys
@@ -309,7 +309,7 @@ This is what it looks like in our template code:
 ~~~
 </div>
 <div data-lang="python" markdown="1">
-~~~
+~~~python
     conf = SparkConf() \
       .setAppName("MovieLensALS") \
       .set("spark.executor.memory", "2g")
@@ -337,7 +337,7 @@ around the tuple `(user: Int, product: Int, rating: Double)`.
 ~~~
 </div>
 <div data-lang="python" markdown="1">
-~~~
+~~~python
     movieLensHomeDir = sys.argv[1]
 
     # ratings is an RDD of (last digit of timestamp, (userId, movieId, rating))
@@ -360,7 +360,7 @@ title map.
 ~~~
 </div>
 <div data-lang="python" markdown="1">
-~~~
+~~~python
     def parseMovie(line):
       fields = line.split("::")
       return int(fields[0]), fields[1]
@@ -374,7 +374,7 @@ Now, let's make our first edit to add code to get a summary of the ratings.
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-~~~
+~~~python
     val numRatings = ratings.count
     val numUsers = ratings.map(_._2.user).distinct.count
     val numMovies = ratings.map(_._2.product).distinct.count
@@ -384,7 +384,7 @@ Now, let's make our first edit to add code to get a summary of the ratings.
 ~~~
 </div>
 <div data-lang="python" markdown="1">
-~~~
+~~~python
     numRatings = ratings.count()
     numUsers = ratings.values().map(lambda r: r[0]).distinct().count()
     numMovies = ratings.values().map(lambda r: r[1]).distinct().count()
@@ -473,7 +473,7 @@ visit them multiple times.
 ~~~
 </div>
 <div data-lang="python" markdown="1">
-~~~
+~~~python
     numPartitions = 4
     training = ratings.filter(lambda x: x[0] < 6) \
       .values() \
@@ -523,7 +523,7 @@ object ALS {
 ~~~
 </div>
 <div data-lang="python" markdown="1" data-editable="true">
-~~~
+~~~python
 class ALS(object):
 
     def train(cls, ratings, rank, iterations=5, lambda_=0.01, blocks=-1):
@@ -576,7 +576,7 @@ selected and its RMSE on the test set is used as the final metric.
 </div>
 <div data-lang="python" markdown="1">
 <div data-lang="python" class="solution" markdown="1">
-~~~
+~~~python
     ranks = [8, 12]
     lambdas = [1.0, 10.0]
     numIters = [10, 20]
@@ -633,7 +633,7 @@ class MatrixFactorizationModel {
 ~~~
 </div>
 <div data-lang="python" markdown="1" data-editable="true">
-~~~
+~~~python
 class MatrixFactorizationModel(object):
     def predictAll(self, usersProducts):
         # ...
@@ -670,7 +670,7 @@ whether they look good to you.
 </div>
 <div data-lang="python" markdown="1">
 <div data-lang="python" class="solution" markdown="1">
-~~~
+~~~python
     myRatedMovieIds = set([x[1] for x in myRatings])
     candidates = sc.parallelize([m for m in movies if m not in myRatedMovieIds])
     predictions = bestModel.predictAll(candidates.map(lambda x: (0, x))).collect()
@@ -727,7 +727,7 @@ straightforward:
 
 <div data-lang="python" markdown="1">
 <div data-lang="python"  class="solution" markdown="1">
-~~~
+~~~python
     meanRating = training.union(validation).map(lambda x: x[2]).mean()
     baselineRmse = sqrt(test.map(lambda x: (meanRating - x[2]) ** 2).reduce(add) / numTest)
     improvement = (baselineRmse - testRmse) / baselineRmse * 100
