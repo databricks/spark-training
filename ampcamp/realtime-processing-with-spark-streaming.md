@@ -7,25 +7,28 @@ navigation:
   show: true
 ---
 
-# Stream Processing w/ Spark Streaming 
-In this chapter, we will walk you through using Spark Streaming to process live data streams. 
-Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant 
-streaming processing. 
-
-These exercises are designed as standalone Scala programs which will receive and process 
-Twitter's real sample tweet streams. For the exercises in this section, you can choose to 
-use Scala or Java.
+In this chapter, we will walk you through using Spark Streaming to process live
+data streams. Remember, Spark Streaming is a component of Spark that provides
+highly scalable, fault-tolerant streaming processing. These exercises are
+designed as standalone Scala programs which will receive and process Twitter's
+real sample tweet streams. For the exercises in this section, you can choose to
+use Scala or Java. 
+<!--If you would like to use Scala but are not familiar with the
+language, we recommend that you see the [Introduction to the Scala
+Shell](introduction-to-the-scala-shell.html) section to learn some basics. -->
 
 ## Setup
-This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, 
-and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing 
-Twitter's real time sample stream.
+This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing Twitter's real time sample stream.
 
 ### System Setup
 
-We use a modified version of the Scala standalone project template introduced in the 
-[Running Standalone Spark Programs](data-exploration-using-spark.html#running-standalone-spark-programs) 
-section for the next exercise. This has been setup in `[USB root directory]/streaming/`. You should find the following items in the directory.
+You should find the following items in the directory `[usb root
+directory]/streaming/`.
+
+<p class="alert alert-warn">
+<i class="icon-info-sign">    </i>
+If you can't find the streaming directory, download and unzip the following zip file in your `[usb root
+directory]` directory: <a href="https://github.com/databricks/training/raw/sparkSummit2014/streaming/streaming_download.zip" target="_blank">streaming.zip</a></p>
 
 <div class="sidebar">
 <p style="font-size:1.2em"><b>What is SBT?</b></p>
@@ -90,12 +93,10 @@ Since all of the exercises are based on Twitter's sample tweet stream, it is nec
 
     ![OAuth details](img/twitter4.png)
 
-5. 
-
 
 ## First Spark Streaming program
 Let's try to write a very simple Spark Streaming program that prints a sample of the tweets it receives from Twitter every second. First locate the file
-`Tutorial.scala` (in `[USB root directory]/streaming/scala/`) or `Tutorial.java` and edit it with a text editor.
+`Tutorial.scala` (in `[usb root directory]/streaming/scala/`) or `Tutorial.java` and edit it with a text editor.
 
 The file contains the following template code to help you out.
 
@@ -168,7 +169,7 @@ String accessTokenSecret = "2BtiPuEgSDMFOMtUJ9DtuLS5Q2Q9FJoJ0DdI6KJhZK099";
 
 
 To express any Spark Streaming computation, a `StreamingContext` object needs to be created.
-This object serves as the main entry point for all Spark Streaming functionality.
+This object serves as the main entry point for all Spark Streaming functionality. For the rest of this exercise, insert the code samples after "//Your Code goes here" placeholder. 
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
@@ -260,32 +261,32 @@ ssc.awaitTermination();
 __Note that all DStream operations must be done before calling this statement.__
 
 After saving `Tutorial.scala`, let us compile the code. To do this, follow these instructions.
-__Make sure you replace `[USB root directory]` in the following instructions with your actual USB root directory path.__
+__Make sure you replace `[usb root directory]` in the following instructions with your actual USB root directory path.__
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
-In the console, make sure you are in the directory: [USB root directory]/streaming/scala .
-`[USB root directory]/sbt/sbt assembly`
-This command will compile the `Tutorial` class and create a JAR file in `[USB root directory]/streaming/scala/target/scala-2.10/`. 
+In the console, make sure you are in the directory: [usb root directory]/streaming/scala .
+`../../sbt/sbt assembly`
+This command will compile the `Tutorial` class and create a JAR file in `[usb root directory]/streaming/scala/target/scala-2.10/`. 
 </div>
 <div data-lang="java" markdown="1">
-In the console, make sure you are in the directory: [USB root directory]/streaming/java .
-`[USB root directory]/sbt/sbt assembly`
-This command will compile the `Tutorial` class and create a JAR file in `[USB root directory]/streaming/java/target/scala-2.10/`. 
+In the console, make sure you are in the directory: [usb root directory]/streaming/java .
+`../../sbt/sbt assembly`
+This command will compile the `Tutorial` class and create a JAR file in `[usb root directory]/streaming/java/target/scala-2.10/`. 
 </div>
 </div>
 
-Finally, the program can be executed as using the `spark-submit` script. At the command line, run the following. Again, __make sure you replace `[USB root directory]` with your actual USB root directory path.__
+Finally, the program can be executed as using the `spark-submit` script. At the command line, run the following. Again, __make sure you replace `[usb root directory]` with your actual USB root directory path.__
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-[USB root directory]/spark/bin/spark-submit --class Tutorial [USB root directory]/streaming/scala/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
+../../spark/bin/spark-submit --class Tutorial ../../streaming/scala/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
 </pre>
 </div>
 <div data-lang="java" markdown="1">
 <pre class="prettyprint lang-bsh">
-[USB root directory]/spark/bin/spark-submit --class Tutorial [USB root directory]/streaming/java/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
+../../spark/bin/spark-submit --class Tutorial ../../streaming/java/target/scala-2.10/Tutorial-assembly-0.1-SNAPSHOT.jar
 </pre>
 </div>
 </div>
@@ -580,5 +581,5 @@ Next, let's try something more interesting, say, try printing the 10 most popula
 To delete the keys, you can go back to the <a href="https://dev.twitter.com/apps" target="_blank">starting page</a> and delete the application you have created. To do this click on the application, 
 and then click on red _Delete Application_ button in the bottom of the page.
 
-For a more detailed explanations of the streaming API, checkout the [Streaming Programming Guide](http://spark.incubator.apache.org/docs/latest/streaming-programming-guide.html). 
-For the full streaming API, checkout the [Java/Scala](http://spark.incubator.apache.org/docs/latest/api/streaming/index.html#spark.streaming.DStream) API docs.
+For a more detailed explanations of the streaming API, checkout the [Streaming Programming Guide](http://spark.apache.org/docs/latest/streaming-programming-guide.html). 
+For the full streaming API, checkout the [Java/Scala](http://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.streaming.api.java.package) API docs.
