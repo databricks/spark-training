@@ -7,14 +7,25 @@ navigation:
   show: true
 ---
 
-In this chapter, we will walk you through using Spark Streaming to process live data streams. Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant streaming processing. These exercises are designed as standalone Scala programs which will receive and process Twitter's real sample tweet streams. For the exercises in this section, you can choose to use Scala or Java. If you would like to use Scala but are not familiar with the language, we recommend that you see the [Introduction to the Scala Shell](introduction-to-the-scala-shell.html) section to learn some basics.
+# Stream Processing w/ Spark Streaming 
+In this chapter, we will walk you through using Spark Streaming to process live data streams. 
+Remember, Spark Streaming is a component of Spark that provides highly scalable, fault-tolerant 
+streaming processing. 
+
+These exercises are designed as standalone Scala programs which will receive and process 
+Twitter's real sample tweet streams. For the exercises in this section, you can choose to 
+use Scala or Java.
 
 ## Setup
-This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing Twitter's real time sample stream.
+This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, 
+and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing 
+Twitter's real time sample stream.
 
 ### System Setup
 
-We use a modified version of the Scala standalone project template introduced in the [Running Standalone Spark Programs](data-exploration-using-spark.html#running-standalone-spark-programs) section for the next exercise. This has been setup in `[USB root directory]/streaming/`. You should find the following items in the directory.
+We use a modified version of the Scala standalone project template introduced in the 
+[Running Standalone Spark Programs](data-exploration-using-spark.html#running-standalone-spark-programs) 
+section for the next exercise. This has been setup in `[USB root directory]/streaming/`. You should find the following items in the directory.
 
 <div class="sidebar">
 <p style="font-size:1.2em"><b>What is SBT?</b></p>

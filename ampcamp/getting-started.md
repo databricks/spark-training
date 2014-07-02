@@ -1,7 +1,6 @@
 ---
 layout: global
-title: Getting Started & Known Issues
-categories: [module]
+title: Getting Started
 navigation:
   weight: 20
   show: true
@@ -12,7 +11,7 @@ navigation:
 If you are attending Spark Training in person, you should have a USB stick containing training material. 
 If you do not have the USB stick, you can [download a zip file with the contents](http://bit.ly/spark-training-2).
 
-## Initial Test 
+## Quick Start 
 After loading the USB key, you should perform the following steps:
 
 <p class="alert alert-warn">
@@ -24,21 +23,25 @@ After loading the USB key, you should perform the following steps:
 1. If your USB key  mounted as `NO NAME`, rename it to `SparkTraining` or any other name without a space. 
 If you skip this step, you will see your sbt builds fail. 
 
+2. Change directories in to where your USB stick is mounted
+
     <p class="alert alert-warn">
     <i class="icon-info-sign">    </i>
-    For the rest of this training session, all command-line instructions assume that the terminal is in the <code>SparkTraining</code> directory.
+    Throughout the training exercises, all command-line instructions of the form 'usb/$' refer to a 
+    terminal that is in the usb directory. Moreover, [usb root directory] refers to the full path to this directory.
     </p>
 
 
-2. Check your setup by building a toy application. To do this, run the following commands:
+3. Check your setup by building a toy application. To do this, run the following commands, 
+and confirm the results match. If they do, you just built a simple spark application - go look at the
+source code to get a feel for what happened.
 
    ~~~
-cd simple-app
-../sbt/sbt package
-../spark/bin/spark-submit \
-  --class "SimpleApp" \
-  --master local[*] \
-  target/scala-2.10/simple-project_2.10-1.0.jar
+usb/$ cd simple-app
+$ ../sbt/sbt package
+$ ../spark/bin/spark-submit --class "SimpleApp" --master local[*] target/scala-2.10/simple-project_2.10-1.0.jar
+2014-06-27 15:40:44.788 java[15324:1607] Unable to load realm info from SCDynamicStore
+Lines with a: 73, Lines with b: 35
    ~~~
 
     <p class="alert alert-warn">
@@ -47,7 +50,9 @@ cd simple-app
     </p>
 
 ## Additional Download
-Please download the following 
+Some of the proceeding labs require you to download an additional project template.
+
+1. 
 
 ## USB Contents
 
