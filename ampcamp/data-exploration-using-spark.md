@@ -1,10 +1,10 @@
 ---
 layout: global
-title: Appendix - Data Exploration Using Spark
-categories: [appendix]
+title: Data Exploration Using Spark
+categories: [module]
 navigation:
-  weight: 500
-  show: false
+  weight: 50
+  show: false                                   
 skip-chapter-toc: true
 ---
 

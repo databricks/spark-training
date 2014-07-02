@@ -9,7 +9,8 @@ skip-chapter-toc: true
 ---
 
 Spark SQL is the newest component of Spark and provides a SQL like interface.
-Spark SQL is tightly integrated with the the various spark programming languages so we will start by launching the Spark shell from the root directory of the provided USB drive:
+Spark SQL is tightly integrated with the the various spark programming languages 
+so we will start by launching the Spark shell from the root directory of the provided USB drive:
 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
