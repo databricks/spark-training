@@ -7,50 +7,27 @@ navigation:
 ---
 
 # Welcome
-Welcome to the Spark Summit 2014 Training hands-on exercises! These exercises
-are extended and enhanced from those given at previous <a
-href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>. The
-exercises we cover today will have you working directly with the Spark specific
-components of the AMPLab's open-source software stack, called the <a
-href="https://amplab.cs.berkeley.edu/software/">Berkeley Data Analytics Stack
-(BDAS)</a>.
+Welcome to the Spark Summit 2014 Training hands-on exercises! Much of this material 
+is extended and enhanced from those given at previous <a
+href="http://ampcamp.berkeley.edu">AMP Camp Big Data Bootcamps</a>.
 
-<!--
-You can navigate around the exercises by looking in the page header or footer
-and clicking on the arrows or the dropdown button that shows the current page
-title.
+<img id="intro-components" src="img/spark-components.png"> These hands-on exercises 
+will have you walk through examples of how to use the higher-level libraries in the Spark project: 
+Spark SQL, Spark Streaming, MLlib, & GraphX.
 
-<p style="margin-bottom:15px"><img src="img/header-nav-dropdown-button-summit.png" class="shadow" style="height:auto; width:498px"/></p>-->
+# Prerequisites
 
-<!-- ## Introductory Exercises
-The tutorial begins with a set of introductory excercises which should be done _**sequentially**_.
+## Assumptions
+In order to get the most out of this course, we assume:
 
-1. [Scala](introduction-to-the-scala-shell.html) - a quick crashcourse on the Scala language and command line interface.
-2. [Spark](data-exploration-using-spark.html) [(programming guide)](http://spark.apache.org/docs/latest/programming-guide.html) - Use the Spark shell to interactively explore Wikipedia data. 
+ * You have experience using the core Spark APIs 
+ * You have a laptop
+ * Your laptop has Java 6 or 7 installed
+ 
+# Exercises Overview
 
-## Advanced Exercises
--->
-The components we will cover at the advanced Spark training are listed below.
-These can be done _**in any order**_ according to your interests.
-
-<ol start="1">
-  <li><a href="data-exploration-using-spark-sql.html">Spark SQL</a> <a href="http://spark.apache.org/docs/latest/sql-programming-guide.html">(programming guide)</a> - Use the Spark shell to write interactive SQL queries.</li>
-  <li><a href="realtime-processing-with-spark-streaming.html">Spark Streaming</a> <a href="http://spark.apache.org/docs/latest/streaming-programming-guide.html">(programming guide)</a> - Process a sample of Twitter tweet streams.</li>
-  <li><a href="movie-recommendation-with-mllib.html">Machine Learning with MLlib</a> <a href="http://spark.apache.org/docs/latest/mllib-guide.html">(programming guide)</a> - Build a movie recommender with Spark.</li>
-  <li><a href="graph-analytics-with-graphx.html">Graph Analytics with GraphX</a> <a href="http://spark.apache.org/docs/latest/graphx-programming-guide.html">(programming guide)</a> - Explore graph-structured data and graph algorithms. (note: this exercise is significantly longer than the rest.)</li>
-</ol>
-
-
-# Course Prerequisites
-In several sections of this training material, you can choose which language you want to use as you follow along and gain experience with the tools. The following table shows which languages this mini course supports for each section. You are welcome to mix and match languages depending on your preferences and interests.
-
-<center>
-<style type="text/css">
-table td, table th {
-  padding: 5px;
-}
-</style>
-<table class="bordered">
+## Languages Used
+<table class="bordered" id="langs-table">
 <thead>
 <tr>
   <th>Section</th>
@@ -89,44 +66,27 @@ table td, table th {
 </tr>
 </tbody>
 </table>
-</center>
+
+In several of the proceeding training modules, you can choose which language 
+you want to use as you follow along and gain experience with the tools. 
+The following table shows which languages this mini course supports for each section. 
+You are welcome to mix and match languages depending on your preferences and interests.
+
+
+## Exercise Content
+The modules we will cover at the advanced Spark training are listed below.
+These can be done _**in any order**_ according to your interests.
+
+{:.bordered}
+| Exercise                                          |   Description                                         | Length |   More Documentation                                                                  |
+|---------------------------------------------------|-------------------------------------------------------|:------:|:------------------------------------------------------------------------------:|
+| [Spark SQL](data-exploration-using-spark-sql.html) | Use the Spark shell to write interactive SQL queries  | Short |[Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)   |
+| [Spark Streaming](realtime-processing-with-spark-streaming.html) | Process a sample of Twitter tweet streams | Medium |[Programming Guide](http://spark.apache.org/docs/latest/streaming-programming-guide.html)   |
+| [MLlib](movie-recommendation-with-mllib.html) | Build a movie recommender with Spark | Medium |[Programming Guide](http://spark.apache.org/docs/latest/mllib-guide.html)   |
+| [GraphX](graph-analytics-with-graphx.html) | Explore graph-structured data and graph algorithms  | Long | [Programming Guide](http://spark.apache.org/docs/latest/sql-programming-guide.html)   |
 
 # Providing feedback
-<!--
-We are using the cutting edge versions (i.e., the master branches) of most of our software components, which means you may run into a few issues. If you do, please call over a TA and explain what's going on. To report a problem, please create a new issue at the <a href="https://github.com/amplab/training/issues">AMPLab's training docs Github issue Tracker</a> (there is also a link to this in the footer on all pages of the exercises).
--->
-TODO: UPDATE INSTRUCTIONS ON FEEDBACK 
+Once you complete the course, we would appreciate hearing your feedback. Please fill out the following survey:
 
-# Getting Started
+ * [Spark Summit 2014 Advanced Workshop Survey](survey.html)
 
-If you are attending Spark Training in person, you should have a USB key containing training material. After loading the USB key, you should perform the following steps:
-
-1. Rename the USB key from <code>NO NAME</code> to <code>SparkTraining</code> 
-
-<p class="alert alert-warn">
-<i class="icon-info-sign">    </i>
-For the rest of this training session, all command-line instructions assume that the terminal is in the <code>SparkTraining</code> directory.
-</p>
-
-
-
-2. Check your setup by building a toy application. To do this, run the following commands:
-
-   ~~~
-cd simple-app
-../sbt/sbt package
-../spark/bin/spark-submit \
-  --class "SimpleApp" \
-  --master local[*] \
-  target/scala-2.10/simple-project_2.10-1.0.jar
-   ~~~
-
-
-<p class="alert alert-warn">
-<i class="icon-info-sign">    </i>
-If you do not have a USB key or cannot get the simple app to build, then ask a TA.
-</p>
-
-
-<!--If you are participating in the exercises from a remote location, you will want
-to download the [training material](FIX BROKEN LINK.html).-->

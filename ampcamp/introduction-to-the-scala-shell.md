@@ -1,10 +1,10 @@
 ---
 layout: global
-title: Introduction to the Scala Shell
-categories: [module]
+title: Appendix - Introduction to the Scala Shell
+categories: [appendix]
 navigation:
-  weight: 40
-  show: true
+  weight: 400
+  show: false
 skip-chapter-toc: true
 ---
 

@@ -46,6 +46,10 @@
 body {
   padding-top: 60px;
   padding-bottom: 0;
+  font-family: 'Helvetica Neue', HelveticaNeue, Roboto, Arial, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #777;
 }
 
 body #content {
@@ -86,18 +90,7 @@ table {
 }
 
 .bordered th {
-    background-color: #dce9f9;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9));
-    background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9);
-    background-image:    -moz-linear-gradient(top, #ebf3fc, #dce9f9);
-    background-image:     -ms-linear-gradient(top, #ebf3fc, #dce9f9);
-    background-image:      -o-linear-gradient(top, #ebf3fc, #dce9f9);
-    background-image:         linear-gradient(top, #ebf3fc, #dce9f9);
-    -webkit-box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
-    -moz-box-shadow:0 1px 0 rgba(255,255,255,.8) inset;
-    box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
-    border-top: none;
-    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+    background-color: #E8E8E8 ;
 }
 
 .bordered td:first-child, .bordered th:first-child {
@@ -183,6 +176,7 @@ a:hover code {
 
 .topbar {
   margin: -60px auto 25px;
+  padding: 20px;
 }
 
 #topbar-middle {
@@ -191,7 +185,7 @@ a:hover code {
 }
 
 #logo{
-  width: 125px;
+  width: 120px;
   height: auto;
   display: inline-block;
   vertical-align: middle;
@@ -219,10 +213,7 @@ a:hover code {
 }
 
 .site-title {
-  font-style: italic;
   font-size: 1.5em;
-  font-weight: bold;
-  padding: 15px 0 10px;
 }
 
 .container {
@@ -230,7 +221,6 @@ a:hover code {
 }
 
 .chapter-toc-header {
-  width: 100%;
   margin: 0;
   padding: 0 0 8px 0;
   text-align: center;
@@ -311,4 +301,36 @@ td.no {
 td.dimmed, td.dimmed.yes, td.dimmed.no {
   color: #888;
   background-color: #EEE;
+}
+
+
+
+
+#content p, #content ol, #content ul {
+  padding: 5px 10px 0px 10px;
+}
+
+
+#intro-components {
+   width: 260px;
+   float: left;
+   margin: 0 10px 10px 10px;
+}
+
+
+h1#prerequisites {
+ clear: both;
+}
+
+
+#content h2 {
+ padding-left: 5px;
+ margin-bottom: 2px
+}
+
+
+
+table#langs-table {
+  float: right;
+  margin: 0 15px;
 }

@@ -2686,7 +2686,6 @@ button.close {
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
-  color: #333333;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
   background-color: #f5f5f5;
   background-image: -moz-linear-gradient(top, #ffffff, #e6e6e6);
@@ -2719,7 +2718,6 @@ button.close {
 .btn.active,
 .btn.disabled,
 .btn[disabled] {
-  color: #333333;
   background-color: #e6e6e6;
   *background-color: #d9d9d9;
 }
@@ -2732,7 +2730,6 @@ button.close {
 }
 .btn:hover,
 .btn:focus {
-  color: #333333;
   text-decoration: none;
   background-position: 0 -15px;
   -webkit-transition: background-position 0.1s linear;
@@ -3106,7 +3103,7 @@ input[type="submit"].btn.btn-mini {
 .btn-group > .btn,
 .btn-group > .dropdown-menu,
 .btn-group > .popover {
-  font-size: 14px;
+  font-size: 22px;
 }
 .btn-group > .btn-mini {
   font-size: 10.5px;
@@ -5252,4 +5249,8 @@ a.badge:focus {
 }
 .affix {
   position: fixed;
+}
+
+i.icon-arrow-right, i.icon-arrow-left {
+color: black;
 }
