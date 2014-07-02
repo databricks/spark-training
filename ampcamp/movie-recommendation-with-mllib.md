@@ -10,9 +10,9 @@ navigation:
 In this chapter, we will use MLlib to make personalized movie recommendations
 tailored *for you*. We will work with 10 million ratings from 72,000 users on
 10,000 movies, collected by [MovieLens](http://movielens.umn.edu/).  This
-dataset is pre-loaded in your USB drive under `/data/movielens/large`. For
+dataset is pre-loaded in your USB drive under `data/movielens/large`. For
 quick testing of your code, you may want to use a smaller dataset under
-`/data/movielens/medium`, which contains 1 million ratings from 6000 users on 4000
+`data/movielens/medium`, which contains 1 million ratings from 6000 users on 4000
 movies.
 
 ##Data set
@@ -76,6 +76,12 @@ If you don't have python installed, please copy `personalRatings.txt.template` t
 `personalRatings.txt` and replace `?`s with your ratings.
 
 ##Setup
+
+<p class="alert alert-warn">
+<i class="icon-info-sign">    </i>
+If you can't find the machine-learning directory on your USB stick, you skipped an important part of the 
+<a href="getting-started.html#additional-required-download">Getting Started instructions</a>. 
+Go back and complete those instructions before continuing</a></p>
 
 We will be using a standalone project template for this exercise. 
 

@@ -4,6 +4,7 @@ title: Getting Started
 navigation:
   weight: 20
   show: true
+skip-chapter-toc: true  
 ---
 
 # Getting Started With Your USB Stick

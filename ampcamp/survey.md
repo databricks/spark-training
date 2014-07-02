@@ -2,7 +2,7 @@
 layout: global
 title: Survey
 navigation:
-  weight: 1000
+  weight: 510
   show: true
 skip-chapter-toc: true
 ---

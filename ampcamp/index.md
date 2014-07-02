@@ -24,6 +24,10 @@ In order to get the most out of this course, we assume:
  * You have a laptop
  * Your laptop has Java 6 or 7 installed
  
+If you would like a quick primer on Scala, check out the following doc in the appendix:
+
+ * [Introduction to the Scala Shell](introduction-to-the-scala-shell.html)
+ 
 # Exercises Overview
 
 ## Languages Used

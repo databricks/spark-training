@@ -6,19 +6,19 @@ navigation:
   weight: 65
   show: true
 ---
-
+ 
 In this chapter, we will walk you through using Spark Streaming to process live
 data streams. Remember, Spark Streaming is a component of Spark that provides
-highly scalable, fault-tolerant streaming processing. These exercises are
-designed as standalone Scala programs which will receive and process Twitter's
+highly scalable, fault-tolerant streaming processing.
+
+These exercises are designed as standalone Scala programs which will receive and process Twitter's
 real sample tweet streams. For the exercises in this section, you can choose to
 use Scala or Java. 
-<!--If you would like to use Scala but are not familiar with the
-language, we recommend that you see the [Introduction to the Scala
-Shell](introduction-to-the-scala-shell.html) section to learn some basics. -->
 
 ## Setup
-This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing Twitter's real time sample stream.
+This section will first introduce you to the basic system setup of the standalone Spark Streaming programs, 
+and then guide you through the steps necessary to create Twitter authentication tokens necessary for processing 
+Twitter's real time sample stream.
 
 ### System Setup
 
@@ -27,8 +27,9 @@ directory]/streaming/`.
 
 <p class="alert alert-warn">
 <i class="icon-info-sign">    </i>
-If you can't find the streaming directory, download and unzip the following zip file in your `[usb root
-directory]` directory: <a href="https://github.com/databricks/training/raw/sparkSummit2014/streaming/streaming_download.zip" target="_blank">streaming.zip</a></p>
+If you can't find the streaming directory, you skipped an important part of the 
+<a href="getting-started.html#additional-required-download">Getting Started instructions</a>. 
+Go back and complete those instructions before continuing</a></p>
 
 <div class="sidebar">
 <p style="font-size:1.2em"><b>What is SBT?</b></p>
@@ -55,10 +56,13 @@ For your convenience, we have added a couple of helper function to get the param
 
 Since all of the exercises are based on Twitter's sample tweet stream, it is necessary to configure authentication with a Twitter account. To do this, you will need to setup a consumer key+secret pair and an access token+secret pair using a Twitter account. Please follow the instructions below to setup these temporary access keys with your Twitter account. These instructions will not require you to provide your Twitter username/password. You will only be required to provide the consumer key and access token pairs that you will generate, which you can easily destroy once you have finished the tutorial. So, your Twitter account will not be compromised in any way.
 
-1. Open this <a href="https://dev.twitter.com/apps" target="_blank">link</a>.
+1. Open <a href="https://dev.twitter.com/apps" target="_blank">Twitter's Application
+   Settings page</a>.
    This page lists the set of Twitter-based applications that you own and have
    already created consumer keys and access tokens for.  This list will be
-   empty if you have never created any applications. For this tutorial, create
+   empty if you have never created any applications.
+   
+   For this tutorial, create
    a new temporary application. To do this, click on the blue "Create a new
    application" button. The new application page should look the page shown
    below. Provide the required fields. The __Name__ of the application must be
