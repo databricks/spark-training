@@ -1,7 +1,7 @@
 # Spark Summit 2014 Training USB #
 
 ## Contents ##
- * spark - binary distribution @ Spark 1.0.1-SNAPSHOT (git hash: e6c90583b4d68ddce3f9dd2c76c8bbad593ad077)
+ * spark - binary distribution (git hash: GIT_HASH)
      * conf/log4j.properties - WARN used for default level, Snappy warnings silenced
  * data - example and lab data
      * graphx - graphx lab data
@@ -17,9 +17,11 @@
      * ivy/cache - a pre-populated cache, pointed to via conf/sbtopts
      * bin - removed and all files moved into sbt's home directory so users can run sbt/sbt similair to working with spark's source code 
  * simple-app - a simple example app to build (based on the Spark quick start docs)
+ * streaming
+ * machine-learning
 
 ## Building and Using the Simple App ##
-    cd simple-app                                      te
+    cd simple-app
     ../sbt/sbt package
     ../spark/bin/spark-submit \
       --class "SimpleApp" \
