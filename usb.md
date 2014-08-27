@@ -17,8 +17,8 @@
      * ivy/cache - a pre-populated cache, pointed to via conf/sbtopts
      * bin - removed and all files moved into sbt's home directory so users can run sbt/sbt similair to working with spark's source code 
  * simple-app - a simple example app to build (based on the Spark quick start docs)
- * streaming
- * machine-learning
+ * streaming - a simple streaming application used for the SparkCamp streaming labs
+ * machine-learning - the simple application used for the SparkCamp machine learning labs
 
 ## Building and Using the Simple App ##
     cd simple-app

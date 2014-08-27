@@ -58,7 +58,7 @@ def copy_and_build_projects(opts):
     os.system("cd usb/target/streaming/scala; ../../sbt/sbt package")
     # Copy and build machine learning.
     os.system("cp -r machine-learning usb/target")
-    os.system("cd usb/target/machine-learning/scala; ../sbt/sbt package")
+    os.system("cd usb/target/machine-learning/scala; ../../sbt/sbt package")
 
 def copy_readme(opts):
     git_hash = os.popen("cd usb/target/spark; git rev-parse HEAD").read().strip()
