@@ -81,7 +81,7 @@ In addition to standard RDD operatrions, SchemaRDDs also have extra information 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-scala> wikiData.registerAsTable("wikiData")
+scala> wikiData.registerTempTable("wikiData")
 scala> val countResult = sqlContext.sql("SELECT COUNT(*) FROM wikiData").collect()
 countResult: Array[org.apache.spark.sql.Row] = Array([39365])
 </pre>
