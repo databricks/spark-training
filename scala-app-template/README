@@ -1,9 +1,0 @@
-This is a stub project for developing standalone Spark progras in Scala.
-It uses Simple Build Tool (sbt), a popular Scala build system.
-
-You can run and modify the project as follows:
-
-- To compile your project into a JAR: sbt/sbt package (builds JAR in target/)
-- To run main class: sbt/sbt run
-- To run main class with arguments: sbt/sbt "run arg1 arg2"
-- To change the project name: edit "name" at the top of build.sbt
