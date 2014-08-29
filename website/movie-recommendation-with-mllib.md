@@ -77,12 +77,6 @@ If you don't have python installed, please copy `personalRatings.txt.template` t
 
 ##Setup
 
-<p class="alert alert-warn">
-<i class="icon-info-sign">    </i>
-If you can't find the machine-learning directory on your USB stick, you skipped an important part of the 
-<a href="getting-started.html#additional-required-download">Getting Started instructions</a>. 
-Go back and complete those instructions before continuing</a></p>
-
 We will be using a standalone project template for this exercise. 
 
 <div class="codetabs">
