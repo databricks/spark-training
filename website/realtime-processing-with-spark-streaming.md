@@ -525,7 +525,7 @@ Next, let's try something more interesting, say, try printing the 10 most popula
       }
     );
 
-    JavaPairDStream<Integer, String> sortedCounts = swappedCounts.transform(
+    JavaPairDStream<Integer, String> sortedCounts = swappedCounts.transformToPair(
       new Function<JavaPairRDD<Integer, String>, JavaPairRDD<Integer, String>>() {
         public JavaPairRDD<Integer, String> call(JavaPairRDD<Integer, String> in) throws Exception {
           return in.sortByKey(false);
