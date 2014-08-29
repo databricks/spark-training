@@ -7,7 +7,10 @@ a directory called _site containing index.html as well as the rest of the
 compiled files. Read more about Jekyll at
 https://github.com/mojombo/jekyll/wiki.
 
-The docs use:
+Just run this command to see the website
+% jekyll serve
+
+To get the website to look nice, you'll also need to download these plugins::
 * [Kramdown](http://kramdown.rubyforge.org/) markdown extensions for
   marking code in code tags.
 
