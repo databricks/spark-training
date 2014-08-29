@@ -25,12 +25,6 @@ Twitter's real time sample stream.
 You should find the following items in the directory `[usb root
 directory]/streaming/`.
 
-<p class="alert alert-warn">
-<i class="icon-info-sign">    </i>
-If you can't find the streaming directory, you skipped an important part of the 
-<a href="getting-started.html#additional-required-download">Getting Started instructions</a>. 
-Go back and complete those instructions before continuing</a></p>
-
 <div class="sidebar">
 <p style="font-size:1.2em"><b>What is SBT?</b></p>
 Simple Build Tool, or SBT, is popular open-source a build tool for Scala and Java projects. Read more about SBT at <a href="https://github.com/harrah/xsbt/wiki" target="_blank">its Github page</a>.
