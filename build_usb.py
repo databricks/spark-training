@@ -50,6 +50,8 @@ def copy_and_build_projects(opts):
     print "Copying the data and examples over and build them."
     # Copy the data directory.
     os.system("cp -r data usb/target")
+    # Copy the website.
+    os.system("cp -r website usb/target")
     # Copy and build the simple app.
     os.system("cp -r simple-app usb/target")
     os.system("cd usb/target/simple-app; ../sbt/sbt package")

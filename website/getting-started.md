@@ -52,18 +52,11 @@ Lines with a: 73, Lines with b: 35
     If you do not have a USB key or cannot get the simple app to build, then ask a TA.
     </p>
 
-## Additional Required Download
-Some of the proceeding labs require you to download an additional project template.
-
-1. Download the [training-downloads.zip](training-downloads.zip) file
-2. Unzip training-download.zip
-3.  Copy the two project templates in to your [usb root directory]
-
 ## USB Contents
 
 You'll find the following contents in the USB stick (this info is taken from the README):
 
- * **spark** - binary distribution @ Spark 1.0.1-SNAPSHOT (git hash: e6c90583b4d68ddce3f9dd2c76c8bbad593ad077)
+ * **spark** - binary distribution
      * conf/log4j.properties - WARN used for default level, Snappy warnings silenced
  * **data** - example and lab data
      * graphx - graphx lab data
@@ -79,8 +72,5 @@ You'll find the following contents in the USB stick (this info is taken from the
      * ivy/cache - a pre-populated cache, pointed to via conf/sbtopts
      * bin - removed and all files moved into sbt's home directory so users can run sbt/sbt similair to working with spark's source code 
  * **simple-app** - a simple example app to build (based on the Spark quick start docs)
-
-After extracting the contents from the USB above, you'll also find:
- 
  * **streaming** - project template for Spark Streaming examples
  * **machine-learning** - project template for Machine Learning examples
