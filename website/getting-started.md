@@ -74,3 +74,4 @@ You'll find the following contents in the USB stick (this info is taken from the
  * **simple-app** - a simple example app to build (based on the Spark quick start docs)
  * **streaming** - project template for Spark Streaming examples
  * **machine-learning** - project template for Machine Learning examples
+ * **website** - documentation for the examples

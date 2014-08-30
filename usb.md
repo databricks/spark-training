@@ -1,4 +1,4 @@
-# Spark Summit 2014 Training USB #
+# SparkCamp Training USB #
 
 ## Contents ##
  * spark - binary distribution (git hash: GIT_HASH)
@@ -19,11 +19,18 @@
  * simple-app - a simple example app to build (based on the Spark quick start docs)
  * streaming - a simple streaming application used for the SparkCamp streaming labs
  * machine-learning - the simple application used for the SparkCamp machine learning labs
+ * website - the website contents for SparkCamp labs.
 
 ## Building and Using the Simple App ##
-    cd simple-app
-    ../sbt/sbt package
-    ../spark/bin/spark-submit \
+    % cd simple-app
+    % ../sbt/sbt package
+    % ../spark/bin/spark-submit \
       --class "SimpleApp" \
       --master local[*] \
       target/scala-2.10/simple-project_2.10-1.0.jar
+
+## Viewing the website for more exercises
+    % cd website
+    To view the site, run jekyll - see the README.md in the website directory for more details on installing.
+    % jekyll serve
+    Now, view http://0.0.0.0:4000/ in your browser.

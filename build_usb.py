@@ -30,7 +30,7 @@ def parse_args():
     return (opts, spark_branch)
 
 def clean(opts):
-    print "Deleting dist and target directories"
+    print "Deleting usb directory"
     os.system("rm -rf usb")
 
 def clone_spark(opts, spark_branch):
@@ -57,10 +57,10 @@ def copy_and_build_projects(opts):
     os.system("cd usb/target/simple-app; ../sbt/sbt package")
     # Copy and build streaming.
     os.system("cp -r streaming usb/target")
-    os.system("cd usb/target/streaming/scala; ../../sbt/sbt package")
+    os.system("cd usb/target/streaming/scala; ../../sbt/sbt assembly")
     # Copy and build machine learning.
     os.system("cp -r machine-learning usb/target")
-    os.system("cd usb/target/machine-learning/scala; ../../sbt/sbt package")
+    os.system("cd usb/target/machine-learning/scala; ../../sbt/sbt assembly")
 
 def copy_readme(opts):
     git_hash = os.popen("cd usb/target/spark; git rev-parse HEAD").read().strip()
@@ -74,6 +74,9 @@ def zip(opts):
 
 def real_main():
     (opts, spark_branch) = parse_args()
+
+    if not "JavaVirtualMachines/1.6" in os.popen("echo $JAVA_HOME").read():
+        sys.exit("JAVA HOME must be set to 1.6")
 
     # Delete the old directories.
     clean(opts)

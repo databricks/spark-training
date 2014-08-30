@@ -5,8 +5,8 @@ name := "Tutorial"
 scalaVersion := "2.10.3"
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-streaming" % "1.0.0" % "provided",
-  "org.apache.spark" %% "spark-streaming-twitter" % "1.0.0"
+  "org.apache.spark" %% "spark-streaming" % "1.0.2",
+  "org.apache.spark" %% "spark-streaming-twitter" % "1.0.2"
 )
 
 resourceDirectory in Compile := baseDirectory.value / "resources"
