@@ -70,7 +70,8 @@ def copy_readme(opts):
 def zip(opts):
     print "Zipping it all up"
     os.system("mv usb/target usb/spark-training")
-    os.system("cd usb; zip -r usb.zip spark-training/*")
+    os.system("cd usb; find spark-training | grep -v \"target\" > include; find spark-training -name \"spark-assembly*.jar\" >> include")
+    os.system("cd usb; cat include | zip usb.zip -@ ")
 
 def real_main():
     (opts, spark_branch) = parse_args()
