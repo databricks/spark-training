@@ -1,7 +1,9 @@
 # SparkCamp Training USB #
 
 ## Contents ##
- * spark - binary distribution (git hash: GIT_HASH)
+ * spark - binary distribution
+     * Spark Version: SPARK_VERSION
+     * Git Hash: GIT_HASH
      * conf/log4j.properties - WARN used for default level, Snappy warnings silenced
  * data - example and lab data
      * graphx - graphx lab data

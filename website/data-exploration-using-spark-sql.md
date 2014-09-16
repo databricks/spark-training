@@ -81,14 +81,14 @@ In addition to standard RDD operatrions, SchemaRDDs also have extra information 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 <pre class="prettyprint lang-bsh">
-scala> wikiData.registerAsTable("wikiData")
+scala> wikiData.registerTempTable("wikiData")
 scala> val countResult = sqlContext.sql("SELECT COUNT(*) FROM wikiData").collect()
 countResult: Array[org.apache.spark.sql.Row] = Array([39365])
 </pre>
 </div>
 <div data-lang="python" markdown="1">
 <pre class="prettyprint lang-bsh">
->>> wikiData.registerAsTable("wikiData")
+>>> wikiData.registerTempTable("wikiData")
 >>> result = sqlCtx.sql("SELECT COUNT(*) AS pageCount FROM wikiData").collect()
 </pre>
 </div>
@@ -155,3 +155,5 @@ This increases the amount of memory allocated for the Spark driver. Since we are
    <div class="solution" markdown="1">
    <pre class="prettyprint lang-sql">SELECT COUNT(*) FROM wikiData WHERE text LIKE '%california%'</pre>
    </div>
+
+

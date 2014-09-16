@@ -3,31 +3,34 @@
 #
 # Simple python script for generating the spark USB.
 #   Always run this script from the spark-training root directory.
-# % ./build_usb.py origin/branch-1.1
+# % ./build_usb.py
 #
 # Running this script will create a usb directory, with the following contents:
 #   - usb/usb.zip
 #   - usb/[target or spark-training] - A folder with all the contents of usb.zip.
 #     The folder is originally called target, and is then renamed to
 #     spark-training before zipping.
+#
+# For now, the Spark version and hash is hardcoded.
+# It's recommended to only use officially released Spark versions for building a USB stick,
+# and running these manual steps to verify each release against the training materials:
+#   [1] Update all the appplications to point to the latest released Spark version.
+#   [2] Update the GIT_HASH and SPARK_VERSION here before building this USB stick.
+#   [3] Test out the exercises and update docs if application if applicable - perhaps for API deprecation.
+#   [4] If it all looks good, upload the usb.zip to AWS.
 import os
 import sys
 
 from optparse import OptionParser
 
-def parse_args():
-    parser = OptionParser(usage="build_usb [options] <spark-branch>"
-                                + "\n\n<spark-branch> can be: origin/master, "
-                                + "origin/branch-1.1, "
-                                + " 70109da212343601d428252e9d298f6affa457f3",
-                          add_help_option=False)
-    (opts, args) = parser.parse_args()
-    if len(args) != 1:
-        parser.print_help()
-        sys.exit(1)
-    spark_branch = args[0]
+GIT_HASH = "2f9b2bd7844ee8393dc9c319f4fefedf95f5e460"
+SPARK_VERSION = "v1.1.0"
 
-    return (opts, spark_branch)
+def parse_args():
+    parser = OptionParser(usage="build_usb.py [options]",
+                          add_help_option=False)
+    opts = parser.parse_args()
+    return opts
 
 def clean(opts):
     print "Deleting usb directory"
@@ -37,7 +40,7 @@ def clone_spark(opts, spark_branch):
     print "Cloning Spark"
     os.system("mkdir -p usb/target")
     os.system("cd usb/target; git clone https://github.com/apache/spark.git")
-    os.system("cd usb/target/spark; git reset --hard %s" % spark_branch)
+    os.system("cd usb/target/spark; git reset --hard %s" % GIT_HASH)
 
 def compile_and_configure_spark(opts):
     print "Building Spark"
@@ -63,9 +66,8 @@ def copy_and_build_projects(opts):
     os.system("cd usb/target/machine-learning/scala; ../../sbt/sbt assembly")
 
 def copy_readme(opts):
-    git_hash = os.popen("cd usb/target/spark; git rev-parse HEAD").read().strip()
-    print "Printing readme with hash %s" % git_hash
-    os.system("sed \"s/GIT_HASH/%s/1\" usb.md > usb/target/README.md" % git_hash)
+    print "Printing readme with hash %s" % GIT_HASH
+    os.system("sed \"s/GIT_HASH/%s/1\" usb.md | sed \"s/SPARK_VERSION/%s/1\" > usb/target/README.md" % (GIT_HASH, SPARK_VERSION))
 
 def zip(opts):
     print "Zipping it all up"

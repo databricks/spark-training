@@ -2,11 +2,11 @@ import AssemblyKeys._ // put this at the top of the file
 
 name := "Tutorial"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.10.4"
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-streaming" % "1.0.2",
-  "org.apache.spark" %% "spark-streaming-twitter" % "1.0.2"
+  "org.apache.spark" %% "spark-streaming" % "1.1.0",
+  "org.apache.spark" %% "spark-streaming-twitter" % "1.1.0"
 )
 
 resourceDirectory in Compile := baseDirectory.value / "resources"
